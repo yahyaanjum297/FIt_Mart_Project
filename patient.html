@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Patient Profile — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.profile-grid{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+@media(max-width:1000px){.profile-grid{grid-template-columns:1fr}}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:sticky;top:110px}
+.profile-banner{height:100px;background:linear-gradient(135deg,rgba(181,255,71,.12),rgba(45,212,191,.1));position:relative;overflow:hidden}
+.profile-banner::after{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(181,255,71,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(181,255,71,.06) 1px,transparent 1px);background-size:28px 28px}
+.profile-av-wrap{padding:0 24px;margin-top:-36px;position:relative;z-index:2}
+.profile-av{width:72px;height:72px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--bg);border:3px solid var(--bg)}
+.profile-body{padding:16px 24px 24px}
+.profile-name{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:4px}
+.profile-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
+.profile-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:20px}
+.ps{background:var(--bg3);padding:12px;text-align:center}
+.ps-n{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--volt)}
+.ps-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.prof-nav{display:flex;flex-direction:column;gap:4px}
+.pn-a{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);transition:color .25s,background .25s;cursor:pointer}
+.pn-a:hover,.pn-a.on{color:var(--white);background:var(--card2)}
+.pn-a.on{color:var(--volt)}
+/* Detail panels */
+.detail-panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.dp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+.dp-sub{font-size:12px;color:var(--muted);margin-bottom:22px}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.info-grid{grid-template-columns:1fr}}
+.info-row{display:flex;flex-direction:column;gap:4px;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px}
+.ir-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.ir-value{font-size:14px;font-weight:500;color:var(--white)}
+.health-alert{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:12px;margin-bottom:10px}
+.ha-ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.18)}
+.ha-warn{background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.18)}
+.ha-danger{background:rgba(255,99,71,.06);border:1px solid rgba(255,99,71,.18)}
+.ha-icon{font-size:16px;flex-shrink:0;margin-top:1px}
+.ha-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.ha-desc{font-size:12px;color:var(--muted);line-height:1.65}
+/* Timeline */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:16px;padding-bottom:20px;position:relative}
+.tl-item::before{content:'';position:absolute;left:13px;top:28px;bottom:0;width:1px;background:var(--border)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;position:relative;z-index:1}
+.tl-body{flex:1;padding-top:3px}
+.tl-date{font-size:11px;color:var(--muted);margin-bottom:4px}
+.tl-text{font-size:13px;line-height:1.7}
+.tl-doctor{font-size:11px;color:var(--volt);font-weight:600;margin-top:4px}
+/* Edit form */
+.edit-section{display:none}
+.edit-section.show{display:block}
+.view-section.hide{display:none}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a on" href="patient.html">My Profile</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a" href="reports.html">Reports</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Dashboard</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Health Care Module</span>
+  <h1>Patient Profile</h1>
+  <p>Your complete medical profile, health conditions, treatment history, and doctor notes — all in one secure place.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="profile-grid">
+    <!-- SIDEBAR -->
+    <div>
+      <div class="profile-card rv">
+        <div class="profile-banner"></div>
+        <div class="profile-av-wrap">
+          <div class="profile-av" id="avEl">?</div>
+        </div>
+        <div class="profile-body">
+          <div class="profile-name" id="profName">Loading...</div>
+          <div class="profile-sub" id="profSub">Member</div>
+          <div class="profile-stats">
+            <div class="ps"><div class="ps-n" id="psAge">—</div><div class="ps-l">Age</div></div>
+            <div class="ps"><div class="ps-n" id="psWeight">—</div><div class="ps-l">Weight</div></div>
+            <div class="ps"><div class="ps-n" id="psBMI">—</div><div class="ps-l">BMI</div></div>
+          </div>
+          <div class="prof-nav">
+            <a class="pn-a on" onclick="showTab('overview',this)" href="#"><span>📋</span>Overview</a>
+            <a class="pn-a" onclick="showTab('medical',this)" href="#"><span>🩺</span>Medical Info</a>
+            <a class="pn-a" onclick="showTab('history',this)" href="#"><span>📅</span>Visit History</a>
+            <a class="pn-a" onclick="showTab('edit',this)" href="#"><span>✏️</span>Edit Profile</a>
+            <a class="pn-a" href="vitals.html"><span>❤️</span>Log Vitals</a>
+            <a class="pn-a" href="reports.html"><span>📊</span>Full Reports</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div>
+      <!-- OVERVIEW TAB -->
+      <div id="tab-overview">
+        <div class="detail-panel rv">
+          <div class="dp-title">Personal Information</div>
+          <div class="dp-sub">Basic details and contact information</div>
+          <div class="info-grid" id="personalInfo"></div>
+        </div>
+
+        <div class="detail-panel rv d1">
+          <div class="dp-title">Health Alerts & Flags</div>
+          <div class="dp-sub">Auto-generated from your profile and latest vitals</div>
+          <div id="healthAlerts"></div>
+        </div>
+
+        <div class="detail-panel rv d2">
+          <div class="dp-title">Fitness Summary</div>
+          <div class="dp-sub">Goals, training details, and membership</div>
+          <div class="info-grid" id="fitnessInfo"></div>
+        </div>
+      </div>
+
+      <!-- MEDICAL TAB -->
+      <div id="tab-medical" style="display:none">
+        <div class="detail-panel rv">
+          <div class="dp-title">Medical History</div>
+          <div class="dp-sub">Conditions, injuries, allergies, and medications</div>
+          <div class="info-grid" id="medicalInfo"></div>
+        </div>
+
+        <div class="detail-panel rv d1">
+          <div class="dp-title">Latest Vitals Snapshot</div>
+          <div class="dp-sub">Last recorded measurements</div>
+          <div class="info-grid" id="vitalsSnap"></div>
+        </div>
+
+        <div class="detail-panel rv d2">
+          <div class="dp-title">Doctor's Notes</div>
+          <div class="dp-sub">Instructions from your assigned physician</div>
+          <div id="doctorNotesList">
+            <div class="health-alert ha-ok"><span class="ha-icon">📋</span><div><div class="ha-title">General Health</div><div class="ha-desc">No special restrictions at this time. Continue with current workout plan. Schedule monthly check-up for vitals review.</div></div></div>
+          </div>
+        </div>
+
+        <div class="detail-panel rv d3">
+          <div class="dp-title">Exercise Restrictions</div>
+          <div class="dp-sub">Exercises approved and restricted by your doctor</div>
+          <div id="exRestrictionsView">
+            <div style="margin-bottom:12px"><div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600">✅ Approved</div><div style="display:flex;flex-wrap:wrap;gap:8px" id="approvedEx"></div></div>
+            <div><div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-weight:600">⚠️ Restricted</div><div style="display:flex;flex-wrap:wrap;gap:8px" id="restrictedEx"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="tab-history" style="display:none">
+        <div class="detail-panel rv">
+          <div class="dp-title">Visit & Activity Timeline</div>
+          <div class="dp-sub">Your FitMart health journey</div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="detail-panel rv d1">
+          <div class="dp-title">Upcoming Appointments</div>
+          <div class="dp-sub">Booked through FitMart Healthcare</div>
+          <div id="upcomingAppts">
+            <div style="color:var(--muted);font-size:13px">No upcoming appointments. <a href="healthcare.html" style="color:var(--volt)">Book one →</a></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT TAB -->
+      <div id="tab-edit" style="display:none">
+        <div class="detail-panel rv">
+          <div class="dp-title">Edit Profile</div>
+          <div class="dp-sub">Update your personal and health information</div>
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="editName" placeholder="Ali Raza"/></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="editEmail" type="email" placeholder="ali@example.com"/></div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="editAge" type="number" placeholder="25"/></div>
+            <div class="form-group"><label class="form-label">Gender</label><select class="form-select" id="editGender"><option>Male</option><option>Female</option><option>Other</option></select></div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Weight (kg)</label><input class="form-input" id="editWeight" type="number" placeholder="70" step="0.1"/></div>
+            <div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="editHeight" type="number" placeholder="175"/></div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Goal</label><select class="form-select" id="editGoal"><option>Weight Loss</option><option>Muscle Gain</option><option>Endurance</option><option>Strength</option><option>Flexibility</option><option>General Fitness</option></select></div>
+            <div class="form-group"><label class="form-label">Fitness Level</label><select class="form-select" id="editLevel"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select></div>
+          </div>
+          <div class="form-group"><label class="form-label">Injuries</label><input class="form-input" id="editInjury" placeholder="e.g. knee pain, None"/></div>
+          <div class="form-group"><label class="form-label">Health Conditions</label><input class="form-input" id="editDisease" placeholder="e.g. diabetes, None"/></div>
+          <div class="form-group"><label class="form-label">Allergies</label><input class="form-input" id="editAllergies" placeholder="e.g. peanuts, None"/></div>
+          <div class="form-group"><label class="form-label">Emergency Contact</label><input class="form-input" id="editEmergency" placeholder="+92 300 000 0000"/></div>
+          <button class="btn-main" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+let user=FM.getUser()||{name:'Member',email:'',role:'member'};
+
+// Init avatar + header
+const nm=user.name||'Member';
+document.getElementById('avEl').textContent=nm.charAt(0).toUpperCase();
+document.getElementById('profName').textContent=nm;
+document.getElementById('profSub').textContent=(user.role||'member').charAt(0).toUpperCase()+(user.role||'member').slice(1)+' · '+(user.plan||'Basic Plan');
+document.getElementById('psAge').textContent=user.age||'—';
+document.getElementById('psWeight').textContent=user.weight?user.weight+'kg':'—';
+if(user.weight&&user.height){const bmi=parseFloat((user.weight/((user.height/100)**2)).toFixed(1));document.getElementById('psBMI').textContent=bmi;}
+
+// Personal info grid
+document.getElementById('personalInfo').innerHTML=[
+  {l:'Full Name',v:user.name||'—'},{l:'Email',v:user.email||'—'},
+  {l:'Age',v:user.age?user.age+' years':'—'},{l:'Gender',v:user.gender||'—'},
+  {l:'Height',v:user.height?user.height+'cm':'—'},{l:'Weight',v:user.weight?user.weight+'kg':'—'},
+  {l:'Phone',v:user.phone||'Not provided'},{l:'Emergency Contact',v:user.emergency||'Not provided'},
+].map(r=>`<div class="info-row"><div class="ir-label">${r.l}</div><div class="ir-value">${r.v}</div></div>`).join('');
+
+// Health alerts
+const alerts=[];
+if(user.injury&&user.injury!=='None') alerts.push({cls:'ha-warn',icon:'🦵',title:'Active Injury',desc:user.injury+'. Modified exercises may apply. Consult your FitMart physiotherapist.'});
+if(user.disease&&user.disease!=='None') alerts.push({cls:'ha-warn',icon:'💊',title:'Health Condition',desc:user.disease+'. Our medical team monitors this when recommending workout intensity.'});
+const vitals=FM.getVitals();
+if(vitals.length){const v=vitals[0];if(v.heartRate>100) alerts.push({cls:'ha-danger',icon:'❤️',title:'Elevated Heart Rate',desc:`Last reading: ${v.heartRate} bpm. Safe range is 60-100 bpm. Please contact Dr. Fatima.`});
+  if(v.bpSys>130) alerts.push({cls:'ha-danger',icon:'🩺',title:'High Blood Pressure',desc:`Last reading: ${v.bpSys}/${v.bpDia} mmHg. Consult your cardiologist.`});}
+if(!alerts.length) alerts.push({cls:'ha-ok',icon:'✅',title:'All Clear',desc:'No active health flags. Your profile shows no concerning conditions or restrictions at this time.'});
+document.getElementById('healthAlerts').innerHTML=alerts.map(a=>`<div class="health-alert ${a.cls}"><span class="ha-icon">${a.icon}</span><div><div class="ha-title">${a.title}</div><div class="ha-desc">${a.desc}</div></div></div>`).join('');
+
+// Fitness summary
+document.getElementById('fitnessInfo').innerHTML=[
+  {l:'Primary Goal',v:user.goal||'General Fitness'},{l:'Fitness Level',v:user.level||'Beginner'},
+  {l:'Training Location',v:user.location||'Gym'},{l:'Membership Plan',v:user.plan||'Basic'},
+  {l:'Workouts Logged',v:FM.getWorkouts().length},{l:'Member Since',v:user.joinedAt?new Date(user.joinedAt).toLocaleDateString('en-PK',{month:'short',year:'numeric'}):'—'},
+].map(r=>`<div class="info-row"><div class="ir-label">${r.l}</div><div class="ir-value">${r.v}</div></div>`).join('');
+
+// Medical info
+document.getElementById('medicalInfo').innerHTML=[
+  {l:'Injuries',v:user.injury||'None reported'},{l:'Conditions',v:user.disease||'None reported'},
+  {l:'Allergies',v:user.allergies||'None reported'},{l:'Medications',v:user.medications||'None listed'},
+  {l:'Blood Group',v:user.bloodGroup||'Not specified'},{l:'Assigned Doctor',v:'Dr. Fatima Malik'},
+].map(r=>`<div class="info-row"><div class="ir-label">${r.l}</div><div class="ir-value">${r.v}</div></div>`).join('');
+
+// Vitals snap
+const lv=FM.getVitals()[0];
+document.getElementById('vitalsSnap').innerHTML=lv?[
+  {l:'Heart Rate',v:lv.heartRate?lv.heartRate+' bpm':'—'},{l:'Blood Pressure',v:lv.bp||'—'},
+  {l:'Blood Sugar',v:lv.sugar?lv.sugar+' mg/dL':'—'},{l:'Sleep',v:lv.sleep?lv.sleep+'h':'—'},
+  {l:'Steps',v:lv.steps?lv.steps.toLocaleString():'—'},{l:'SpO2',v:lv.spo2?lv.spo2+'%':'—'},
+].map(r=>`<div class="info-row"><div class="ir-label">${r.l}</div><div class="ir-value">${r.v}</div></div>`).join('')
+:'<div style="color:var(--muted);font-size:13px;grid-column:1/-1">No vitals logged yet. <a href="vitals.html" style="color:var(--volt)">Log your first reading →</a></div>';
+
+// Exercise restrictions
+const approved=['Light cardio','Swimming','Yoga','Resistance training','Walking'];
+const restricted=user.injury&&user.injury!=='None'?['HIIT','Heavy squats','Contact sports']:[];
+document.getElementById('approvedEx').innerHTML=approved.map(e=>`<span class="badge badge-volt">${e}</span>`).join('');
+document.getElementById('restrictedEx').innerHTML=restricted.length?restricted.map(e=>`<span class="badge badge-red">${e}</span>`).join(''):'<span style="font-size:13px;color:var(--muted)">No restrictions at this time</span>';
+
+// Timeline
+const wkl=FM.getWorkouts();
+const appts=FM.load('appointments',[])||[];
+const timelineItems=[
+  ...wkl.slice(0,5).map(w=>({date:w.date,icon:'💪',iconBg:'var(--volt-dim)',text:`Logged workout: <strong>${w.exercise}</strong> — ${w.sets.length} sets`,type:'workout'})),
+  ...appts.map(a=>({date:a.date,icon:'🩺',iconBg:'var(--teal-dim)',text:`Appointment booked: <strong>${a.doctor}</strong> (${a.type})`,type:'appt'})),
+  {date:user.joinedAt?.split('T')[0]||'2025-01-01',icon:'🎉',iconBg:'rgba(181,255,71,.1)',text:'Joined FitMart — Welcome to your wellness journey!',type:'join'},
+].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
+
+document.getElementById('timeline').innerHTML=timelineItems.map(t=>`
+  <div class="tl-item">
+    <div class="tl-dot" style="background:${t.iconBg};border:1px solid var(--border)">${t.icon}</div>
+    <div class="tl-body"><div class="tl-date">${t.date}</div><div class="tl-text">${t.text}</div></div>
+  </div>`).join('');
+
+// Upcoming appointments
+const upcoming=appts.filter(a=>new Date(a.date)>=new Date()).slice(0,5);
+if(upcoming.length) document.getElementById('upcomingAppts').innerHTML=upcoming.map(a=>`
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;margin-bottom:10px">
+    <div><div style="font-weight:600;font-size:14px">${a.doctor}</div><div style="font-size:12px;color:var(--muted);margin-top:3px">${a.date} · ${a.type}</div></div>
+    <span class="badge badge-teal">${a.status||'Pending'}</span>
+  </div>`).join('');
+
+// Pre-fill edit form
+document.getElementById('editName').value=user.name||'';
+document.getElementById('editEmail').value=user.email||'';
+document.getElementById('editAge').value=user.age||'';
+document.getElementById('editWeight').value=user.weight||'';
+document.getElementById('editHeight').value=user.height||'';
+document.getElementById('editInjury').value=user.injury||'None';
+document.getElementById('editDisease').value=user.disease||'None';
+document.getElementById('editAllergies').value=user.allergies||'';
+document.getElementById('editEmergency').value=user.emergency||'';
+if(user.gender){const g=document.getElementById('editGender');[...g.options].forEach(o=>{if(o.value===user.gender)o.selected=true;});}
+if(user.goal){const g=document.getElementById('editGoal');[...g.options].forEach(o=>{if(o.value===user.goal)o.selected=true;});}
+if(user.level){const g=document.getElementById('editLevel');[...g.options].forEach(o=>{if(o.value===user.level)o.selected=true;});}
+
+function saveProfile(){
+  const updated={...user,
+    name:document.getElementById('editName').value,
+    email:document.getElementById('editEmail').value,
+    age:parseInt(document.getElementById('editAge').value)||user.age,
+    gender:document.getElementById('editGender').value,
+    weight:parseFloat(document.getElementById('editWeight').value)||user.weight,
+    height:parseFloat(document.getElementById('editHeight').value)||user.height,
+    goal:document.getElementById('editGoal').value,
+    level:document.getElementById('editLevel').value,
+    injury:document.getElementById('editInjury').value||'None',
+    disease:document.getElementById('editDisease').value||'None',
+    allergies:document.getElementById('editAllergies').value,
+    emergency:document.getElementById('editEmergency').value,
+  };
+  FM.setUser(updated);
+  FMToast.success('Profile updated! Reload to see changes.');
+}
+
+function showTab(name,el){
+  ['overview','medical','history','edit'].forEach(t=>{document.getElementById('tab-'+t).style.display='none';});
+  document.getElementById('tab-'+name).style.display='block';
+  document.querySelectorAll('.pn-a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+}
+</script>
+</body>
+</html>

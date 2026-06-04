@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Workout Plans — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.plan-filter{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:36px}
+.filter-btn{padding:10px 22px;border-radius:100px;font-size:13px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s}
+.filter-btn.on,.filter-btn:hover{border-color:var(--volt);color:var(--volt);background:var(--volt-dim)}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.plan-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.plan-grid{grid-template-columns:1fr}}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:border-color .3s,transform .35s var(--ease);cursor:pointer}
+.plan-card:hover{border-color:rgba(181,255,71,.22);transform:translateY(-5px)}
+.plan-thumb{height:160px;position:relative;overflow:hidden}
+.plan-thumb img{transition:transform .5s var(--ease);width:100%;height:100%;object-fit:cover;filter:brightness(.35) saturate(.5)}
+.plan-card:hover .plan-thumb img{transform:scale(1.07)}
+.plan-thumb-ov{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:space-between;padding:16px}
+.plan-level{padding:4px 12px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.plan-days{font-size:11px;font-weight:600;color:rgba(237,244,240,.8)}
+.plan-body{padding:22px}
+.plan-name{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:6px}
+.plan-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.plan-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.plan-meta{display:flex;gap:16px;font-size:12px;color:var(--muted);padding-top:14px;border-top:1px solid var(--border)}
+.pm-item{display:flex;align-items:center;gap:5px}
+/* Plan detail modal */
+.plan-day{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px}
+.pd-day{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:10px;color:var(--volt)}
+.pd-ex{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.pd-ex:last-child{border-bottom:none}
+.pd-sets{font-size:11px;font-weight:600;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+<div id="planModal" class="modal-overlay">
+  <div class="modal" style="max-width:680px">
+    <button class="modal-close" onclick="FMModal.close('planModal')">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a on" href="workout-plans.html">Plans</a>
+    <a class="nav-a" href="workout-tracker.html">Tracker</a>
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Gym Module</span>
+  <h1>Workout Plans</h1>
+  <p>Pre-designed expert programs for every goal and level. Tap any plan to view the full weekly schedule, then start tracking in one click.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="plan-filter rv" id="filters">
+    <button class="filter-btn on" onclick="filterPlans('all',this)">All Plans</button>
+    <button class="filter-btn" onclick="filterPlans('Weight Loss',this)">Weight Loss</button>
+    <button class="filter-btn" onclick="filterPlans('Muscle Gain',this)">Muscle Gain</button>
+    <button class="filter-btn" onclick="filterPlans('Strength',this)">Strength</button>
+    <button class="filter-btn" onclick="filterPlans('Endurance',this)">Endurance</button>
+    <button class="filter-btn" onclick="filterPlans('Beginner',this)">Beginner</button>
+    <button class="filter-btn" onclick="filterPlans('Home',this)">Home Workout</button>
+  </div>
+  <div class="plan-grid" id="planGrid"></div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const PLANS=[
+  {id:1,name:'Fat Burner 6-Week',goal:'Weight Loss',level:'Beginner',days:5,img:'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',desc:'High-intensity interval sessions combined with steady-state cardio to maximise fat burning while preserving muscle.',tags:['HIIT','Cardio','Fat Loss'],duration:'45 min',cals:420,location:'Gym',schedule:[
+    {day:'Monday',exercises:[{name:'Treadmill Incline Walk',sets:'20 min'},{name:'Jump Rope',sets:'3×3 min'},{name:'Mountain Climbers',sets:'4×30s'},{name:'Burpees',sets:'3×15'}]},
+    {day:'Tuesday',exercises:[{name:'Cycling',sets:'25 min'},{name:'Box Step-ups',sets:'3×20'},{name:'High Knees',sets:'4×30s'}]},
+    {day:'Wednesday',exercises:[{name:'Rest / Light Walk',sets:'30 min walk'}]},
+    {day:'Thursday',exercises:[{name:'HIIT Circuit',sets:'5 rounds'},{name:'Jump Squats',sets:'3×20'},{name:'Push-ups',sets:'3×max'},{name:'Plank',sets:'3×45s'}]},
+    {day:'Friday',exercises:[{name:'Rowing Machine',sets:'20 min'},{name:'Kettlebell Swings',sets:'4×15'},{name:'Battle Ropes',sets:'3×30s'}]},
+  ]},
+  {id:2,name:'Mass Builder 8-Week',goal:'Muscle Gain',level:'Intermediate',days:5,img:'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=600&q=80',desc:'Progressive overload hypertrophy programme targeting all major muscle groups with proven compound and isolation movements.',tags:['Hypertrophy','Compound','Progressive'],duration:'75 min',cals:310,location:'Gym',schedule:[
+    {day:'Monday — Chest & Triceps',exercises:[{name:'Bench Press',sets:'4×8'},{name:'Incline Dumbbell Press',sets:'3×10'},{name:'Cable Flye',sets:'3×12'},{name:'Tricep Dips',sets:'3×12'},{name:'Rope Pushdown',sets:'3×15'}]},
+    {day:'Tuesday — Back & Biceps',exercises:[{name:'Barbell Row',sets:'4×8'},{name:'Pull-ups',sets:'4×max'},{name:'Lat Pulldown',sets:'3×12'},{name:'Bicep Curl',sets:'3×12'},{name:'Hammer Curl',sets:'3×12'}]},
+    {day:'Wednesday — Rest / Abs',exercises:[{name:'Plank',sets:'3×60s'},{name:'Hanging Leg Raise',sets:'3×15'},{name:'Cable Crunch',sets:'3×20'}]},
+    {day:'Thursday — Shoulders',exercises:[{name:'Overhead Press',sets:'4×8'},{name:'Lateral Raise',sets:'4×15'},{name:'Face Pull',sets:'3×15'},{name:'Front Raise',sets:'3×12'}]},
+    {day:'Friday — Legs',exercises:[{name:'Squat',sets:'4×8'},{name:'Leg Press',sets:'3×12'},{name:'Romanian Deadlift',sets:'3×10'},{name:'Leg Curl',sets:'3×12'},{name:'Calf Raise',sets:'4×20'}]},
+  ]},
+  {id:3,name:'Powerlifting Foundation',goal:'Strength',level:'Intermediate',days:4,img:'https://images.unsplash.com/photo-1581009137042-c552e485697a?w=600&q=80',desc:'Build raw strength on the three powerlifting movements with linear periodisation and accessory work for longevity.',tags:['Squat','Bench','Deadlift'],duration:'90 min',cals:280,location:'Gym',schedule:[
+    {day:'Monday — Squat Focus',exercises:[{name:'Back Squat',sets:'5×5'},{name:'Front Squat',sets:'3×5'},{name:'Leg Press',sets:'3×8'},{name:'Leg Curl',sets:'3×10'}]},
+    {day:'Wednesday — Bench Focus',exercises:[{name:'Bench Press',sets:'5×5'},{name:'Close-Grip Bench',sets:'3×5'},{name:'Overhead Press',sets:'3×8'},{name:'Tricep Extension',sets:'3×12'}]},
+    {day:'Friday — Deadlift Focus',exercises:[{name:'Deadlift',sets:'3×5'},{name:'Romanian Deadlift',sets:'3×6'},{name:'Barbell Row',sets:'4×8'},{name:'Pull-ups',sets:'3×max'}]},
+    {day:'Saturday — Accessory',exercises:[{name:'Bulgarian Split Squat',sets:'3×8'},{name:'Dumbbell Bench',sets:'3×10'},{name:'Face Pull',sets:'3×15'},{name:'Farmer Carry',sets:'3×30m'}]},
+  ]},
+  {id:4,name:'Beginner Kickstart 4-Week',goal:'General Fitness',level:'Beginner',days:3,img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80',desc:'The perfect starting programme for new gym-goers. Full-body sessions 3 days a week to build technique and consistency.',tags:['Full Body','Beginner','Technique'],duration:'50 min',cals:250,location:'Gym',schedule:[
+    {day:'Monday / Wednesday / Friday — Full Body',exercises:[{name:'Squat',sets:'3×10'},{name:'Bench Press',sets:'3×10'},{name:'Barbell Row',sets:'3×10'},{name:'Overhead Press',sets:'3×10'},{name:'Deadlift',sets:'3×8'},{name:'Plank',sets:'2×30s'}]},
+  ]},
+  {id:5,name:'Home HIIT & Strength',goal:'Weight Loss',level:'Beginner',days:5,img:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80',desc:'No equipment needed. Uses bodyweight movements to build strength and burn fat from the comfort of your home.',tags:['Home','No Equipment','HIIT'],duration:'35 min',cals:300,location:'Home',schedule:[
+    {day:'Monday — Upper Body',exercises:[{name:'Push-ups',sets:'4×max'},{name:'Pike Push-ups',sets:'3×12'},{name:'Tricep Dips (chair)',sets:'3×15'},{name:'Superman',sets:'3×15'}]},
+    {day:'Wednesday — Lower Body',exercises:[{name:'Bodyweight Squat',sets:'4×20'},{name:'Lunges',sets:'3×12 each'},{name:'Glute Bridge',sets:'4×15'},{name:'Calf Raise',sets:'3×25'}]},
+    {day:'Friday — Full Body HIIT',exercises:[{name:'Burpees',sets:'3×10'},{name:'Jump Squats',sets:'3×15'},{name:'Mountain Climbers',sets:'3×30s'},{name:'High Knees',sets:'3×30s'},{name:'Plank',sets:'3×45s'}]},
+  ]},
+  {id:6,name:'Marathon Prep 12-Week',goal:'Endurance',level:'Advanced',days:6,img:'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=600&q=80',desc:'Structured running programme from 5K to marathon distance with strength work to prevent injury and improve economy.',tags:['Running','Cardio','Endurance'],duration:'60–120 min',cals:600,location:'Gym',schedule:[
+    {day:'Monday',exercises:[{name:'Easy Run',sets:'30 min @ 65% HR'},{name:'Leg Strength',sets:'2×12 squats/lunges'}]},
+    {day:'Tuesday',exercises:[{name:'Tempo Run',sets:'20 min @ 80% HR'},{name:'Core Work',sets:'15 min'}]},
+    {day:'Wednesday',exercises:[{name:'Rest or Cross-training',sets:'Swim / Cycle 30 min'}]},
+    {day:'Thursday',exercises:[{name:'Interval Training',sets:'6×800m @ race pace'}]},
+    {day:'Saturday',exercises:[{name:'Long Run',sets:'Week 1: 10km, +1km/week'}]},
+    {day:'Sunday',exercises:[{name:'Recovery Walk',sets:'20 min easy'},{name:'Stretching',sets:'20 min'}]},
+  ]},
+];
+
+let activeFilter='all';
+
+function filterPlans(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderPlans();
+}
+
+function renderPlans(){
+  const filtered=activeFilter==='all'?PLANS:PLANS.filter(p=>p.goal===activeFilter||p.level===activeFilter||p.location===activeFilter);
+  const levelColors={Beginner:'badge-green',Intermediate:'badge-teal',Advanced:'badge-coral'};
+  document.getElementById('planGrid').innerHTML=filtered.map(p=>`
+    <div class="plan-card rv" onclick="openPlan(${p.id})">
+      <div class="plan-thumb">
+        <img src="${p.img}" alt="${p.name}" loading="lazy"/>
+        <div class="plan-thumb-ov">
+          <span class="badge ${levelColors[p.level]||'badge-teal'}">${p.level}</span>
+          <span class="plan-days">${p.days} days/week</span>
+        </div>
+      </div>
+      <div class="plan-body">
+        <div class="plan-name">${p.name}</div>
+        <div class="plan-desc">${p.desc}</div>
+        <div class="plan-tags">${p.tags.map(t=>`<span class="badge badge-volt">${t}</span>`).join('')}</div>
+        <div class="plan-meta">
+          <div class="pm-item">⏱ ${p.duration}</div>
+          <div class="pm-item">🔥 ~${p.cals} kcal</div>
+          <div class="pm-item">📍 ${p.location}</div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openPlan(id){
+  const p=PLANS.find(x=>x.id===id);
+  if(!p) return;
+  document.getElementById('modalContent').innerHTML=`
+    <div style="margin-bottom:20px">
+      <span class="badge badge-teal" style="margin-bottom:10px;display:inline-block">${p.level} · ${p.goal}</span>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:-0.5px;margin-bottom:8px">${p.name}</div>
+      <div style="font-size:14px;color:var(--muted);margin-bottom:16px">${p.desc}</div>
+      <div style="display:flex;gap:16px;font-size:13px;color:var(--muted);margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+        <span>⏱ ${p.duration}</span><span>🔥 ~${p.cals} kcal/session</span><span>📅 ${p.days} days/week</span><span>📍 ${p.location}</span>
+      </div>
+    </div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px">Weekly Schedule</div>
+    ${p.schedule.map(day=>`
+      <div class="plan-day">
+        <div class="pd-day">${day.day}</div>
+        ${day.exercises.map(e=>`<div class="pd-ex"><span>${e.name}</span><span class="pd-sets">${e.sets}</span></div>`).join('')}
+      </div>`).join('')}
+    <div style="display:flex;gap:12px;margin-top:20px">
+      <button class="btn-main" style="flex:1" onclick="startPlan(${p.id})">Start This Plan</button>
+      <button class="btn-outline" onclick="FMModal.close('planModal')">Close</button>
+    </div>`;
+  FMModal.open('planModal');
+}
+
+function startPlan(id){
+  const p=PLANS.find(x=>x.id===id);
+  if(!p) return;
+  const user=FM.getUser()||{};
+  FM.setUser({...user,activePlan:p.name,goal:p.goal});
+  FMModal.close('planModal');
+  FMToast.success(`✅ "${p.name}" set as your active plan!`);
+  setTimeout(()=>window.location.href='workout-tracker.html',1000);
+}
+
+renderPlans();
+</script>
+</body>
+</html>

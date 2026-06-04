@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reports & Analytics — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.report-grid{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start}
+@media(max-width:1000px){.report-grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+.panel-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+/* Weekly score ring */
+.score-ring-wrap{position:relative;width:140px;height:140px;margin:0 auto 16px}
+.score-ring-wrap canvas{position:absolute;inset:0}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.score-n{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;color:var(--volt);letter-spacing:-1px;line-height:1}
+.score-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+/* Category scores */
+.cat-score{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+.cat-score:last-child{border-bottom:none}
+.cat-left{display:flex;align-items:center;gap:10px;font-size:13px}
+.cat-icon{font-size:16px;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.cat-n{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--volt)}
+/* AI insight */
+.insight-card{background:linear-gradient(135deg,rgba(181,255,71,.05),rgba(45,212,191,.05));border:1px solid rgba(181,255,71,.15);border-radius:16px;padding:20px;margin-bottom:14px}
+.insight-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.insight-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;background:var(--volt-dim)}
+.insight-title{font-weight:700;font-size:14px}
+.insight-text{font-size:13px;color:var(--muted);line-height:1.75}
+/* Risk badge */
+.risk-card{padding:20px;border-radius:14px;margin-bottom:16px;border:1px solid}
+.risk-card.low{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.2)}
+.risk-card.medium{background:rgba(245,158,11,.05);border-color:rgba(245,158,11,.2)}
+.risk-card.high{background:rgba(255,99,71,.06);border-color:rgba(255,99,71,.18)}
+.risk-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
+.risk-desc{font-size:12px;color:var(--muted);line-height:1.7}
+/* Export btn */
+.export-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="workout-tracker.html">Workouts</a>
+    <a class="nav-a" href="progress-tracking.html">Progress</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a on" href="reports.html">Reports</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Back</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Analytics</span>
+  <h1>Reports & Analytics</h1>
+  <p>Your complete weekly health summary — workouts, vitals, diet compliance, sleep, and risk assessment in one view.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Top KPI -->
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:14px;margin-bottom:24px" class="rv">
+    <div class="stat-box"><div class="stat-n" id="rWorkouts">0</div><div class="stat-l">Workouts</div></div>
+    <div class="stat-box"><div class="stat-n teal" id="rSteps">—</div><div class="stat-l">Avg Steps</div></div>
+    <div class="stat-box"><div class="stat-n white" id="rSleep">—</div><div class="stat-l">Avg Sleep</div></div>
+    <div class="stat-box"><div class="stat-n" id="rCal">—</div><div class="stat-l">kcal Burned</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:#a78bfa" id="rVitals">0</div><div class="stat-l">Vitals Logged</div></div>
+    <div class="stat-box"><div class="stat-n teal" id="rDiet">—</div><div class="stat-l">Diet Score</div></div>
+  </div>
+
+  <div class="report-grid">
+    <!-- LEFT -->
+    <div>
+      <!-- Activity chart -->
+      <div class="panel rv">
+        <div class="panel-title">Weekly Activity</div>
+        <div class="panel-sub">Workouts logged per day this week</div>
+        <canvas id="activityChart" height="160"></canvas>
+      </div>
+
+      <!-- Vitals trend -->
+      <div class="panel rv d1">
+        <div class="panel-title">Vitals Trend — 4 Weeks</div>
+        <div class="panel-sub">Average heart rate and blood pressure over time</div>
+        <canvas id="vitalsChart" height="160"></canvas>
+      </div>
+
+      <!-- Weight vs goal -->
+      <div class="panel rv d2">
+        <div class="panel-title">Weight vs Goal</div>
+        <div class="panel-sub">Tracking your progress toward target weight</div>
+        <canvas id="weightGoalChart" height="160"></canvas>
+      </div>
+
+      <!-- Workout breakdown -->
+      <div class="panel rv d3">
+        <div class="panel-title">Workout Breakdown by Muscle Group</div>
+        <div class="panel-sub">Distribution across all logged sessions</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:center">
+          <canvas id="muscleChart" height="200"></canvas>
+          <div id="muscleList" style="display:flex;flex-direction:column;gap:10px"></div>
+        </div>
+      </div>
+
+      <!-- AI Insights -->
+      <div class="panel rv d4">
+        <div class="panel-title">AI Health Insights</div>
+        <div class="panel-sub">Generated from your this week's data</div>
+        <div id="insights"></div>
+        <button class="btn-outline btn-sm" style="margin-top:8px" onclick="generateInsights()">⚡ Regenerate Insights</button>
+      </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div>
+      <!-- Weekly score -->
+      <div class="panel rv" style="text-align:center">
+        <div class="panel-title">Weekly Wellness Score</div>
+        <div class="panel-sub">Based on workouts, vitals, sleep & diet</div>
+        <div class="score-ring-wrap">
+          <canvas id="scoreChart"></canvas>
+          <div class="score-center"><div class="score-n" id="scoreN">—</div><div class="score-l">/ 100</div></div>
+        </div>
+        <div id="catScores" style="margin-top:8px"></div>
+      </div>
+
+      <!-- Risk assessment -->
+      <div class="panel rv d1">
+        <div class="panel-title">Risk Assessment</div>
+        <div class="panel-sub">Auto-calculated from latest vitals</div>
+        <div id="riskCards"></div>
+        <div style="margin-top:14px;padding:14px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;font-size:12px;color:var(--muted)">⚕️ This is an automated assessment. Always consult your FitMart doctor for clinical advice.</div>
+      </div>
+
+      <!-- Export -->
+      <div class="panel rv d2">
+        <div class="panel-title">Export Report</div>
+        <div class="panel-sub">Download or share your health data</div>
+        <div class="export-row">
+          <button class="btn-outline btn-sm" onclick="exportJSON()">📥 Export JSON</button>
+          <button class="btn-outline btn-sm" onclick="printReport()">🖨️ Print Report</button>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.7">All data is stored locally on your device. Connect backend for cloud sync and PDF export.</div>
+      </div>
+
+      <!-- Quick links -->
+      <div class="panel rv d3">
+        <div class="panel-title" style="margin-bottom:14px">Quick Navigation</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="workout-tracker.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s" class="card-link">💪 <span>Log a Workout</span></a>
+          <a href="vitals.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s" class="card-link">❤️ <span>Update Vitals</span></a>
+          <a href="diet.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s" class="card-link">🥗 <span>Log Meals</span></a>
+          <a href="progress-tracking.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s" class="card-link">📈 <span>Log Weight</span></a>
+          <a href="bmi-calculator.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s" class="card-link">⚖️ <span>Check BMI</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+const wkl=FM.getWorkouts();
+const vitals=FM.getVitals();
+const prog=FM.load('progress',[])||[];
+const foodLog=FM.load('food_log_today',[])||[];
+const user=FM.getUser()||{};
+const weekStart=new Date(Date.now()-7*86400000);
+
+// KPIs
+const weekWk=wkl.filter(w=>new Date(w.date)>=weekStart);
+document.getElementById('rWorkouts').textContent=weekWk.length;
+const latestV=vitals[0];
+document.getElementById('rSteps').textContent=latestV?.steps?latestV.steps.toLocaleString():'—';
+document.getElementById('rSleep').textContent=latestV?.sleep?latestV.sleep+'h':'—';
+document.getElementById('rCal').textContent=weekWk.reduce((a,w)=>a+(w.calories||0),0)||'—';
+document.getElementById('rVitals').textContent=vitals.length;
+const dietScore=foodLog.length>0?Math.min(100,Math.round(foodLog.reduce((a,f)=>a+f.prot,0)/140*100)):'—';
+document.getElementById('rDiet').textContent=typeof dietScore==='number'?dietScore+'%':dietScore;
+
+// Activity chart
+const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const now=new Date();
+const actData=days.map((_,i)=>{const d=new Date(now);d.setDate(now.getDate()-now.getDay()+i+1);const ds=d.toISOString().split('T')[0];return wkl.filter(w=>w.date===ds).length;});
+new Chart(document.getElementById('activityChart').getContext('2d'),{
+  type:'bar',data:{labels:days,datasets:[{data:actData,backgroundColor:ctx=>actData[ctx.dataIndex]>0?'rgba(181,255,71,0.7)':'rgba(255,255,255,0.06)',borderRadius:6,borderSkipped:false}]},
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true,ticks:{stepSize:1}}}}
+});
+
+// Vitals trend
+const wkLabels=['4w ago','3w ago','2w ago','Last week','This week'];
+const hrData=vitals.slice(0,5).reverse().map(v=>v.heartRate||null);
+const bpData=vitals.slice(0,5).reverse().map(v=>v.bpSys||null);
+new Chart(document.getElementById('vitalsChart').getContext('2d'),{
+  type:'line',
+  data:{labels:wkLabels.slice(-Math.max(hrData.length,1)),datasets:[
+    {data:hrData,label:'Heart Rate',borderColor:'#ff6347',backgroundColor:'rgba(255,99,71,.05)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'#ff6347'},
+    {data:bpData,label:'BP Systolic',borderColor:'#2dd4bf',backgroundColor:'rgba(45,212,191,.05)',fill:false,tension:.4,pointRadius:4,pointBackgroundColor:'#2dd4bf'},
+  ]},
+  options:{responsive:true,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'}}}}
+});
+
+// Weight vs goal
+const wts=prog.slice(0,8).reverse().map(p=>p.weight);
+const wtLabels=prog.slice(0,8).reverse().map(p=>p.date);
+const goalWt=parseFloat(user.weight)||70;
+const targetWt=user.goal==='Weight Loss'?goalWt*0.88:user.goal==='Muscle Gain'?goalWt*1.08:goalWt;
+new Chart(document.getElementById('weightGoalChart').getContext('2d'),{
+  type:'line',
+  data:{labels:wtLabels.length?wtLabels:['Start'],datasets:[
+    {data:wts.length?wts:[goalWt],label:'Your Weight',borderColor:'var(--volt)',backgroundColor:'rgba(181,255,71,.07)',fill:true,tension:.4,pointRadius:4,pointBackgroundColor:'var(--volt)'},
+    {data:wtLabels.map(()=>targetWt),label:'Target',borderColor:'rgba(45,212,191,.4)',borderDash:[5,5],pointRadius:0,fill:false},
+  ]},
+  options:{responsive:true,plugins:{legend:{position:'top',labels:{boxWidth:10,font:{size:11}}}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>v+'kg'}}}}
+});
+
+// Muscle breakdown
+const muscles={};
+wkl.forEach(w=>{muscles[w.muscle||'Other']=(muscles[w.muscle||'Other']||0)+1;});
+const mLabels=Object.keys(muscles),mData=Object.values(muscles);
+const mColors=['rgba(181,255,71,.8)','rgba(45,212,191,.8)','rgba(255,99,71,.8)','rgba(167,139,250,.8)','rgba(245,158,11,.8)','rgba(96,165,250,.8)'];
+if(mLabels.length){
+  new Chart(document.getElementById('muscleChart').getContext('2d'),{
+    type:'doughnut',data:{labels:mLabels,datasets:[{data:mData,backgroundColor:mColors,borderColor:'transparent',borderWidth:0}]},
+    options:{responsive:true,cutout:'60%',plugins:{legend:{display:false}}}
+  });
+  document.getElementById('muscleList').innerHTML=mLabels.map((l,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px"><div style="width:10px;height:10px;border-radius:50%;background:${mColors[i]};flex-shrink:0"></div><span style="color:var(--muted)">${l}</span><span style="margin-left:auto;font-weight:700;color:var(--white)">${mData[i]}</span></div>`).join('');
+} else {
+  document.getElementById('muscleChart').parentElement.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">Log workouts to see muscle breakdown</div>';
+}
+
+// Wellness score
+function calcScore(){
+  let s=0;
+  s+=Math.min(30,weekWk.length*6); // workouts max 30
+  if(latestV){
+    if(latestV.heartRate>=60&&latestV.heartRate<=100)s+=15;
+    if(latestV.sleep>=7&&latestV.sleep<=9)s+=20;
+    if(latestV.steps>=8000)s+=20;
+    if(latestV.sugar>=70&&latestV.sugar<=100)s+=15;
+  }
+  return Math.min(100,s);
+}
+const score=calcScore();
+document.getElementById('scoreN').textContent=score;
+new Chart(document.getElementById('scoreChart').getContext('2d'),{
+  type:'doughnut',data:{datasets:[{data:[score,100-score],backgroundColor:[score>=80?'rgba(181,255,71,.85)':score>=60?'rgba(45,212,191,.85)':'rgba(255,99,71,.85)','rgba(255,255,255,0.05)'],borderColor:'transparent',borderWidth:0}]},
+  options:{responsive:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:false}}}
+});
+
+const cats=[{icon:'💪',label:'Workouts',score:Math.min(100,weekWk.length*20)},{icon:'❤️',label:'Vitals',score:latestV?80:0},{icon:'💤',label:'Sleep',score:latestV?.sleep>=7?90:latestV?.sleep?60:0},{icon:'👟',label:'Activity',score:latestV?.steps>=8000?95:latestV?.steps?Math.round(latestV.steps/10000*100):0}];
+document.getElementById('catScores').innerHTML=cats.map(c=>`<div class="cat-score"><div class="cat-left"><div class="cat-icon">${c.icon}</div><span>${c.label}</span></div><div style="flex:1;margin:0 14px"><div class="prog-wrap"><div class="prog-fill" style="width:${c.score}%"></div></div></div><div class="cat-n">${c.score}%</div></div>`).join('');
+
+// Risk cards
+const v=latestV||{};
+const hrOk=!v.heartRate||(v.heartRate>=60&&v.heartRate<=100);
+const bpOk=!v.bpSys||(v.bpSys<130&&v.bpDia<85);
+const sugarOk=!v.sugar||(v.sugar>=70&&v.sugar<=100);
+const overallRisk=(!hrOk||!bpOk)?'high':(!sugarOk)?'medium':'low';
+document.getElementById('riskCards').innerHTML=`
+  <div class="risk-card ${overallRisk}">
+    <div class="risk-title">${overallRisk==='low'?'✅ Low Risk':overallRisk==='medium'?'⚠️ Moderate Risk':'🚨 Elevated Risk'}</div>
+    <div class="risk-desc">${overallRisk==='low'?'Your current vitals and activity levels look healthy. Keep up the great work!':overallRisk==='medium'?'One or more vitals are slightly borderline. Monitor closely and consult your FitMart doctor.':'One or more vitals are outside safe ranges. Please consult Dr. Fatima Malik today.'}</div>
+  </div>
+  <div class="risk-card low" style="margin-top:10px"><div class="risk-title">💪 Fitness Risk: ${weekWk.length>=3?'Low':'Moderate'}</div><div class="risk-desc">${weekWk.length>=3?'Great consistency this week! You\'re on track with your training.':'Fewer than 3 workouts this week. Aim for 3–5 sessions for optimal results.'}</div></div>`;
+
+// AI Insights
+function generateInsights(){
+  const ins=[
+    {icon:'⚡',title:'Recovery Recommendation',text:weekWk.length>=5?'High training volume this week. Consider adding an active rest day with light yoga or walking to prevent overtraining.':'Your training volume is balanced. Keep 1–2 rest days with light activity for optimal recovery.'},
+    {icon:'💧',title:'Hydration Alert',text:!latestV?.steps?'Log your daily steps and water intake for personalised hydration targets.':'Based on your '+((latestV?.steps||0)/1000).toFixed(1)+'K steps today, aim for at least 2.5L of water to stay optimally hydrated.'},
+    {icon:'📊',title:'Progress Insight',text:prog.length>=2?`Your weight trend shows ${parseFloat((prog[0].weight-prog[prog.length-1].weight).toFixed(1))<0?'a downward':'an upward'} movement of ${Math.abs(parseFloat((prog[0].weight-prog[prog.length-1].weight).toFixed(1)))}kg over ${prog.length} entries. Stay consistent.`:'Log your weight weekly in Progress Tracking to unlock personalised trend insights.'},
+  ];
+  document.getElementById('insights').innerHTML=ins.map(i=>`<div class="insight-card"><div class="insight-head"><div class="insight-icon">${i.icon}</div><div class="insight-title">${i.title}</div></div><div class="insight-text">${i.text}</div></div>`).join('');
+}
+generateInsights();
+
+function exportJSON(){
+  const data={exportDate:new Date().toISOString(),user:FM.getUser(),workouts:FM.getWorkouts(),vitals:FM.getVitals(),bmiHistory:FM.getBMIHistory(),progress:FM.load('progress',[])};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitmart-report-'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  FMToast.success('Report exported!');
+}
+function printReport(){window.print();}
+
+document.querySelectorAll('.card-link').forEach(a=>{a.addEventListener('mouseenter',()=>a.style.borderColor='rgba(181,255,71,.2)');a.addEventListener('mouseleave',()=>a.style.borderColor='');});
+</script>
+</body>
+</html>

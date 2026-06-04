@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+.auth-wrap{min-height:100vh;display:flex;align-items:stretch}
+.auth-left{flex:1;position:relative;overflow:hidden;display:none}
+@media(min-width:960px){.auth-left{display:block}}
+.auth-left img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22) saturate(0.5)}
+.auth-left-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,10,14,0.8),rgba(5,10,14,0.3))}
+.auth-left-content{position:absolute;bottom:60px;left:60px;right:60px;z-index:2}
+.auth-left-content h2{font-family:'Syne',sans-serif;font-weight:800;font-size:42px;line-height:0.95;letter-spacing:-1.5px;margin-bottom:16px;padding-bottom:4px}
+.auth-left-content p{font-size:15px;color:var(--muted);line-height:1.75;margin-bottom:32px}
+.auth-pill{display:inline-flex;align-items:center;gap:8px;background:var(--volt-dim);border:1px solid rgba(181,255,71,0.2);padding:6px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--volt);margin-bottom:32px}
+.auth-stats{display:flex;gap:32px}
+.auth-stat-n{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:var(--volt);letter-spacing:-1px}
+.auth-stat-l{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.auth-right{width:100%;max-width:520px;display:flex;flex-direction:column;justify-content:center;padding:60px 52px;background:var(--bg);position:relative;z-index:10}
+@media(min-width:960px){.auth-right{min-width:480px;max-width:520px}}
+@media(max-width:520px){.auth-right{padding:40px 24px}}
+.auth-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:48px}
+.auth-logo .n-mark{width:30px;height:30px;background:var(--volt);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.auth-logo .n-mark svg{width:16px;height:16px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round}
+.auth-title{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px;margin-bottom:8px}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:36px}
+.divider{display:flex;align-items:center;gap:16px;margin:24px 0;color:var(--muted2);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.social-btns{display:flex;gap:12px;margin-bottom:0}
+.social-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;font-size:13px;font-weight:500;color:var(--white);cursor:pointer;transition:border-color 0.25s,background 0.25s}
+.social-btn:hover{border-color:var(--border3);background:var(--card)}
+.auth-switch{margin-top:28px;text-align:center;font-size:13px;color:var(--muted)}
+.auth-switch a{color:var(--volt);font-weight:600}
+.auth-switch a:hover{text-decoration:underline}
+.error-msg{background:var(--coral-dim);border:1px solid rgba(255,99,71,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--coral);margin-bottom:16px;display:none}
+.forgot-link{font-size:12px;color:var(--muted);float:right;transition:color 0.25s}
+.forgot-link:hover{color:var(--volt)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<div class="auth-wrap">
+  <!-- LEFT PANEL -->
+  <div class="auth-left">
+    <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80&auto=format&fit=crop" alt="gym"/>
+    <div class="auth-left-ov"></div>
+    <div class="auth-left-content">
+      <div class="auth-pill">● Live Community</div>
+      <h2>Your Wellness<br><span style="color:var(--volt)">Journey Continues</span></h2>
+      <p>Access your personalised dashboard, today's workout plan, health vitals, and doctor notes — all in one place.</p>
+      <div class="auth-stats">
+        <div><div class="auth-stat-n">15K+</div><div class="auth-stat-l">Members</div></div>
+        <div><div class="auth-stat-n">98%</div><div class="auth-stat-l">Satisfaction</div></div>
+        <div><div class="auth-stat-n">24/7</div><div class="auth-stat-l">Access</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="auth-right">
+    <a class="auth-logo" href="index.html">
+      <div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+      FitMart
+    </a>
+
+    <div class="auth-title">Welcome Back</div>
+    <p class="auth-sub">Sign in to your account to continue</p>
+
+    <div id="errorMsg" class="error-msg"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="email" type="email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password <a class="forgot-link" href="auth-forgot.html">Forgot password?</a></label>
+        <input class="form-input" id="password" type="password" placeholder="••••••••" required/>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:24px">
+        <input type="checkbox" id="remember" style="accent-color:var(--volt);width:15px;height:15px;cursor:pointer"/>
+        <label for="remember" style="font-size:13px;color:var(--muted)">Remember me for 30 days</label>
+      </div>
+      <button class="btn-main btn-full" type="submit" id="loginBtn">
+        <div class="spinner" id="loginSpin" style="display:none"></div>
+        <span id="loginLbl">Sign In →</span>
+      </button>
+    </form>
+
+    <div class="divider">or continue with</div>
+    <div class="social-btns">
+      <button class="social-btn" onclick="FMToast.info('Google auth coming soon')">🌐 Google</button>
+      <button class="social-btn" onclick="FMToast.info('Facebook auth coming soon')">📘 Facebook</button>
+    </div>
+
+    <div class="auth-switch">Don't have an account? <a href="auth-register.html">Create one free →</a></div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn   = document.getElementById('loginBtn');
+  const spin  = document.getElementById('loginSpin');
+  const lbl   = document.getElementById('loginLbl');
+  const err   = document.getElementById('errorMsg');
+  const email    = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value;
+
+  // Client-side validation
+  if (!email) { showErr('Please enter your email address'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address'); return; }
+  if (!password) { showErr('Please enter your password'); return; }
+
+  spin.style.display = 'block';
+  lbl.textContent = 'Signing in...';
+  btn.disabled = true;
+  err.style.display = 'none';
+
+  function showErr(msg) {
+    err.textContent = msg;
+    err.style.display = 'block';
+    spin.style.display = 'none';
+    lbl.textContent = 'Sign In →';
+    btn.disabled = false;
+  }
+
+  try {
+    const res = await FMAPI.post('/auth/login', { email, password });
+    if (!res || !res.user) throw new Error('Invalid response from server');
+
+    const user = res.user;
+    if (res.token) FM.save('auth_token', res.token);
+    FM.setUser(user);
+    FMToast.success('Welcome back, ' + (user.name || 'Member') + '!');
+
+    // Route by role
+    const routes = {
+      admin:   'admin-dashboard.html',
+      doctor:  'doctor-dashboard.html',
+      trainer: 'trainer-dashboard.html',
+    };
+    setTimeout(() => window.location.href = routes[user.role] || 'dashboard.html', 800);
+
+  } catch(err_obj) {
+    let msg = err_obj.message || 'Login failed';
+    if (msg.includes('401') || msg.toLowerCase().includes('invalid')) {
+      msg = 'Invalid email or password. Please try again.';
+    } else if (msg.includes('403')) {
+      msg = 'Your account has been suspended. Contact support.';
+    } else if (msg.includes('network') || msg.includes('fetch') || msg.includes('Failed')) {
+      // Offline demo mode
+      const demoUsers = {
+        'doctor@fitmart.pk':  { id: 2, role: 'doctor',  name: 'Dr. Fatima',  plan: 'Elite' },
+        'admin@fitmart.pk':   { id: 1, role: 'admin',   name: 'Admin',       plan: 'Elite' },
+        'trainer@fitmart.pk': { id: 5, role: 'trainer', name: 'Umar Khan',   plan: 'Elite' },
+      };
+      const demoUser = demoUsers[email];
+      if (demoUser && password.length >= 6) {
+        FM.setUser({ ...demoUser, email });
+        FMToast.info('Demo mode — backend offline');
+        const routes = { admin:'admin-dashboard.html', doctor:'doctor-dashboard.html', trainer:'trainer-dashboard.html' };
+        setTimeout(() => window.location.href = routes[demoUser.role] || 'dashboard.html', 800);
+        spin.style.display = 'none'; lbl.textContent = 'Sign In →'; btn.disabled = false;
+        return;
+      }
+      msg = 'Cannot connect to server. Please check that the backend is running.';
+    }
+    showErr(msg);
+  }
+});
+</script>
+</body>
+</html>

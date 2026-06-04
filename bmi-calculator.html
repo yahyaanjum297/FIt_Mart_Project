@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BMI Calculator — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.bmi-hero{padding:60px 0 40px}
+.bmi-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start}
+@media(max-width:860px){.bmi-grid{grid-template-columns:1fr}}
+
+/* Gauge */
+.gauge-wrap{position:relative;width:260px;height:140px;margin:0 auto 24px}
+.gauge-svg{width:100%;height:100%}
+.gauge-bg{fill:none;stroke:var(--border2);stroke-width:18;stroke-linecap:round}
+.gauge-fill{fill:none;stroke-width:18;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:408;transition:stroke-dashoffset 1.2s var(--ease),stroke 0.8s;transform-origin:center;transform:rotate(180deg)}
+.gauge-center{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);text-align:center}
+.gauge-val{font-family:'Syne',sans-serif;font-weight:800;font-size:48px;letter-spacing:-2px;line-height:1;color:var(--volt)}
+.gauge-label{font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+/* BMI Scale bar */
+.bmi-scale{display:flex;height:8px;border-radius:4px;overflow:hidden;margin:16px 0 8px;gap:2px}
+.bmi-scale-seg{flex:1;border-radius:2px;position:relative}
+.scale-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:24px;padding:0 2px}
+
+/* Result card */
+.result-card{background:var(--card2);border:1px solid var(--border2);border-radius:20px;padding:32px;text-align:center}
+.result-bmi{font-family:'Syne',sans-serif;font-weight:800;font-size:72px;letter-spacing:-3px;line-height:1;margin-bottom:8px;transition:color 0.8s}
+.result-cat{font-size:16px;font-weight:600;margin-bottom:24px;transition:color 0.5s}
+.result-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.rm{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.rm-n{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--teal);margin-bottom:2px}
+.rm-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.health-bars{display:flex;flex-direction:column;gap:14px;margin-top:24px}
+.hbar-row{display:flex;flex-direction:column;gap:6px}
+.hbar-info{display:flex;justify-content:space-between;font-size:12px}
+.hbar-label{color:var(--muted)}.hbar-val{font-weight:600;color:var(--white)}
+
+/* History table */
+.history-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-top:24px}
+
+/* Input card */
+.input-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:sticky;top:110px}
+.unit-toggle{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:3px;margin-bottom:24px}
+.unit-btn{flex:1;padding:8px;border-radius:100px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:color 0.25s,background 0.25s;border:none;background:transparent;text-align:center}
+.unit-btn.on{background:var(--volt);color:var(--bg)}
+.range-wrap{position:relative;margin-top:8px}
+.fm-range{width:100%;accent-color:var(--volt);height:4px;cursor:pointer}
+.range-val{position:absolute;right:0;top:-24px;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--volt)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a on" href="bmi-calculator.html">BMI</a>
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="bmi-hero">
+  <div class="wrap">
+    <div class="rv"><span class="stag">Health Assessment</span></div>
+    <div class="rv d1"><h1 class="sh2">BMI Calculator</h1></div>
+    <div class="rv d2"><p class="ssub">Instant Body Mass Index analysis with AI-powered health insights, ideal weight range, and personalised recommendations.</p></div>
+  </div>
+</div>
+
+<div class="wrap section" style="padding-top:0">
+  <div class="bmi-grid">
+    <!-- INPUT CARD -->
+    <div class="input-card rv">
+      <div class="unit-toggle">
+        <button class="unit-btn on" id="metricBtn" onclick="setUnit('metric')">Metric (cm/kg)</button>
+        <button class="unit-btn" id="imperialBtn" onclick="setUnit('imperial')">Imperial (ft/lb)</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Age</label>
+        <div class="range-wrap">
+          <input type="range" class="fm-range" id="ageRange" min="10" max="100" value="25" oninput="updateRange('age',this.value)"/>
+          <span class="range-val" id="ageVal">25 yrs</span>
+        </div>
+        <input class="form-input" id="ageInput" type="number" value="25" min="10" max="100" oninput="syncRange('age',this.value)" style="margin-top:10px"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Gender</label>
+        <select class="form-select" id="genderInput">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="heightMetricWrap">
+        <label class="form-label">Height (cm)</label>
+        <div class="range-wrap">
+          <input type="range" class="fm-range" id="heightRange" min="100" max="250" value="175" oninput="updateRange('height',this.value)"/>
+          <span class="range-val" id="heightVal">175 cm</span>
+        </div>
+        <input class="form-input" id="heightInput" type="number" value="175" min="100" max="250" oninput="syncRange('height',this.value)" style="margin-top:10px"/>
+      </div>
+
+      <div class="form-group" id="heightImperialWrap" style="display:none">
+        <label class="form-label">Height</label>
+        <div class="form-grid-2">
+          <div><input class="form-input" id="feetInput" type="number" placeholder="5" min="3" max="8"/> <small style="color:var(--muted);font-size:11px">Feet</small></div>
+          <div><input class="form-input" id="inchInput" type="number" placeholder="9" min="0" max="11"/> <small style="color:var(--muted);font-size:11px">Inches</small></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" id="weightLabel">Weight (kg)</label>
+        <div class="range-wrap">
+          <input type="range" class="fm-range" id="weightRange" min="30" max="250" value="70" oninput="updateRange('weight',this.value)"/>
+          <span class="range-val" id="weightVal">70 kg</span>
+        </div>
+        <input class="form-input" id="weightInput" type="number" value="70" min="30" max="250" oninput="syncRange('weight',this.value)" style="margin-top:10px"/>
+      </div>
+
+      <button class="btn-main btn-full" onclick="calculateBMI()" style="margin-bottom:12px">⚖️ Calculate BMI</button>
+      <button class="btn-outline btn-full" onclick="getAIPlan()" id="aiBtn">⚡ Get AI Health Plan</button>
+    </div>
+
+    <!-- RESULT PANEL -->
+    <div>
+      <div class="result-card rv d1">
+        <!-- Gauge -->
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 260 140">
+            <path class="gauge-bg" d="M 20 130 A 110 110 0 0 1 240 130"/>
+            <path class="gauge-fill" id="gaugeFill" d="M 20 130 A 110 110 0 0 1 240 130"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-val" id="bmiDisplay">—</div>
+            <div class="gauge-label">BMI</div>
+          </div>
+        </div>
+
+        <!-- Scale bar -->
+        <div class="bmi-scale">
+          <div class="bmi-scale-seg" style="background:#3b82f6;flex:0.7" title="Underweight <18.5"></div>
+          <div class="bmi-scale-seg" style="background:#22c55e;flex:1.15" title="Normal 18.5-24.9"></div>
+          <div class="bmi-scale-seg" style="background:#f59e0b;flex:0.85" title="Overweight 25-29.9"></div>
+          <div class="bmi-scale-seg" style="background:#ef4444;flex:1.3" title="Obese 30+"></div>
+        </div>
+        <div class="scale-labels"><span>Underweight</span><span>Normal</span><span>Overweight</span><span>Obese</span></div>
+
+        <div class="result-bmi" id="resultBMI">—</div>
+        <div class="result-cat" id="resultCat">Enter your details and calculate</div>
+
+        <div class="result-metrics">
+          <div class="rm"><div class="rm-n" id="idealMin">—</div><div class="rm-l">Ideal Weight Min</div></div>
+          <div class="rm"><div class="rm-n" id="idealMax">—</div><div class="rm-l">Ideal Weight Max</div></div>
+          <div class="rm"><div class="rm-n" id="bmiPrime">—</div><div class="rm-l">BMI Prime</div></div>
+          <div class="rm"><div class="rm-n" id="bmrVal">—</div><div class="rm-l">BMR (kcal/day)</div></div>
+        </div>
+
+        <div class="health-bars">
+          <div class="hbar-row"><div class="hbar-info"><span class="hbar-label">Healthy Weight Progress</span><span class="hbar-val" id="progPct">0%</span></div><div class="prog-wrap"><div class="prog-fill" id="healthProg" style="width:0%"></div></div></div>
+          <div class="hbar-row"><div class="hbar-info"><span class="hbar-label">Cardiovascular Risk</span><span class="hbar-val" id="cardioRisk">—</span></div><div class="prog-wrap"><div class="prog-fill" id="cardioBar" style="width:0%;background:linear-gradient(90deg,#22c55e,#f59e0b)"></div></div></div>
+        </div>
+      </div>
+
+      <!-- AI Result -->
+      <div class="res-box" id="aiResult">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+          <div style="width:34px;height:34px;background:var(--volt-dim);border-radius:10px;display:flex;align-items:center;justify-content:center">⚡</div>
+          <div><div style="font-weight:600;font-size:15px">AI Health Analysis</div><div style="font-size:11px;color:var(--muted)">Powered by Claude · Not medical advice</div></div>
+        </div>
+        <div id="aiResultBody"></div>
+      </div>
+
+      <!-- History -->
+      <div class="history-card" id="historyCard" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">BMI History</div>
+          <button class="btn-ghost btn-sm" onclick="clearHistory()">Clear</button>
+        </div>
+        <table class="fm-table" id="histTable"><thead><tr><th>Date</th><th>BMI</th><th>Category</th><th>Weight</th></tr></thead><tbody id="histBody"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+let currentUnit='metric';
+function setUnit(u){
+  currentUnit=u;
+  document.getElementById('metricBtn').classList.toggle('on',u==='metric');
+  document.getElementById('imperialBtn').classList.toggle('on',u==='imperial');
+  document.getElementById('heightMetricWrap').style.display=u==='metric'?'':'none';
+  document.getElementById('heightImperialWrap').style.display=u==='imperial'?'':'none';
+  document.getElementById('weightLabel').textContent=u==='metric'?'Weight (kg)':'Weight (lbs)';
+  if(u==='imperial'){document.getElementById('weightRange').max=550;document.getElementById('weightRange').value=154;document.getElementById('weightInput').value=154;document.getElementById('weightVal').textContent='154 lbs';}
+  else{document.getElementById('weightRange').max=250;document.getElementById('weightRange').value=70;document.getElementById('weightInput').value=70;document.getElementById('weightVal').textContent='70 kg';}
+}
+function updateRange(type,val){
+  const sfx={age:' yrs',height:' cm',weight:currentUnit==='metric'?' kg':' lbs'};
+  document.getElementById(type+'Val').textContent=val+sfx[type];
+  document.getElementById(type+'Input').value=val;
+}
+function syncRange(type,val){
+  document.getElementById(type+'Range').value=val;
+  const sfx={age:' yrs',height:' cm',weight:currentUnit==='metric'?' kg':' lbs'};
+  document.getElementById(type+'Val').textContent=val+sfx[type];
+}
+
+const catData=[
+  {cat:'Severe Underweight',color:'#1d4ed8',max:16,risk:30},
+  {cat:'Underweight',color:'#3b82f6',max:18.5,risk:25},
+  {cat:'Normal weight',color:'#22c55e',max:25,risk:10},
+  {cat:'Overweight',color:'#f59e0b',max:30,risk:40},
+  {cat:'Obese Class I',color:'#ef4444',max:35,risk:65},
+  {cat:'Obese Class II',color:'#dc2626',max:40,risk:80},
+  {cat:'Obese Class III',color:'#991b1b',max:999,risk:95},
+];
+
+function calculateBMI(){
+  let weight=parseFloat(document.getElementById('weightInput').value);
+  let heightCm;
+  const age=parseInt(document.getElementById('ageInput').value)||25;
+  const gender=document.getElementById('genderInput').value;
+
+  if(currentUnit==='imperial'){
+    const ft=parseFloat(document.getElementById('feetInput').value)||5;
+    const inch=parseFloat(document.getElementById('inchInput').value)||9;
+    heightCm=(ft*30.48)+(inch*2.54);
+    weight=weight*0.453592;
+  } else {
+    heightCm=parseFloat(document.getElementById('heightInput').value)||175;
+  }
+
+  const h=heightCm/100;
+  const bmi=parseFloat((weight/(h*h)).toFixed(1));
+  const cat=catData.find(c=>bmi<c.max)||catData[catData.length-1];
+
+  // Ideal weight (BMI 18.5–24.9)
+  const idealMin=Math.round(18.5*h*h*10)/10;
+  const idealMax=Math.round(24.9*h*h*10)/10;
+  const bmiPrime=Math.round((bmi/25)*100)/100;
+
+  // BMR (Mifflin-St Jeor)
+  let bmr;
+  if(gender==='male') bmr=Math.round(10*weight+6.25*heightCm-5*age+5);
+  else bmr=Math.round(10*weight+6.25*heightCm-5*age-161);
+
+  // Health progress (how close to 18.5-25 range)
+  let prog=0;
+  if(bmi>=18.5&&bmi<=24.9) prog=100;
+  else if(bmi<18.5) prog=Math.max(0,Math.round((bmi/18.5)*80));
+  else prog=Math.max(0,Math.round(100-(bmi-25)*8));
+
+  // Update UI
+  document.getElementById('resultBMI').textContent=bmi;
+  document.getElementById('resultBMI').style.color=cat.color;
+  document.getElementById('resultCat').textContent=cat.cat;
+  document.getElementById('resultCat').style.color=cat.color;
+  document.getElementById('bmiDisplay').textContent=bmi;
+  document.getElementById('bmiDisplay').style.color=cat.color;
+  document.getElementById('idealMin').textContent=idealMin+'kg';
+  document.getElementById('idealMax').textContent=idealMax+'kg';
+  document.getElementById('bmiPrime').textContent=bmiPrime;
+  document.getElementById('bmrVal').textContent=bmr;
+  document.getElementById('progPct').textContent=prog+'%';
+  document.getElementById('healthProg').style.width=prog+'%';
+  document.getElementById('cardioRisk').textContent=cat.risk+'%';
+  document.getElementById('cardioBar').style.width=cat.risk+'%';
+
+  // Gauge animation (dashoffset from 408 to 0 maps BMI 10-50)
+  const pct=Math.min(1,Math.max(0,(bmi-10)/40));
+  document.getElementById('gaugeFill').style.strokeDashoffset=408-(408*pct);
+  document.getElementById('gaugeFill').style.stroke=cat.color;
+
+  // Save to history
+  FM.addBMI({bmi,category:cat.cat,weight:Math.round(weight*10)/10,height:Math.round(heightCm)});
+  loadHistory();
+  FMToast.success('BMI calculated: '+bmi+' ('+cat.cat+')');
+}
+
+function loadHistory(){
+  const hist=FM.getBMIHistory();
+  if(hist.length===0)return;
+  document.getElementById('historyCard').style.display='';
+  document.getElementById('histBody').innerHTML=hist.slice(0,8).map(h=>`
+    <tr><td>${h.date}</td><td style="color:var(--volt);font-weight:700">${h.bmi}</td><td>${h.category}</td><td>${h.weight}kg</td></tr>`).join('');
+}
+function clearHistory(){FM.save('bmi_history',[]);document.getElementById('historyCard').style.display='none';FMToast.info('History cleared');}
+
+async function getAIPlan(){
+  const weight=parseFloat(document.getElementById('weightInput').value)||70;
+  const height=parseFloat(document.getElementById('heightInput').value)||175;
+  const age=parseInt(document.getElementById('ageInput').value)||25;
+  const gender=document.getElementById('genderInput').value;
+  const bmi=parseFloat((weight/((height/100)**2)).toFixed(1));
+  const bmiS=bmi<18.5?'Underweight':bmi<25?'Normal weight':bmi<30?'Overweight':'Obese';
+
+  document.getElementById('aiBtn').disabled=true;document.getElementById('aiBtn').textContent='Generating...';
+  const box=document.getElementById('aiResult'),body=document.getElementById('aiResultBody');
+  box.classList.remove('show');
+
+  const prompt=`You are FitMart's AI health advisor. Based on this person's BMI data, provide a warm, actionable 4-paragraph health plan covering: 1) BMI interpretation and what it means for them 2) Top 3 specific diet tips 3) Best exercise approach for their category 4) One key health metric to monitor. Use <strong> for key terms and <span class="hl"> for numbers. Under 250 words. Data: Age ${age}, Gender ${gender}, Weight ${weight}kg, Height ${height}cm, BMI ${bmi} (${bmiS})`;
+
+  try{
+    const text = await FMAi.ask(prompt, 800);
+    body.innerHTML = text && !text.includes('AI Key Not Configured') ? text : fallbackAI(bmi,bmiS,gender,age);
+  }catch{body.innerHTML=fallbackAI(bmi,bmiS,gender,age);}
+
+  box.classList.add('show');document.getElementById('aiBtn').disabled=false;document.getElementById('aiBtn').textContent='⚡ Get AI Health Plan';
+  setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'nearest'}),100);
+}
+
+function fallbackAI(bmi,cat,gender,age){
+  const tips={
+    'Underweight':'Focus on calorie-dense whole foods: nuts, avocados, oats, and lean proteins. Aim for a <span class="hl">500 kcal surplus daily</span>.',
+    'Normal weight':'Maintain your excellent foundation. Prioritise <strong>balanced macros</strong>: 40% carbs, 30% protein, 30% fats.',
+    'Overweight':'A <span class="hl">400–500 kcal daily deficit</span> through diet and exercise creates sustainable fat loss without muscle loss.',
+    'Obese':'Start with <strong>low-impact cardio</strong> (walking, swimming) and a moderate caloric reduction. Even a <span class="hl">5–10% weight loss</span> dramatically reduces health risks.',
+  };
+  const ex={
+    'Underweight':'Focus on <strong>resistance training 3–4×/week</strong> with compound lifts to build lean mass.',
+    'Normal weight':'Maintain with a <strong>mix of cardio and strength</strong> training — 150 minutes moderate activity per week.',
+    'Overweight':'<strong>5 days cardio</strong> (brisk walking, cycling) + 2 days light weights is ideal for this stage.',
+    'Obese':'Begin with <span class="hl">20–30 min walks daily</span>, gradually increasing. Water aerobics is excellent for joint protection.',
+  };
+  const tip=tips[cat]||tips['Normal weight'];
+  const exc=ex[cat]||ex['Normal weight'];
+  return `<p><strong>BMI Assessment:</strong> Your BMI of <span class="hl">${bmi}</span> places you in the <strong>${cat}</strong> category. ${cat==='Normal weight'?'Congratulations — you\'re within the healthy range. The goal now is to maintain and optimise.':'This is a clear starting point, and even small, consistent changes create dramatic health improvements over time.'}</p><br>
+  <p><strong>Nutrition Strategy:</strong> ${tip}</p><br>
+  <p><strong>Exercise Plan:</strong> ${exc}</p><br>
+  <p><strong>Key Metric to Watch:</strong> Beyond BMI, track your <strong>waist circumference</strong> — for ${gender==='male'?'men, under 94cm is the healthy target':'women, under 80cm is the healthy target'}. Visit your FitMart health clinic for a full body composition analysis with our specialists.</p>`;
+}
+
+// Load history on page load
+loadHistory();
+// Pre-calculate on page load
+setTimeout(calculateBMI, 500);
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Care — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.hc-hero{position:relative;min-height:55vh;display:flex;align-items:flex-end;overflow:hidden}
+.hc-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.2) saturate(.5)}
+.hc-hero-ov{position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,transparent 55%)}
+.hc-hero-content{position:relative;z-index:2;padding:0 80px 60px;width:100%}
+@media(max-width:600px){.hc-hero-content{padding:0 24px 40px}}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.services-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.services-grid{grid-template-columns:1fr}}
+.service-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:border-color .3s,transform .35s var(--ease)}
+.service-card:hover{border-color:rgba(181,255,71,.18);transform:translateY(-5px)}
+.sc-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:22px}
+.sc-title{font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:8px}
+.sc-desc{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:18px}
+.sc-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--volt);transition:gap .25s}
+.sc-link:hover{gap:10px}
+/* Doctors */
+.doctor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:900px){.doctor-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.doctor-grid{grid-template-columns:1fr}}
+.doc-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;text-align:center;transition:border-color .3s,transform .35s var(--ease)}
+.doc-card:hover{border-color:rgba(181,255,71,.18);transform:translateY(-4px)}
+.doc-av{width:70px;height:70px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:26px;margin:0 auto 14px;border:2px solid var(--border2)}
+.doc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+.doc-spec{font-size:12px;color:var(--volt);font-weight:600;margin-bottom:8px}
+.doc-exp{font-size:12px;color:var(--muted);margin-bottom:16px}
+.doc-avail{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+.avail-dot{width:7px;height:7px;border-radius:50%}
+/* Appointment form */
+.appt-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;max-width:640px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a on" href="healthcare.html">Health Care</a>
+    <a class="nav-a" href="bmi-calculator.html">BMI</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<section class="hc-hero">
+  <img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?w=1920&q=80&auto=format&fit=crop" alt="Healthcare"/>
+  <div class="hc-hero-ov"></div>
+  <div class="hc-hero-content">
+    <span class="stag">Integrated Medical Care</span>
+    <h1 class="sh2" style="margin-bottom:14px">Healthcare<br><span style="color:var(--teal)">Meets Fitness.</span></h1>
+    <p style="font-size:16px;color:var(--muted);max-width:500px;margin-bottom:32px;line-height:1.75">Doctor consultations, lab reports, vitals monitoring, physiotherapy, and tele-medicine — integrated with your gym journey.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <a class="btn-teal" href="#book-appt">Book Appointment →</a>
+      <a class="btn-outline" href="vitals.html">Track My Vitals</a>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:52px">
+      <span class="stag">Our Services</span>
+      <h2 class="sh2">Complete Care,<br>One Platform</h2>
+    </div>
+    <div class="services-grid">
+      <a class="service-card rv d1" href="doctor-dashboard.html">
+        <div class="sc-icon" style="background:var(--teal-dim);border:1px solid rgba(45,212,191,.15)">🩺</div>
+        <div class="sc-title">Doctor Consultations</div>
+        <div class="sc-desc">General physicians, cardiologists, endocrinologists, and sports medicine specialists. In-clinic and video call available.</div>
+        <span class="sc-link">Book Now →</span>
+      </a>
+      <a class="service-card rv d2" href="vitals.html">
+        <div class="sc-icon" style="background:var(--volt-dim);border:1px solid rgba(181,255,71,.15)">❤️</div>
+        <div class="sc-title">Vitals Monitoring</div>
+        <div class="sc-desc">Track BP, heart rate, blood sugar, SpO2, and sleep. Automated alerts when readings exit safe ranges.</div>
+        <span class="sc-link">Track Vitals →</span>
+      </a>
+      <div class="service-card rv d3">
+        <div class="sc-icon" style="background:var(--coral-dim);border:1px solid rgba(255,99,71,.15)">🧪</div>
+        <div class="sc-title">Lab Reports</div>
+        <div class="sc-desc">Complete blood count, lipid panel, HbA1c, thyroid, vitamin D, and 30+ tests. Results in 24–48 hours.</div>
+        <span class="sc-link" onclick="FMToast.info('Lab booking coming soon')">Book Lab Test →</span>
+      </div>
+      <div class="service-card rv d1">
+        <div class="sc-icon" style="background:var(--teal-dim);border:1px solid rgba(45,212,191,.15)">🖥️</div>
+        <div class="sc-title">Tele-Medicine</div>
+        <div class="sc-desc">Video consultations from home. Prescription delivery, digital reports, and follow-up reminders — no clinic visit needed.</div>
+        <span class="sc-link" onclick="FMToast.info('Tele-med coming soon')">Start Video Call →</span>
+      </div>
+      <a class="service-card rv d2" href="diet.html">
+        <div class="sc-icon" style="background:var(--volt-dim);border:1px solid rgba(181,255,71,.15)">🥗</div>
+        <div class="sc-title">Diet & Nutrition</div>
+        <div class="sc-desc">Registered dietitians create medically-aligned meal plans for diabetes, hypertension, weight management, and more.</div>
+        <span class="sc-link">View Plans →</span>
+      </a>
+      <div class="service-card rv d3">
+        <div class="sc-icon" style="background:var(--coral-dim);border:1px solid rgba(255,99,71,.15)">🦴</div>
+        <div class="sc-title">Physiotherapy</div>
+        <div class="sc-desc">Post-surgery rehab, sports injury recovery, and chronic pain management. Linked directly to your workout plan.</div>
+        <span class="sc-link" onclick="FMToast.info('Physio booking coming soon')">Book Session →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCTORS -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:44px">
+      <span class="stag">Our Specialists</span>
+      <h2 class="sh2">Meet the Doctors</h2>
+    </div>
+    <div class="doctor-grid">
+      <div class="doc-card rv d1"><div class="doc-av" style="background:rgba(45,212,191,.1);color:var(--teal)">F</div><div class="doc-name">Dr. Fatima Malik</div><div class="doc-spec">General Physician</div><div class="doc-exp">MBBS, FCPS · 12 years</div><div class="doc-avail"><div class="avail-dot" style="background:#4ade80"></div><span style="color:#4ade80">Available Today</span></div></div>
+      <div class="doc-card rv d2"><div class="doc-av" style="background:rgba(181,255,71,.1);color:var(--volt)">A</div><div class="doc-name">Dr. Ahmed Siddiqui</div><div class="doc-spec">Cardiologist</div><div class="doc-exp">MBBS, MRCP · 18 years</div><div class="doc-avail"><div class="avail-dot" style="background:#4ade80"></div><span style="color:#4ade80">Available Today</span></div></div>
+      <div class="doc-card rv d3"><div class="doc-av" style="background:rgba(255,99,71,.1);color:var(--coral)">S</div><div class="doc-name">Dr. Sara Rehman</div><div class="doc-spec">Endocrinologist</div><div class="doc-exp">MBBS, FCPS · 9 years</div><div class="doc-avail"><div class="avail-dot" style="background:#f59e0b"></div><span style="color:#f59e0b">Available Tomorrow</span></div></div>
+      <div class="doc-card rv d1"><div class="doc-av" style="background:rgba(167,139,250,.1);color:#a78bfa">Z</div><div class="doc-name">Dr. Zara Khan</div><div class="doc-spec">Sports Medicine</div><div class="doc-exp">MBBS, MSSM · 7 years</div><div class="doc-avail"><div class="avail-dot" style="background:#4ade80"></div><span style="color:#4ade80">Available Today</span></div></div>
+      <div class="doc-card rv d2"><div class="doc-av" style="background:rgba(45,212,191,.1);color:var(--teal)">U</div><div class="doc-name">Dr. Umar Farooq</div><div class="doc-spec">Physiotherapist</div><div class="doc-exp">DPT, MSPT · 11 years</div><div class="doc-avail"><div class="avail-dot" style="background:#4ade80"></div><span style="color:#4ade80">Available Today</span></div></div>
+      <div class="doc-card rv d3"><div class="doc-av" style="background:rgba(181,255,71,.1);color:var(--volt)">N</div><div class="doc-name">Dr. Nadia Akhtar</div><div class="doc-spec">Nutritionist</div><div class="doc-exp">MSc, RDN · 8 years</div><div class="doc-avail"><div class="avail-dot" style="background:#f59e0b"></div><span style="color:#f59e0b">Available Tomorrow</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOK APPOINTMENT -->
+<section class="section" style="padding-top:0" id="book-appt">
+  <div class="wrap">
+    <div class="rv" style="text-align:center;margin-bottom:44px">
+      <span class="stag" style="justify-content:center">Easy Booking</span>
+      <h2 class="sh2">Book an Appointment</h2>
+    </div>
+    <div class="appt-card rv d1">
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="apptName" placeholder="Ali Raza"/></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="apptPhone" placeholder="+92 300 000 0000"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Select Doctor</label>
+        <select class="form-select" id="apptDoc">
+          <option>Dr. Fatima Malik — General Physician</option>
+          <option>Dr. Ahmed Siddiqui — Cardiologist</option>
+          <option>Dr. Sara Rehman — Endocrinologist</option>
+          <option>Dr. Zara Khan — Sports Medicine</option>
+          <option>Dr. Umar Farooq — Physiotherapist</option>
+        </select>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Preferred Date</label><input class="form-input" type="date" id="apptDate"/></div>
+        <div class="form-group"><label class="form-label">Appointment Type</label>
+          <select class="form-select" id="apptType"><option>In-Clinic</option><option>Video Call</option><option>Phone Call</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Reason / Symptoms</label><textarea class="form-textarea" id="apptReason" placeholder="Describe your concern briefly..."></textarea></div>
+      <button class="btn-teal btn-full" onclick="bookAppt()">Confirm Appointment →</button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="wrap"><div class="fbottom" style="border:none;padding-top:0"><p>© 2025 FitMart · Healthcare Division</p><div style="display:flex;gap:20px"><a href="index.html">Home</a><a href="gym.html">Gym</a><a href="plans.html">Plans</a></div></div></div></footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>60),{passive:true});
+document.getElementById('apptDate').value=new Date(Date.now()+86400000).toISOString().split('T')[0];
+function bookAppt(){
+  const name=document.getElementById('apptName').value.trim();
+  if(!name){FMToast.error('Please enter your name');return;}
+  const appts=FM.load('appointments',[])||[];
+  appts.push({name,phone:document.getElementById('apptPhone').value,doctor:document.getElementById('apptDoc').value,date:document.getElementById('apptDate').value,type:document.getElementById('apptType').value,reason:document.getElementById('apptReason').value,id:Date.now()});
+  FM.save('appointments',appts);
+  FMToast.success('Appointment booked! We\'ll confirm via SMS.');
+  document.getElementById('apptName').value='';document.getElementById('apptReason').value='';
+}
+</script>
+</body>
+</html>

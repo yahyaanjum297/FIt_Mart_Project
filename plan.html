@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Your Plan — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.plan-hero{padding:60px 0 40px;text-align:center}
+.plan-layout{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start;margin-top:32px}
+@media(max-width:1000px){.plan-layout{grid-template-columns:1fr}}
+.plan-panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.pp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px}
+.pp-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+/* Metrics row */
+.metrics-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+@media(max-width:800px){.metrics-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.metrics-row{grid-template-columns:1fr 1fr}}
+.metric-box{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center}
+.mb-n{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;letter-spacing:-1px;color:var(--volt);line-height:1;margin-bottom:4px}
+.mb-l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+/* Week plan */
+.day-plan{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:10px}
+.dp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.dp-day{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.dp-type{font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px}
+.ex-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px}
+.ex-row:last-child{border-bottom:none}
+.ex-name{font-weight:500}.ex-sets{font-size:11px;font-weight:600;color:var(--muted)}
+/* Meal plan */
+.meal-section{margin-bottom:16px;padding:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px}
+.ms-title{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--volt);margin-bottom:8px}
+.ms-item{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);padding:5px 0;border-bottom:1px solid var(--border)}
+.ms-item:last-child{border-bottom:none}
+.ms-cal{font-weight:600;color:var(--white)}
+/* AI plan box */
+.ai-plan-wrap{background:var(--card2);border:1px solid rgba(181,255,71,.15);border-radius:16px;padding:24px}
+.ai-plan-content p{font-size:14px;color:var(--muted);line-height:1.85;margin-bottom:12px}
+.ai-plan-content p:last-child{margin-bottom:0}
+.ai-plan-content strong{color:var(--white)}
+.ai-plan-content .hl{color:var(--volt);font-weight:700}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="bmi-calculator.html">BMI</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Save Plan Free</a>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="plan-hero rv">
+    <span class="stag" style="justify-content:center">⚡ AI-Generated</span>
+    <h1 class="sh2" style="margin-bottom:12px">Your Personalised Plan</h1>
+    <p class="ssub" style="margin:0 auto;text-align:center">Tailored to your body, goals, and health conditions. Review with your FitMart trainer before starting.</p>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics-row rv d1" id="metricsRow"></div>
+
+  <!-- Loading state -->
+  <div id="loadingState" style="text-align:center;padding:60px 20px">
+    <div class="spinner" style="width:32px;height:32px;margin:0 auto 20px;border-width:3px"></div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:8px">Generating Your Plan...</div>
+    <div style="color:var(--muted);font-size:14px">Our AI is analysing your profile. This takes 5–10 seconds.</div>
+  </div>
+
+  <div id="planContent" style="display:none">
+    <div class="plan-layout">
+      <!-- LEFT -->
+      <div>
+        <!-- AI Summary -->
+        <div class="plan-panel rv">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+            <div style="width:38px;height:38px;background:var(--volt-dim);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px">⚡</div>
+            <div><div class="pp-title" style="margin-bottom:0">AI Health Assessment</div><div style="font-size:12px;color:var(--muted)">Powered by Claude · Not a medical diagnosis</div></div>
+          </div>
+          <div class="ai-plan-content" id="aiPlanContent"></div>
+        </div>
+
+        <!-- Weekly workout plan -->
+        <div class="plan-panel rv d1">
+          <div class="pp-title">Your Weekly Workout Plan</div>
+          <div class="pp-sub" id="planSubtitle">Personalised for your goal</div>
+          <div id="weekPlan"></div>
+        </div>
+
+        <!-- Nutrition plan -->
+        <div class="plan-panel rv d2">
+          <div class="pp-title">Daily Nutrition Guide</div>
+          <div class="pp-sub" id="nutritionSubtitle">Calorie and macro targets</div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px" id="macroBoxes"></div>
+          <div id="mealPlan"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT sidebar -->
+      <div>
+        <!-- Safety notes -->
+        <div class="plan-panel rv" id="safetyPanel"></div>
+
+        <!-- BMI gauge summary -->
+        <div class="plan-panel rv d1">
+          <div class="pp-title">BMI Analysis</div>
+          <div class="pp-sub">Based on your height and weight</div>
+          <div style="text-align:center;padding:20px 0">
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:64px;letter-spacing:-3px;color:var(--volt);line-height:1;margin-bottom:8px" id="bmiLarge">—</div>
+            <div style="font-size:14px;font-weight:600;margin-bottom:16px" id="bmiCat">—</div>
+            <div id="bmiProgressWrap">
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:6px"><span>Underweight</span><span>Normal</span><span>Obese</span></div>
+              <div class="prog-wrap"><div class="prog-fill" id="bmiProg" style="width:0%"></div></div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="bmiDetails"></div>
+        </div>
+
+        <!-- CTA: Save plan -->
+        <div class="plan-panel rv d2" style="background:linear-gradient(135deg,rgba(181,255,71,.06),rgba(45,212,191,.04));border-color:rgba(181,255,71,.2);text-align:center">
+          <div style="font-size:28px;margin-bottom:12px">🎯</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:8px">Save This Plan</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.7">Create a free account to save your plan, track workouts, and monitor progress.</div>
+          <a class="btn-main btn-full" href="auth-register.html">Create Free Account →</a>
+          <div style="margin-top:10px"><a href="index.html" style="font-size:12px;color:var(--muted)">← Generate another plan</a></div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="plan-panel rv d3">
+          <div class="pp-title" style="margin-bottom:14px">Next Steps</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <a href="bmi-calculator.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">⚖️ Full BMI Calculator</a>
+            <a href="workout-plans.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">💪 Browse All Plans</a>
+            <a href="diet.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">🥗 Diet Planner</a>
+            <a href="healthcare.html" style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">🩺 See a Doctor</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+// Parse URL params from index.html form
+const params=new URLSearchParams(location.search);
+const age=parseInt(params.get('age'))||25;
+const weight=parseFloat(params.get('weight'))||70;
+const height=parseFloat(params.get('height'))||175;
+const injury=params.get('injury')||'None';
+const disease=params.get('disease')||'None';
+const goal=params.get('goal')||'Weight Loss';
+const loc=params.get('location')||'Gym';
+const bmi=parseFloat((weight/((height/100)**2)).toFixed(1));
+const bmiCat=bmi<18.5?'Underweight':bmi<25?'Normal Weight':bmi<30?'Overweight':'Obese';
+const prot=Math.round(weight*(goal==='Muscle Gain'?2.2:1.6));
+const cal=goal==='Muscle Gain'?Math.round(weight*40):goal==='Weight Loss'?1600:1900;
+
+// Metrics
+document.getElementById('metricsRow').innerHTML=[
+  {n:bmi,l:'BMI',c:'volt'},{n:weight+'kg',l:'Weight',c:'teal'},{n:height+'cm',l:'Height',c:'white'},
+  {n:prot+'g',l:'Protein/Day',c:'volt'},{n:cal,l:'kcal Target',c:'teal'},
+].map(m=>`<div class="metric-box"><div class="mb-n" style="color:var(--${m.c})">${m.n}</div><div class="mb-l">${m.l}</div></div>`).join('');
+
+// BMI display
+document.getElementById('bmiLarge').textContent=bmi;
+document.getElementById('bmiCat').textContent=bmiCat;
+document.getElementById('bmiCat').style.color=bmi<18.5?'#3b82f6':bmi<25?'#22c55e':bmi<30?'#f59e0b':'#ef4444';
+const bmiPct=Math.min(100,Math.max(0,(bmi-10)/40*100));
+document.getElementById('bmiProg').style.width=bmiPct+'%';
+const idealMin=Math.round(18.5*((height/100)**2)*10)/10;
+const idealMax=Math.round(24.9*((height/100)**2)*10)/10;
+document.getElementById('bmiDetails').innerHTML=[
+  {l:'Ideal Weight Range',v:`${idealMin}–${idealMax}kg`},{l:'Weight to Goal',v:bmi<18.5?`+${(idealMin-weight).toFixed(1)}kg`:(weight-idealMax).toFixed(1)>0?`-${(weight-idealMax).toFixed(1)}kg`:'✓ At target'},
+  {l:'Age',v:age+' years'},{l:'Training Location',v:loc},
+].map(r=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px"><span style="color:var(--muted)">${r.l}</span><span style="font-weight:600">${r.v}</span></div>`).join('');
+
+// Safety panel
+const safetyItems=[];
+if(injury!=='None') safetyItems.push({icon:'🦵',title:'Injury Consideration',text:`You reported: <strong>${injury}</strong>. Exercises involving this area have been modified. Always consult your physiotherapist before returning to heavy loading.`,cls:'coral'});
+if(disease!=='None') safetyItems.push({icon:'💊',title:'Health Condition Note',text:`Condition: <strong>${disease}</strong>. Workout intensity and nutrition targets have been adjusted. Have your doctor review this plan before starting.`,cls:'teal'});
+safetyItems.push({icon:'✅',title:'Medical Clearance',text:'Always get medical clearance before starting a new exercise programme, especially if you are new to exercise or have any health concerns.',cls:'volt'});
+document.getElementById('safetyPanel').innerHTML=`<div class="pp-title">⚕️ Safety Notes</div><div class="pp-sub" style="margin-bottom:16px">Important before you start</div>`+safetyItems.map(s=>`<div style="padding:12px;background:rgba(${s.cls==='volt'?'181,255,71':s.cls==='teal'?'45,212,191':'255,99,71'},.06);border:1px solid rgba(${s.cls==='volt'?'181,255,71':s.cls==='teal'?'45,212,191':'255,99,71'},.18);border-radius:10px;margin-bottom:10px"><div style="display:flex;gap:10px"><span>${s.icon}</span><div><div style="font-weight:600;font-size:13px;margin-bottom:4px">${s.title}</div><div style="font-size:12px;color:var(--muted);line-height:1.7">${s.text}</div></div></div></div>`).join('');
+
+// Weekly plan by goal
+const WEEK_PLANS={
+  'Weight Loss':{sub:'Fat-burning focused, 5 sessions/week',days:[{day:'Monday',type:'HIIT',cls:'coral',ex:[{n:'Jump Rope',s:'3×3 min'},{n:'Burpees',s:'3×15'},{n:'Mountain Climbers',s:'4×30s'},{n:'Box Steps',s:'3×20'}]},{day:'Tuesday',type:'Cardio',cls:'teal',ex:[{n:'Treadmill Run',s:'25 min'},{n:'Cycling',s:'15 min'},{n:'Stair Climber',s:'10 min'}]},{day:'Wednesday',type:'Strength',cls:'volt',ex:[{n:'Bodyweight Squat',s:'4×20'},{n:'Push-ups',s:'4×max'},{n:'Plank',s:'3×45s'}]},{day:'Thursday',type:'HIIT',cls:'coral',ex:[{n:'Kettlebell Swings',s:'4×15'},{n:'Jump Squats',s:'3×15'},{n:'Battle Ropes',s:'3×30s'}]},{day:'Friday',type:'Cardio',cls:'teal',ex:[{n:'Treadmill Run',s:'30 min @ 70% HR'},{n:'Cool-down Walk',s:'10 min'}]},{day:'Sat–Sun',type:'Rest',cls:'white',ex:[{n:'Light Walk',s:'20–30 min'},{n:'Stretching / Yoga',s:'15 min'}]}]},
+  'Muscle Gain':{sub:'Hypertrophy split, 5 sessions/week',days:[{day:'Monday',type:'Chest+Tri',cls:'volt',ex:[{n:'Bench Press',s:'4×8'},{n:'Incline Press',s:'3×10'},{n:'Tricep Dips',s:'3×12'}]},{day:'Tuesday',type:'Back+Bi',cls:'teal',ex:[{n:'Pull-ups',s:'4×max'},{n:'Barbell Row',s:'4×8'},{n:'Bicep Curl',s:'3×12'}]},{day:'Wednesday',type:'Rest',cls:'white',ex:[{n:'Core Work',s:'20 min'},{n:'Stretching',s:'15 min'}]},{day:'Thursday',type:'Shoulders',cls:'coral',ex:[{n:'Overhead Press',s:'4×8'},{n:'Lateral Raise',s:'4×15'},{n:'Face Pull',s:'3×15'}]},{day:'Friday',type:'Legs',cls:'volt',ex:[{n:'Squat',s:'4×8'},{n:'Romanian Deadlift',s:'3×10'},{n:'Leg Press',s:'3×12'}]},{day:'Sat–Sun',type:'Rest',cls:'white',ex:[{n:'Active Recovery',s:'Walk / Swim'},{n:'Full Stretch',s:'20 min'}]}]},
+};
+const weekPlan=WEEK_PLANS[goal]||WEEK_PLANS['Weight Loss'];
+document.getElementById('planSubtitle').textContent=weekPlan.sub;
+const typeColors={HIIT:'var(--coral)',Cardio:'var(--teal)',Strength:'var(--volt)',Rest:'var(--muted)','Chest+Tri':'var(--volt)','Back+Bi':'var(--teal)',Shoulders:'var(--coral)',Legs:'var(--volt)'};
+document.getElementById('weekPlan').innerHTML=weekPlan.days.map(d=>`
+  <div class="day-plan">
+    <div class="dp-header">
+      <div class="dp-day">${d.day}</div>
+      <span class="dp-type" style="background:rgba(255,255,255,.05);color:${typeColors[d.type]||'var(--muted)'}">${d.type}</span>
+    </div>
+    ${d.ex.map(e=>`<div class="ex-row"><span class="ex-name">${e.n}</span><span class="ex-sets">${e.s}</span></div>`).join('')}
+  </div>`).join('');
+
+// Macros
+document.getElementById('nutritionSubtitle').textContent=`Daily target: ${cal} kcal · ${prot}g protein`;
+document.getElementById('macroBoxes').innerHTML=[
+  {n:cal,l:'kcal',c:'volt'},{n:prot+'g',l:'Protein',c:'teal'},
+  {n:Math.round(cal*0.45/4)+'g',l:'Carbs',c:'white'},{n:Math.round(cal*0.25/9)+'g',l:'Fats',c:'coral'},
+].map(m=>`<div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:var(--${m.c});margin-bottom:3px">${m.n}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${m.l}</div></div>`).join('');
+
+const meals=goal==='Muscle Gain'?[
+  {t:'Breakfast 7AM',items:[{n:'Oats 100g',c:354},{n:'4 Eggs',c:280},{n:'Banana',c:89}]},
+  {t:'Snack 10AM',items:[{n:'Protein Shake',c:120},{n:'Peanut Butter 30g',c:188}]},
+  {t:'Lunch 1PM',items:[{n:'Chicken Breast 200g',c:330},{n:'Rice 120g dry',c:428},{n:'Salad',c:50}]},
+  {t:'Dinner 7PM',items:[{n:'Beef / Fish 200g',c:280},{n:'Sweet Potato',c:86},{n:'Vegetables',c:50}]},
+]:[
+  {t:'Breakfast 7AM',items:[{n:'Oats 50g',c:177},{n:'3 Egg Whites',c:51},{n:'Berries',c:46}]},
+  {t:'Snack 10AM',items:[{n:'Greek Yogurt',c:87},{n:'Almonds 20g',c:117}]},
+  {t:'Lunch 1PM',items:[{n:'Chicken Breast 150g',c:248},{n:'Brown Rice 80g',c:289},{n:'Salad',c:25}]},
+  {t:'Dinner 7PM',items:[{n:'Grilled Fish 150g',c:195},{n:'Broccoli 150g',c:51},{n:'Sweet Potato',c:86}]},
+];
+document.getElementById('mealPlan').innerHTML=meals.map(m=>`
+  <div class="meal-section">
+    <div class="ms-title">${m.t} — ${m.items.reduce((a,i)=>a+i.c,0)} kcal</div>
+    ${m.items.map(i=>`<div class="ms-item"><span>${i.n}</span><span class="ms-cal">${i.c} kcal</span></div>`).join('')}
+  </div>`).join('');
+
+// Generate AI plan
+async function generateAI(){
+  const prompt=`You are FitMart's expert AI coach. Write a warm, motivating 4-paragraph personalised health plan. Use <strong> for key terms and <span class="hl"> for metrics. Cover: (1) BMI interpretation for this person, (2) why this specific workout approach suits their goal, (3) one key nutrition principle with a concrete number, (4) one motivating closing message. Under 200 words. Data: Age ${age}, Weight ${weight}kg, Height ${height}cm, BMI ${bmi} (${bmiCat}), Goal: ${goal}, Injury: ${injury}, Condition: ${disease}, Location: ${loc}`;
+  try{
+    const text = await FMAi.ask(prompt, 800);
+    document.getElementById('aiPlanContent').innerHTML = text && !text.includes('AI Key Not Configured') ? text : fallback();
+  }catch{document.getElementById('aiPlanContent').innerHTML=fallback();}
+}
+function fallback(){
+  return`<p>Based on your profile, your BMI of <span class="hl">${bmi}</span> places you in the <strong>${bmiCat}</strong> category. ${bmiCat==='Normal Weight'?'You\'re starting from a solid foundation.':'This is your clear starting point, and the plan below is specifically designed to get you there.'}</p><br>
+  <p>For <strong>${goal}</strong>, the <span class="hl">${weekPlan.sub}</span> approach will be most effective. Your training is spread across ${weekPlan.days.filter(d=>d.type!=='Rest').length} active days with adequate recovery built in — never skip the rest days.</p><br>
+  <p>On the nutrition side, your daily protein target is <span class="hl">${prot}g</span> — the single most important number to hit consistently. Total daily calories: <span class="hl">${cal} kcal</span>. Eat your largest meal around your training window.</p><br>
+  <p>${injury!=='None'?`<strong>Important:</strong> Your reported ${injury} has been accounted for with modified exercises. Check with our physiotherapy team before progressing loads on affected areas. `:''}Consistency beats perfection. Even completing 80% of this plan week over week will deliver measurable results within 4–6 weeks.</p>`;
+}
+
+// Show plan
+setTimeout(()=>{
+  document.getElementById('loadingState').style.display='none';
+  document.getElementById('planContent').style.display='block';
+  generateAI();
+},1200);
+</script>
+</body>
+</html>

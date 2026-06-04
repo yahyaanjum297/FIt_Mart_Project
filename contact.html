@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Contact — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.contact-grid{display:grid;grid-template-columns:1fr 480px;gap:32px;align-items:start}
+@media(max-width:1000px){.contact-grid{grid-template-columns:1fr}}
+.contact-info{position:sticky;top:110px}
+.ci-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;margin-bottom:20px}
+.ci-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px}
+.ci-row{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.ci-row:last-child{border-bottom:none}
+.ci-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.ci-label{font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.ci-val{font-size:14px;font-weight:500}
+.ci-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.hours-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.hg-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 10px;background:var(--bg3);border-radius:8px}
+.hg-day{color:var(--muted)}.hg-time{font-weight:600;color:var(--volt)}
+.map-embed{height:200px;border-radius:14px;overflow:hidden;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;margin-top:16px}
+/* Form */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px}
+.subject-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.sp{padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;transition:all .25s;background:transparent}
+.sp.on,.sp:hover{border-color:var(--volt);color:var(--volt);background:var(--volt-dim)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="healthcare.html">Health Care</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+    <a class="nav-a on" href="contact.html">Contact</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Get in Touch</span>
+  <h1>Contact FitMart</h1>
+  <p>Questions about membership, healthcare services, or technical support? We're here to help — 7 days a week.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="contact-grid">
+    <!-- Contact info -->
+    <div class="contact-info">
+      <div class="ci-card rv">
+        <div class="ci-title">Contact Information</div>
+        <div class="ci-row"><div class="ci-icon" style="background:var(--volt-dim)">📍</div><div><div class="ci-label">Address</div><div class="ci-val">FitMart Complex</div><div class="ci-sub">Satellite Town, Rawalpindi<br>Punjab, Pakistan</div></div></div>
+        <div class="ci-row"><div class="ci-icon" style="background:var(--teal-dim)">📞</div><div><div class="ci-label">Phone</div><div class="ci-val">+92 51 000 0000</div><div class="ci-sub">WhatsApp: +92 300 000 0000</div></div></div>
+        <div class="ci-row"><div class="ci-icon" style="background:var(--coral-dim)">✉️</div><div><div class="ci-label">Email</div><div class="ci-val">hello@fitmart.pk</div><div class="ci-sub">Support: support@fitmart.pk</div></div></div>
+        <div class="ci-row"><div class="ci-icon" style="background:var(--volt-dim)">🆘</div><div><div class="ci-label">Medical Emergency</div><div class="ci-val">+92 51 111 0000</div><div class="ci-sub">24/7 on-call doctor line</div></div></div>
+      </div>
+
+      <div class="ci-card rv d1">
+        <div class="ci-title">Opening Hours</div>
+        <div class="hours-grid">
+          <div class="hg-row"><span class="hg-day">Mon–Fri</span><span class="hg-time">5AM–11PM</span></div>
+          <div class="hg-row"><span class="hg-day">Saturday</span><span class="hg-time">6AM–10PM</span></div>
+          <div class="hg-row"><span class="hg-day">Sunday</span><span class="hg-time">7AM–9PM</span></div>
+          <div class="hg-row"><span class="hg-day">Clinic</span><span class="hg-time">9AM–6PM</span></div>
+        </div>
+        <div style="margin-top:14px;padding:12px;background:var(--volt-dim);border:1px solid rgba(181,255,71,.18);border-radius:10px;font-size:12px;color:var(--volt)">
+          ⚡ Emergency medical line available 24/7
+        </div>
+        <div class="map-embed">📍 Satellite Town, Rawalpindi · Google Maps link here</div>
+      </div>
+
+      <div class="ci-card rv d2">
+        <div class="ci-title">Quick Links</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="healthcare.html#book-appt" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">🩺 Book a Doctor Appointment</a>
+          <a href="gym.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">💪 Book a Gym Class</a>
+          <a href="plans.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">💎 View Membership Plans</a>
+          <a href="auth-register.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">✨ Create Free Account</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact form -->
+    <div class="form-card rv d1">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:6px">Send a Message</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:28px">We respond within 24 hours on business days</div>
+
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <div class="subject-pills" id="subjectPills">
+          <button class="sp on" onclick="selectSub(this,'General Enquiry')">General</button>
+          <button class="sp" onclick="selectSub(this,'Membership')">Membership</button>
+          <button class="sp" onclick="selectSub(this,'Medical Query')">Medical</button>
+          <button class="sp" onclick="selectSub(this,'Technical Support')">Tech Support</button>
+          <button class="sp" onclick="selectSub(this,'Billing')">Billing</button>
+          <button class="sp" onclick="selectSub(this,'Partnership')">Partnership</button>
+        </div>
+        <input class="form-input" id="subject" value="General Enquiry" style="margin-top:10px"/>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="cName" placeholder="Ali Raza"/></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="cPhone" placeholder="+92 300 000 0000"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="cEmail" type="email" placeholder="ali@example.com"/></div>
+      <div class="form-group">
+        <label class="form-label">Are you a member?</label>
+        <select class="form-select" id="cMember">
+          <option>Yes — existing member</option>
+          <option>No — prospective member</option>
+          <option>Healthcare patient</option>
+          <option>Corporate inquiry</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" id="cMessage" placeholder="Write your message here..." style="min-height:140px"></textarea></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <input type="checkbox" id="cConsent" style="accent-color:var(--volt);width:15px;height:15px;cursor:pointer"/>
+        <label for="cConsent" style="font-size:12px;color:var(--muted)">I agree to FitMart's Privacy Policy and consent to being contacted regarding my enquiry.</label>
+      </div>
+      <button class="btn-main btn-full" onclick="sendMessage()">Send Message →</button>
+
+      <div style="margin-top:24px;padding:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;font-size:12px;color:var(--muted);text-align:center">
+        🔒 Your information is encrypted and never shared with third parties
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top:60px">
+  <div class="wrap"><div class="fbottom" style="border:none;padding-top:0"><p>© 2025 FitMart · Rawalpindi, Punjab, Pakistan</p><div style="display:flex;gap:20px"><a href="index.html">Home</a><a href="plans.html">Plans</a><a href="healthcare.html">Health Care</a></div></div></div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>60),{passive:true});
+function selectSub(btn,val){document.querySelectorAll('.sp').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('subject').value=val;}
+function sendMessage(){
+  const name=document.getElementById('cName').value.trim();
+  const email=document.getElementById('cEmail').value.trim();
+  // Validate email format
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    FMToast.error('Please enter a valid email address');
+    document.getElementById('cEmail').focus();
+    return;
+  }
+  const msg=document.getElementById('cMessage').value.trim();
+  const consent=document.getElementById('cConsent').checked;
+  if(!name){FMToast.error('Please enter your name');return;}
+  if(!email){FMToast.error('Please enter your email address');return;}
+  if(!msg){FMToast.error('Please enter your message');return;}
+  if(msg.length<10){FMToast.error('Message too short — please provide more details');return;}
+  if(!consent){FMToast.error('Please accept the privacy policy to continue');return;}
+  // Save locally and show success
+  const msgs=FM.load('contact_messages',[])||[];
+  msgs.push({name,email,phone:document.getElementById('cPhone').value,subject:document.getElementById('subject').value,member:document.getElementById('cMember').value,message:msg,sent:new Date().toISOString()});
+  FM.save('contact_messages',msgs);
+  FMToast.success('Message sent! We\'ll respond within 24 hours.');
+  document.getElementById('cName').value='';document.getElementById('cEmail').value='';
+  document.getElementById('cMessage').value='';document.getElementById('cPhone').value='';
+}
+</script>
+</body>
+</html>

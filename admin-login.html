@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Login — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a0f;--bg2:#090e15;--card:#0d1520;--card2:#111c28;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.1);
+  --volt:#b5ff47;--volt-dim:rgba(181,255,71,0.08);--volt-glow:rgba(181,255,71,0.25);
+  --teal:#2dd4bf;--coral:#ff6347;--white:#e8f0ea;--muted:rgba(232,240,234,0.45);
+  --ease:cubic-bezier(0.16,1,0.3,1);--ease3:cubic-bezier(0.34,1.56,0.64,1);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--white);font-family:'DM Sans',sans-serif;cursor:pointer}
+
+/* ══ CURSOR ══ */
+#cur{position:fixed;width:8px;height:8px;background:var(--volt);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);mix-blend-mode:difference;transition:width .2s,height .2s}
+#cring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(181,255,71,0.4);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .4s var(--ease),height .4s var(--ease),border-radius .35s var(--ease)}
+body.hov #cur{width:14px;height:14px}body.hov #cring{width:54px;height:54px;border-color:rgba(181,255,71,.7);border-radius:10px}
+
+/* ══ GRID BG ══ */
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(181,255,71,.022) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(181,255,71,.022) 1px,transparent 1px);
+  background-size:72px 72px;animation:gridMove 20s linear infinite;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%)}
+@keyframes gridMove{0%{background-position:0 0}100%{background-position:72px 72px}}
+
+/* ══ SCAN LINE ══ */
+.scan{position:fixed;top:-2px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--volt),transparent);
+  animation:scan 4s ease-in-out infinite;opacity:.5;pointer-events:none;z-index:1}
+@keyframes scan{0%{top:-2px;opacity:0}10%{opacity:.6}90%{opacity:.6}100%{top:100vh;opacity:0}}
+
+/* ══ SIDE PANEL ══ */
+.side{position:fixed;left:0;top:0;bottom:0;width:340px;border-right:1px solid var(--border);
+  background:linear-gradient(160deg,#090e15 0%,#060a0f 100%);
+  display:flex;flex-direction:column;z-index:2;padding:48px 40px}
+@media(max-width:900px){.side{display:none}}
+.side-brand{display:flex;align-items:center;gap:12px;margin-bottom:60px}
+.smark{width:38px;height:38px;background:var(--volt);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.smark svg{width:20px;height:20px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round}
+.sbrand-name{font-family:'Syne',sans-serif;font-weight:800;font-size:20px}
+.side h2{font-family:'Syne',sans-serif;font-weight:800;font-size:34px;letter-spacing:-1px;line-height:1.05;margin-bottom:20px}
+.side h2 em{font-style:italic;color:var(--volt);font-family:'DM Mono',monospace;font-size:30px}
+.side p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:48px}
+.security-badges{display:flex;flex-direction:column;gap:10px;margin-top:auto}
+.sbadge{display:flex;align-items:center;gap:12px;padding:12px 16px;background:rgba(181,255,71,.04);border:1px solid rgba(181,255,71,.1);border-radius:12px}
+.sbadge-icon{font-size:16px;flex-shrink:0}.sbadge-t{font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px}.sbadge-s{font-size:11px;color:var(--muted)}
+.side-footer{margin-top:24px;font-size:11px;color:var(--muted);line-height:1.7;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ══ MAIN LOGIN PANEL ══ */
+.main{position:fixed;left:340px;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:40px;z-index:2}
+@media(max-width:900px){.main{left:0}}
+.login-box{width:100%;max-width:440px;background:var(--card);border:1px solid var(--border2);border-radius:24px;padding:48px;position:relative;overflow:hidden}
+.login-box::before{content:'';position:absolute;top:0;left:-100%;width:60%;height:2px;background:linear-gradient(90deg,transparent,var(--volt),transparent);animation:sweep 4s ease-in-out infinite}
+@keyframes sweep{0%{left:-60%}100%{left:160%}}
+
+/* Steps */
+.step{display:none}.step.active{display:block}
+.step-indicator{display:flex;gap:6px;margin-bottom:36px}
+.si{height:3px;border-radius:2px;background:var(--border);flex:1;transition:background .4s}
+.si.done{background:var(--volt)}.si.active{background:rgba(181,255,71,.5)}
+
+.login-title{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;letter-spacing:-.5px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--muted);margin-bottom:32px;line-height:1.7}
+
+/* Form elements */
+.fg{margin-bottom:20px;position:relative}
+.fl{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'Syne',sans-serif}
+.fi{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:12px;padding:14px 18px;color:var(--white);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .25s,box-shadow .25s}
+.fi:focus{border-color:rgba(181,255,71,.45);box-shadow:0 0 0 3px rgba(181,255,71,.07)}
+.fi::placeholder{color:rgba(232,240,234,.25)}
+.fi-icon{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;cursor:pointer;margin-top:11px}
+.pw-toggle{cursor:pointer;transition:color .2s}.pw-toggle:hover{color:var(--volt)}
+
+/* PIN pad */
+.pin-display{display:flex;gap:10px;justify-content:center;margin:24px 0}
+.pin-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);transition:all .3s var(--ease3);background:transparent}
+.pin-dot.filled{background:var(--volt);border-color:var(--volt);transform:scale(1.15);box-shadow:0 0 10px var(--volt-glow)}
+.pin-dot.error{background:var(--coral);border-color:var(--coral);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px}
+.pp-btn{padding:18px 10px;background:var(--card2);border:1px solid var(--border);border-radius:14px;font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--white);cursor:pointer;transition:all .2s var(--ease);text-align:center}
+.pp-btn:hover{background:rgba(181,255,71,.08);border-color:rgba(181,255,71,.3);color:var(--volt)}
+.pp-btn:active{transform:scale(.93)}
+.pp-btn.del{font-size:14px;color:var(--muted)}
+.pp-btn.zero{grid-column:2}
+
+/* Submit btn */
+.submit-btn{width:100%;padding:16px;border:none;border-radius:14px;background:var(--volt);color:var(--bg);font-family:'Syne',sans-serif;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden;transition:transform .35s var(--ease),box-shadow .35s}
+.submit-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.3) 50%,transparent 62%);transform:translateX(-100%)}
+.submit-btn:hover{transform:translateY(-2px) scale(1.02);box-shadow:0 12px 32px var(--volt-glow)}
+.submit-btn:hover::before{animation:shimmer .45s forwards}
+@keyframes shimmer{to{transform:translateX(100%)}}
+.submit-btn:disabled{opacity:.6;transform:none;box-shadow:none}
+.spin{width:18px;height:18px;border:2px solid rgba(5,10,14,.3);border-top-color:var(--bg);border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Error/status */
+.err-box{background:rgba(255,99,71,.07);border:1px solid rgba(255,99,71,.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--coral);margin-bottom:16px;display:none;align-items:center;gap:10px}
+.lock-box{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.18);border-radius:10px;padding:12px 16px;font-size:13px;color:#f59e0b;margin-bottom:16px;display:none}
+.attempt-bar{display:flex;gap:6px;margin-top:12px}
+.atm-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--border2)}
+.atm-dot.used{background:var(--coral);border-color:var(--coral)}
+.back-link{text-align:center;margin-top:20px;font-size:13px;color:var(--muted)}
+.back-link a{color:var(--volt);font-weight:600;cursor:pointer}
+
+/* Security log */
+.sec-log{margin-top:28px;padding:16px;background:rgba(181,255,71,.03);border:1px solid rgba(181,255,71,.1);border-radius:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)}
+.log-line{line-height:2;color:rgba(181,255,71,.5)}
+.log-line span{color:var(--muted)}
+
+/* 2FA step */
+.code-inputs{display:flex;gap:8px;justify-content:center;margin:20px 0}
+.code-inp{width:48px;height:56px;background:var(--card2);border:1px solid var(--border2);border-radius:12px;color:var(--white);font-family:'DM Mono',monospace;font-size:22px;font-weight:500;text-align:center;outline:none;transition:border-color .25s}
+.code-inp:focus{border-color:rgba(181,255,71,.45);box-shadow:0 0 0 3px rgba(181,255,71,.07)}
+</style>
+</head>
+<body>
+<div id="cur"></div><div id="cring"></div>
+<div class="grid-bg"></div>
+<div class="scan"></div>
+
+<!-- SIDE PANEL -->
+<aside class="side">
+  <div class="side-brand">
+    <div class="smark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+    <span class="sbrand-name">FitMart</span>
+  </div>
+  <h2>Admin <em>Control</em><br>Centre</h2>
+  <p>Restricted access portal. Manage membership plans, pricing, member data, health alerts, and platform settings.</p>
+  <div class="security-badges">
+    <div class="sbadge"><span class="sbadge-icon">🔐</span><div><div class="sbadge-t">End-to-End Encrypted</div><div class="sbadge-s">TLS 1.3 · AES-256 at rest</div></div></div>
+    <div class="sbadge"><span class="sbadge-icon">📋</span><div><div class="sbadge-t">Audit Logged</div><div class="sbadge-s">Every admin action is recorded</div></div></div>
+    <div class="sbadge"><span class="sbadge-icon">⏱</span><div><div class="sbadge-t">Session Timeout</div><div class="sbadge-s">Auto-logout after 30 minutes</div></div></div>
+  </div>
+  <div class="side-footer">All login attempts are recorded with IP address, timestamp, and device fingerprint. Unauthorised access is a criminal offence under Pakistan's Prevention of Electronic Crimes Act (PECA) 2016.</div>
+</aside>
+
+<!-- MAIN PANEL -->
+<main class="main">
+  <div class="login-box">
+    <!-- STEP 1: Credentials -->
+    <div class="step active" id="step1">
+      <div class="step-indicator"><div class="si active" id="si1"></div><div class="si" id="si2"></div><div class="si" id="si3"></div></div>
+      <div class="login-title">Admin Login</div>
+      <div class="login-sub">Enter your administrator credentials to continue.</div>
+
+      <div class="err-box" id="credErr">⛔ <span id="credErrMsg">Invalid credentials</span></div>
+
+      <div class="fg">
+        <label class="fl">Admin Email</label>
+        <input class="fi" id="adminEmail" type="email" placeholder="admin@fitmart.pk" autocomplete="username"/>
+      </div>
+      <div class="fg">
+        <label class="fl">Password</label>
+        <div style="position:relative">
+          <input class="fi" id="adminPass" type="password" placeholder="••••••••••" autocomplete="current-password" style="padding-right:44px"/>
+          <span class="fi-icon pw-toggle" id="pwEye" onclick="togglePw()">👁</span>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px">
+        <input type="checkbox" id="rememberMe" style="accent-color:var(--volt);width:15px;height:15px;cursor:pointer"/>
+        <label for="rememberMe" style="font-size:13px;color:var(--muted)">Keep me logged in on this device</label>
+      </div>
+
+      <button class="submit-btn" id="step1Btn" onclick="verifyCredentials()">
+        <div class="spin" id="spin1"></div>
+        <span id="step1Lbl">Continue →</span>
+      </button>
+
+      <div style="margin-top:20px;display:flex;justify-content:space-between">
+        <div class="attempt-bar" id="attemptBar">
+          <div class="atm-dot" id="a1"></div><div class="atm-dot" id="a2"></div>
+          <div class="atm-dot" id="a3"></div><div class="atm-dot" id="a4"></div><div class="atm-dot" id="a5"></div>
+        </div>
+        <span style="font-size:12px;color:var(--muted)" id="attemptsLeft">5 attempts remaining</span>
+      </div>
+
+      <div class="sec-log">
+        <div class="log-line">» <span id="logIp">Resolving IP...</span></div>
+        <div class="log-line">» <span id="logTime"></span></div>
+        <div class="log-line">» <span>Session: <span id="logSess"></span></span></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: PIN -->
+    <div class="step" id="step2">
+      <div class="step-indicator"><div class="si done" id="si1b"></div><div class="si active" id="si2b"></div><div class="si" id="si3b"></div></div>
+      <div style="text-align:center;margin-bottom:8px;font-size:32px">🔢</div>
+      <div class="login-title" style="text-align:center">Admin PIN</div>
+      <div class="login-sub" style="text-align:center">Enter your 4-digit security PIN to verify identity.</div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:4px">Demo PIN: <strong style="color:var(--volt);font-family:'DM Mono',monospace">1234</strong></div>
+
+      <div class="err-box" id="pinErr">⛔ <span>Incorrect PIN. Try again.</span></div>
+
+      <div class="pin-display" id="pinDisplay">
+        <div class="pin-dot" id="pd0"></div><div class="pin-dot" id="pd1"></div>
+        <div class="pin-dot" id="pd2"></div><div class="pin-dot" id="pd3"></div>
+      </div>
+
+      <div class="pin-pad">
+        <div class="pp-btn" onclick="pinInput('1')">1</div>
+        <div class="pp-btn" onclick="pinInput('2')">2</div>
+        <div class="pp-btn" onclick="pinInput('3')">3</div>
+        <div class="pp-btn" onclick="pinInput('4')">4</div>
+        <div class="pp-btn" onclick="pinInput('5')">5</div>
+        <div class="pp-btn" onclick="pinInput('6')">6</div>
+        <div class="pp-btn" onclick="pinInput('7')">7</div>
+        <div class="pp-btn" onclick="pinInput('8')">8</div>
+        <div class="pp-btn" onclick="pinInput('9')">9</div>
+        <div class="pp-btn zero" onclick="pinInput('0')">0</div>
+        <div class="pp-btn del" onclick="pinDelete()">⌫</div>
+      </div>
+      <div class="back-link"><a onclick="goStep(1)">← Back</a></div>
+    </div>
+
+    <!-- STEP 3: 2FA Code -->
+    <div class="step" id="step3">
+      <div class="step-indicator"><div class="si done"></div><div class="si done"></div><div class="si active"></div></div>
+      <div style="text-align:center;margin-bottom:8px;font-size:32px">📱</div>
+      <div class="login-title" style="text-align:center">Verify Identity</div>
+      <div class="login-sub" style="text-align:center">Enter the 6-digit code sent to <strong style="color:var(--white)" id="maskedEmail"></strong></div>
+      <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px">Demo code: <strong style="color:var(--volt);font-family:'DM Mono',monospace">123456</strong></div>
+
+      <div class="err-box" id="codeErr">⛔ Invalid code. Please try again.</div>
+
+      <div class="code-inputs">
+        <input class="code-inp" id="c0" maxlength="1" oninput="codeInput(0,this)"/>
+        <input class="code-inp" id="c1" maxlength="1" oninput="codeInput(1,this)"/>
+        <input class="code-inp" id="c2" maxlength="1" oninput="codeInput(2,this)"/>
+        <input class="code-inp" id="c3" maxlength="1" oninput="codeInput(3,this)"/>
+        <input class="code-inp" id="c4" maxlength="1" oninput="codeInput(4,this)"/>
+        <input class="code-inp" id="c5" maxlength="1" oninput="codeInput(5,this)"/>
+      </div>
+
+      <button class="submit-btn" id="step3Btn" onclick="verifyCode()">
+        <div class="spin" id="spin3"></div>
+        <span id="step3Lbl">Access Dashboard →</span>
+      </button>
+
+      <div style="text-align:center;margin-top:16px;font-size:13px;color:var(--muted)">
+        Didn't get it? <a style="color:var(--volt);cursor:pointer" onclick="resendCode()">Resend Code</a>
+      </div>
+      <div class="back-link"><a onclick="goStep(2)">← Back</a></div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+// Cursor
+const cur=document.getElementById('cur'),cring=document.getElementById('cring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function loop(){rx+=(mx-rx)*.1;ry+=(my-ry)*.1;cring.style.left=rx+'px';cring.style.top=ry+'px';requestAnimationFrame(loop)})();
+document.querySelectorAll('button,input,a').forEach(el=>{el.addEventListener('mouseenter',()=>document.body.classList.add('hov'));el.addEventListener('mouseleave',()=>document.body.classList.remove('hov'));});
+
+// Security log
+document.getElementById('logTime').textContent=new Date().toLocaleString('en-PK');
+document.getElementById('logSess').textContent=Math.random().toString(36).substr(2,16).toUpperCase();
+// Simulated IP resolution
+setTimeout(()=>{document.getElementById('logIp').textContent='IP: 27.255.'+Math.floor(Math.random()*255)+'.'+Math.floor(Math.random()*255)+' (Rawalpindi, PK)';},600);
+
+// State
+let step=1,pinVal='',attempts=0,maxAttempts=5;
+const ADMIN_CREDENTIALS={'admin@fitmart.pk':'FitMart@Admin2025','superadmin@fitmart.pk':'Super@123'};
+const ADMIN_PIN='1234';
+const CODE_2FA='123456';
+let currentEmail='';
+
+function goStep(n){
+  document.getElementById('step'+step).classList.remove('active');
+  step=n;
+  document.getElementById('step'+n).classList.add('active');
+}
+
+function togglePw(){
+  const f=document.getElementById('adminPass');
+  f.type=f.type==='password'?'text':'password';
+}
+
+async function verifyCredentials(){
+  const email=document.getElementById('adminEmail').value.trim();
+  const pass=document.getElementById('adminPass').value;
+  const btn=document.getElementById('step1Btn'),spin=document.getElementById('spin1'),lbl=document.getElementById('step1Lbl');
+  const err=document.getElementById('credErr');
+  if(!email||!pass){showErr('credErr','Please enter both email and password');return;}
+  spin.style.display='block';lbl.textContent='Verifying...';btn.disabled=true;err.style.display='none';
+
+  // Try backend first
+  let ok=false;
+  try{
+    const res=await fetch(FMConfig.getBackendUrl()+'/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass}),signal:AbortSignal.timeout(5000)});
+    const data=await res.json();
+    if(res.ok&&data.user?.role==='admin'){ok=true;currentEmail=email;}
+    else if(res.ok&&data.user?.role!=='admin'){showErr('credErr','Account does not have admin privileges');spin.style.display='none';lbl.textContent='Continue →';btn.disabled=false;return;}
+  }catch{}
+
+  // Fallback: local admin credentials
+  if(!ok&&ADMIN_CREDENTIALS[email.toLowerCase()]===pass){ok=true;currentEmail=email;}
+
+  await new Promise(r=>setTimeout(r,900));
+  spin.style.display='none';lbl.textContent='Continue →';btn.disabled=false;
+
+  if(ok){
+    document.getElementById('maskedEmail').textContent=email.replace(/(.{2}).+(@.+)/,'$1***$2');
+    goStep(2);
+  }else{
+    attempts++;
+    document.getElementById('a'+(attempts)).classList.add('used');
+    document.getElementById('attemptsLeft').textContent=(maxAttempts-attempts)+' attempts remaining';
+    showErr('credErr',attempts>=maxAttempts?'Account temporarily locked. Try again in 15 minutes.':'Incorrect email or password. Check your credentials.');
+    if(attempts>=maxAttempts){btn.disabled=true;btn.textContent='Locked';}
+  }
+}
+
+function showErr(id,msg){
+  const el=document.getElementById(id);
+  el.style.display='flex';
+  const sp=el.querySelector('span');if(sp&&msg)sp.textContent=msg;
+  el.animate([{opacity:0,transform:'translateY(-4px)'},{opacity:1,transform:'none'}],{duration:300,fill:'forwards'});
+}
+
+// PIN
+function pinInput(digit){
+  if(pinVal.length>=4)return;
+  pinVal+=digit;
+  document.getElementById('pd'+(pinVal.length-1)).classList.add('filled');
+  if(pinVal.length===4)setTimeout(verifyPin,200);
+}
+function pinDelete(){
+  if(!pinVal.length)return;
+  document.getElementById('pd'+(pinVal.length-1)).classList.remove('filled','error');
+  pinVal=pinVal.slice(0,-1);
+  document.getElementById('pinErr').style.display='none';
+}
+function verifyPin(){
+  if(pinVal===ADMIN_PIN){
+    document.querySelectorAll('.pin-dot').forEach(d=>{d.style.background='var(--volt)';d.style.borderColor='var(--volt)';});
+    setTimeout(()=>goStep(3),400);
+  }else{
+    document.querySelectorAll('.pin-dot').forEach(d=>d.classList.add('error'));
+    document.getElementById('pinErr').style.display='flex';
+    setTimeout(()=>{pinVal='';document.querySelectorAll('.pin-dot').forEach(d=>{d.className='pin-dot';});},600);
+  }
+}
+
+// Code input
+function codeInput(idx,el){
+  el.value=el.value.replace(/\D/,'');
+  if(el.value&&idx<5)document.getElementById('c'+(idx+1)).focus();
+  const code=[...Array(6)].map((_,i)=>document.getElementById('c'+i).value).join('');
+  if(code.length===6)setTimeout(verifyCode,200);
+}
+
+async function verifyCode(){
+  const code=[...Array(6)].map((_,i)=>document.getElementById('c'+i).value).join('');
+  const btn=document.getElementById('step3Btn'),spin=document.getElementById('spin3'),lbl=document.getElementById('step3Lbl');
+  if(code.length!==6){showErr('codeErr','Please enter all 6 digits');return;}
+  spin.style.display='block';lbl.textContent='Verifying...';btn.disabled=true;
+  await new Promise(r=>setTimeout(r,1200));
+  if(code===CODE_2FA){
+    lbl.textContent='✓ Access Granted';btn.style.background='#22c55e';
+    // Save admin session
+    const adminUser={role:'admin',name:'FitMart Admin',email:currentEmail,loginTime:new Date().toISOString(),sessionId:Math.random().toString(36).substr(2,16)};
+    try{localStorage.setItem('fm_user',JSON.stringify(adminUser));}catch{}
+    setTimeout(()=>window.location.href='admin-dashboard.html',700);
+  }else{
+    showErr('codeErr','Invalid code. Please check and try again.');
+    spin.style.display='none';lbl.textContent='Access Dashboard →';btn.disabled=false;
+    [...Array(6)].forEach((_,i)=>{const c=document.getElementById('c'+i);c.value='';c.style.borderColor='var(--coral)';setTimeout(()=>c.style.borderColor='',1500);});
+    document.getElementById('c0').focus();
+  }
+}
+
+function resendCode(){alert('In production, a new code will be sent to your registered email/phone.');}
+
+// Keyboard enter support
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(step===1)verifyCredentials();else if(step===3)verifyCode();}});
+
+// Auto-fill on page load if session exists
+window.addEventListener('load',()=>{
+  try{
+    const u=JSON.parse(localStorage.getItem('fm_user')||'{}');
+    if(u.role==='admin'&&u.loginTime){
+      const age=(Date.now()-new Date(u.loginTime))/1000/60;
+      if(age<30){window.location.href='admin-dashboard.html';return;}
+    }
+  }catch{}
+});
+</script>
+</body>
+</html>

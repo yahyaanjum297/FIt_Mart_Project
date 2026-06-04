@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Create Account — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+.auth-wrap{min-height:100vh;display:flex;align-items:stretch}
+.auth-left{flex:1;position:relative;overflow:hidden;display:none}
+@media(min-width:960px){.auth-left{display:block}}
+.auth-left img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22) saturate(0.5)}
+.auth-left-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(5,10,14,0.7),rgba(5,10,14,0.4))}
+.auth-left-content{position:absolute;top:0;bottom:0;left:60px;right:60px;z-index:2;display:flex;flex-direction:column;justify-content:center}
+.auth-left-content h2{font-family:'Syne',sans-serif;font-weight:800;font-size:38px;line-height:0.95;letter-spacing:-1.5px;margin-bottom:14px;padding-bottom:4px}
+.perks{display:flex;flex-direction:column;gap:14px;margin-top:32px}
+.perk{display:flex;align-items:flex-start;gap:14px}
+.perk-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:2px}
+.perk-t{font-weight:600;font-size:14px;margin-bottom:3px}
+.perk-s{font-size:12px;color:var(--muted)}
+.auth-right{width:100%;max-width:540px;display:flex;flex-direction:column;justify-content:center;padding:60px 52px;background:var(--bg);position:relative;z-index:10}
+@media(min-width:960px){.auth-right{min-width:520px}}
+@media(max-width:520px){.auth-right{padding:40px 24px}}
+.auth-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:20px;margin-bottom:40px}
+.n-mark{width:30px;height:30px;background:var(--volt);border-radius:8px;display:flex;align-items:center;justify-content:center}
+.n-mark svg{width:16px;height:16px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round}
+/* steps */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:40px}
+.step{display:flex;align-items:center;gap:10px;flex:1}
+.step-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;border:1.5px solid var(--border2);color:var(--muted2);transition:background 0.35s,border-color 0.35s,color 0.35s;flex-shrink:0}
+.step.done .step-num{background:var(--volt);border-color:var(--volt);color:var(--bg)}
+.step.active .step-num{border-color:var(--volt);color:var(--volt)}
+.step-label{font-size:11px;font-weight:600;color:var(--muted2);letter-spacing:0.5px;transition:color 0.35s}
+.step.active .step-label,.step.done .step-label{color:var(--white)}
+.step-line{flex:1;height:1px;background:var(--border);margin:0 8px;transition:background 0.35s}
+.step.done .step-line{background:var(--volt)}
+.form-page{display:none}.form-page.active{display:block}
+.auth-title{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;letter-spacing:-0.8px;margin-bottom:6px}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+.auth-switch{margin-top:24px;text-align:center;font-size:13px;color:var(--muted)}
+.auth-switch a{color:var(--volt);font-weight:600}
+.btn-back{padding:14px 28px;border-radius:100px;font-size:14px;font-weight:500;background:transparent;color:var(--white);border:1.5px solid var(--border3);transition:border-color 0.3s,background 0.3s}
+.btn-back:hover{border-color:var(--border2);background:var(--bg3)}
+.pass-strength{height:4px;border-radius:2px;background:var(--border);margin-top:8px;overflow:hidden}
+.pass-bar{height:100%;width:0;border-radius:2px;transition:width 0.4s,background 0.4s}
+.pass-hint{font-size:11px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<div class="auth-wrap">
+  <div class="auth-left">
+    <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=1200&q=80&auto=format&fit=crop" alt="fitness"/>
+    <div class="auth-left-ov"></div>
+    <div class="auth-left-content">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:var(--volt-dim);border:1px solid rgba(181,255,71,0.2);padding:6px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--volt);margin-bottom:24px">Free for 7 Days</div>
+      <h2>Join 15,000+<br><span style="color:var(--volt)">Members Today</span></h2>
+      <div class="perks">
+        <div class="perk"><div class="perk-icon" style="background:var(--volt-dim)">⚡</div><div><div class="perk-t">AI Workout Plans</div><div class="perk-s">Personalised to your goals, injuries, and health data</div></div></div>
+        <div class="perk"><div class="perk-icon" style="background:var(--teal-dim)">🩺</div><div><div class="perk-t">Doctor Integration</div><div class="perk-s">Your trainer and doctor work together for safe progress</div></div></div>
+        <div class="perk"><div class="perk-icon" style="background:var(--coral-dim)">📊</div><div><div class="perk-t">Full Health Tracking</div><div class="perk-s">Vitals, workouts, diet, BMI — all in one dashboard</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <a class="auth-logo" href="index.html">
+      <div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+      FitMart
+    </a>
+
+    <!-- STEPS -->
+    <div class="steps" id="stepsEl">
+      <div class="step active" id="s1"><div class="step-num">1</div><span class="step-label">Account</span><div class="step-line"></div></div>
+      <div class="step" id="s2"><div class="step-num">2</div><span class="step-label">Health Profile</span><div class="step-line"></div></div>
+      <div class="step" id="s3"><div class="step-num">3</div><span class="step-label">Goals</span></div>
+    </div>
+
+    <!-- PAGE 1 -->
+    <div class="form-page active" id="page1">
+      <div class="auth-title">Create Account</div>
+      <p class="auth-sub">Start your 7-day free trial today</p>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="firstName" placeholder="Ali" required/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="lastName" placeholder="Raza" required/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="regEmail" type="email" placeholder="ali@example.com" required/></div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="regPassword" type="password" placeholder="Min 8 characters" required oninput="checkPass(this.value)"/>
+        <div class="pass-strength"><div class="pass-bar" id="passBr"></div></div>
+        <div class="pass-hint" id="passHint">Use 8+ characters with numbers and symbols</div>
+      </div>
+      <button class="btn-main btn-full" onclick="goToPage(2)">Continue →</button>
+      <div class="auth-switch">Already have an account? <a href="auth-login.html">Sign in</a></div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="form-page" id="page2">
+      <div class="auth-title">Health Profile</div>
+      <p class="auth-sub">Help us personalise your experience</p>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Age</label><input class="form-input" id="regAge" type="number" placeholder="25" min="10" max="100"/></div>
+        <div class="form-group"><label class="form-label">Gender</label><select class="form-select" id="regGender"><option>Male</option><option>Female</option><option>Other</option><option>Prefer not to say</option></select></div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Weight (kg)</label><input class="form-input" id="regWeight" type="number" placeholder="70"/></div>
+        <div class="form-group"><label class="form-label">Height (cm)</label><input class="form-input" id="regHeight" type="number" placeholder="175"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Any Injuries</label><input class="form-input" id="regInjury" placeholder="e.g. knee pain — or leave blank"/></div>
+      <div class="form-group"><label class="form-label">Chronic Conditions</label><input class="form-input" id="regDisease" placeholder="e.g. diabetes — or leave blank"/></div>
+      <div style="display:flex;gap:12px">
+        <button class="btn-back" onclick="goToPage(1)">← Back</button>
+        <button class="btn-main" style="flex:1" onclick="goToPage(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3 -->
+    <div class="form-page" id="page3">
+      <div class="auth-title">Set Your Goals</div>
+      <p class="auth-sub">We'll build your first plan around these</p>
+      <div class="form-group"><label class="form-label">Primary Goal</label>
+        <select class="form-select" id="regGoal">
+          <option>Weight Loss</option><option>Muscle Gain</option><option>Endurance</option>
+          <option>Strength</option><option>Flexibility</option><option>General Fitness</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Training Location</label>
+        <select class="form-select" id="regLocation"><option>Gym</option><option>Home</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Fitness Level</label>
+        <select class="form-select" id="regLevel"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Membership Plan</label>
+        <select class="form-select" id="regPlan"><option>Basic (Free 7 days)</option><option>Pro — Rs 2,999/mo</option><option>Elite — Rs 5,999/mo</option></select>
+      </div>
+      <div style="display:flex;gap:12px">
+        <button class="btn-back" onclick="goToPage(2)">← Back</button>
+        <button class="btn-main" style="flex:1" id="registerBtn" onclick="doRegister()">
+          <div class="spinner" id="regSpin" style="display:none"></div>
+          <span id="regLbl">Create Account →</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+let currentPage=1;
+function goToPage(n){
+  if(n===2){
+    const fn=document.getElementById('firstName').value,em=document.getElementById('regEmail').value,pw=document.getElementById('regPassword').value;
+    if(!fn||!em||!pw){FMToast.error('Please fill in all fields');return;}
+    if(pw.length<8){FMToast.error('Password must be at least 8 characters');return;}
+  }
+  document.getElementById('page'+currentPage).classList.remove('active');
+  document.getElementById('s'+currentPage).classList.remove('active');
+  document.getElementById('s'+currentPage).classList.add('done');
+  currentPage=n;
+  document.getElementById('page'+n).classList.add('active');
+  document.getElementById('s'+n).classList.add('active');
+}
+
+function checkPass(v){
+  const br=document.getElementById('passBr'),hint=document.getElementById('passHint');
+  let score=0;
+  if(v.length>=8)score++;if(/[A-Z]/.test(v))score++;if(/[0-9]/.test(v))score++;if(/[^A-Za-z0-9]/.test(v))score++;
+  const colors=['','#ff6347','#f59e0b','#b5ff47','#2dd4bf'];
+  const labels=['','Weak','Fair','Good','Strong'];
+  br.style.width=(score*25)+'%';br.style.background=colors[score]||'';
+  hint.textContent=labels[score]||'Use 8+ characters with numbers and symbols';
+  hint.style.color=colors[score]||'';
+}
+
+async function doRegister(){
+  const btn  = document.getElementById('registerBtn');
+  const spin = document.getElementById('regSpin');
+  const lbl  = document.getElementById('regLbl');
+  spin.style.display = 'block';
+  lbl.textContent = 'Creating account...';
+  btn.disabled = true;
+
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('regEmail').value.trim().toLowerCase();
+  const password  = document.getElementById('regPassword').value;
+  const planRaw   = document.getElementById('regPlan').value;
+
+  // Clean plan value (remove price suffix)
+  const planMap   = { 'Basic': 'Basic', 'Pro': 'Pro', 'Elite': 'Elite' };
+  const planClean = Object.keys(planMap).find(k => planRaw.startsWith(k)) || 'Basic';
+
+  const userData = {
+    name:     firstName + ' ' + lastName,
+    email:    email,
+    password: password,
+    age:      parseInt(document.getElementById('regAge').value) || null,
+    gender:   document.getElementById('regGender').value,
+    weight:   parseFloat(document.getElementById('regWeight').value) || null,
+    height:   parseFloat(document.getElementById('regHeight').value) || null,
+    injury:   document.getElementById('regInjury').value.trim() || 'None',
+    disease:  document.getElementById('regDisease').value.trim() || 'None',
+    goal:     document.getElementById('regGoal').value,
+    location: document.getElementById('regLocation').value,
+    level:    document.getElementById('regLevel').value,
+    plan:     planClean,
+    role:     'member',
+  };
+
+  try {
+    const res = await FMAPI.post('/auth/register', userData);
+    if (res && res.user) {
+      if (res.token) FM.save('auth_token', res.token);
+      FM.setUser(res.user);
+    } else {
+      throw new Error('Invalid response');
+    }
+  } catch(err) {
+    const msg = err.message || '';
+    if (msg.includes('already registered') || msg.includes('already exists')) {
+      FMToast.error('This email is already registered. Try logging in instead.');
+      spin.style.display = 'none'; lbl.textContent = 'Create Account →'; btn.disabled = false;
+      return;
+    }
+    // Offline fallback - save locally
+    const localUser = { ...userData, id: Date.now(), joinedAt: new Date().toISOString() };
+    delete localUser.password;
+    FM.setUser(localUser);
+  }
+
+  FMToast.success('Account created! Welcome to FitMart 🎉');
+  setTimeout(() => window.location.href = 'dashboard.html', 1200);
+}
+</script>
+</body>
+</html>

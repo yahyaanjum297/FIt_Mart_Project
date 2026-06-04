@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Workout Tracker — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.tracker-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+@media(max-width:1000px){.tracker-grid{grid-template-columns:1fr}}
+.log-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:sticky;top:110px}
+.exercise-suggestions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.ex-chip{padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:100px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;transition:color 0.25s,border-color 0.25s,background 0.25s}
+.ex-chip:hover{color:var(--volt);border-color:rgba(181,255,71,0.3);background:var(--volt-dim)}
+.sets-table{width:100%;border-collapse:collapse;margin:16px 0}
+.sets-table th{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:8px 10px;text-align:left;border-bottom:1px solid var(--border)}
+.sets-table td{padding:8px 10px}
+.sets-table input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--white);font-size:13px;text-align:center}
+.sets-table input:focus{border-color:rgba(181,255,71,0.4);outline:none}
+.add-set-btn{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--volt);cursor:pointer;padding:6px 0;transition:opacity 0.25s;background:none;border:none}
+.add-set-btn:hover{opacity:0.7}
+/* Log list */
+.log-list{display:flex;flex-direction:column;gap:12px}
+.log-entry{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;transition:border-color 0.25s}
+.log-entry:hover{border-color:rgba(181,255,71,0.15)}
+.le-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.le-name{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.le-date{font-size:11px;color:var(--muted);margin-top:3px}
+.le-metrics{display:flex;gap:16px;flex-wrap:wrap}
+.le-m{text-align:center}
+.le-mn{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--volt)}
+.le-ml{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.le-sets{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.le-set{padding:5px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;font-weight:500;color:var(--muted)}
+.delete-btn{color:var(--muted2);font-size:16px;cursor:pointer;transition:color 0.2s;background:none;border:none;padding:4px}
+.delete-btn:hover{color:var(--coral)}
+/* Summary bar */
+.summary-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.sb-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.sb-n{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--volt);letter-spacing:-1px}
+.sb-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:4px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a on" href="workout-tracker.html">Tracker</a>
+    <a class="nav-a" href="progress-tracking.html">Progress</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a" href="diet.html">Diet</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Dashboard</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header"><span class="stag">Gym Module</span><h1>Workout Tracker</h1><p>Log every set, rep, and weight. Track calories burned and progressive overload. All data saved locally.</p></div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Summary bar -->
+  <div class="summary-bar rv">
+    <div class="sb-item"><div class="sb-n" id="totalWorkouts">0</div><div class="sb-l">Total Logged</div></div>
+    <div class="sb-item"><div class="sb-n" id="totalSets">0</div><div class="sb-l">Total Sets</div></div>
+    <div class="sb-item"><div class="sb-n" id="totalCal">0</div><div class="sb-l">kcal Burned</div></div>
+    <div class="sb-item"><div class="sb-n" id="thisWeek">0</div><div class="sb-l">This Week</div></div>
+  </div>
+
+  <div class="tracker-grid">
+    <!-- LOG FORM -->
+    <div>
+      <!-- Chart -->
+      <div class="log-card" style="position:relative;margin-bottom:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Volume This Week</div><div style="font-size:12px;color:var(--muted)">Sets × Reps × Weight</div></div>
+        </div>
+        <canvas id="weekChart" height="120"></canvas>
+      </div>
+
+      <!-- Log list -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px">Workout Log</div>
+        <button class="btn-ghost btn-sm" onclick="clearAllLogs()">Clear All</button>
+      </div>
+      <div class="log-list" id="logList"><div style="color:var(--muted);font-size:14px;padding:24px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:16px">No workouts logged yet. Add your first one! 💪</div></div>
+    </div>
+
+    <!-- LOG CARD -->
+    <div class="log-card rv d1">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:20px">Log Exercise</div>
+
+      <div class="form-group">
+        <label class="form-label">Exercise Name</label>
+        <input class="form-input" id="exName" placeholder="e.g. Bench Press" list="exList"/>
+        <datalist id="exList">
+          <option value="Bench Press"/><option value="Squat"/><option value="Deadlift"/>
+          <option value="Overhead Press"/><option value="Pull-ups"/><option value="Barbell Row"/>
+          <option value="Bicep Curl"/><option value="Tricep Dip"/><option value="Leg Press"/>
+          <option value="Lat Pulldown"/><option value="Cable Row"/><option value="Incline Press"/>
+          <option value="Romanian Deadlift"/><option value="Dumbbell Flye"/><option value="Plank"/>
+          <option value="Treadmill Run"/><option value="Cycling"/><option value="Jump Rope"/>
+        </datalist>
+      </div>
+
+      <!-- Quick select chips -->
+      <div class="exercise-suggestions">
+        <span class="ex-chip" onclick="setEx('Bench Press')">Bench Press</span>
+        <span class="ex-chip" onclick="setEx('Squat')">Squat</span>
+        <span class="ex-chip" onclick="setEx('Deadlift')">Deadlift</span>
+        <span class="ex-chip" onclick="setEx('Pull-ups')">Pull-ups</span>
+        <span class="ex-chip" onclick="setEx('Barbell Row')">Barbell Row</span>
+        <span class="ex-chip" onclick="setEx('Treadmill Run')">Treadmill Run</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input class="form-input" id="exDate" type="date"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Muscle Group</label>
+        <select class="form-select" id="exMuscle">
+          <option>Chest</option><option>Back</option><option>Shoulders</option>
+          <option>Legs</option><option>Arms</option><option>Core</option><option>Cardio</option><option>Full Body</option>
+        </select>
+      </div>
+
+      <label class="form-label">Sets</label>
+      <table class="sets-table" id="setsTable">
+        <thead><tr><th>#</th><th>Reps</th><th>Weight (kg)</th><th>RPE</th></tr></thead>
+        <tbody id="setRows">
+          <tr><td style="font-size:12px;color:var(--muted);text-align:center">1</td><td><input type="number" placeholder="10" min="1" max="100"/></td><td><input type="number" placeholder="40" min="0" max="500"/></td><td><input type="number" placeholder="7" min="1" max="10"/></td></tr>
+          <tr><td style="font-size:12px;color:var(--muted);text-align:center">2</td><td><input type="number" placeholder="10" min="1" max="100"/></td><td><input type="number" placeholder="40" min="0" max="500"/></td><td><input type="number" placeholder="7" min="1" max="10"/></td></tr>
+          <tr><td style="font-size:12px;color:var(--muted);text-align:center">3</td><td><input type="number" placeholder="10" min="1" max="100"/></td><td><input type="number" placeholder="40" min="0" max="500"/></td><td><input type="number" placeholder="8" min="1" max="10"/></td></tr>
+        </tbody>
+      </table>
+      <button class="add-set-btn" onclick="addSetRow()">+ Add Set</button>
+
+      <div class="form-group" style="margin-top:16px">
+        <div class="form-grid-2">
+          <div><label class="form-label">Duration (min)</label><input class="form-input" id="exDuration" type="number" placeholder="45"/></div>
+          <div><label class="form-label">Calories Burned</label><input class="form-input" id="exCal" type="number" placeholder="350"/></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="exNotes" placeholder="How did it feel? Any PRs?" style="min-height:72px"></textarea>
+      </div>
+
+      <button class="btn-main btn-full" onclick="logWorkout()">Save Workout Log</button>
+
+      <!-- AI suggestion -->
+      <div style="margin-top:20px;padding:16px;background:var(--volt-dim);border:1px solid rgba(181,255,71,0.15);border-radius:12px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--volt);margin-bottom:8px">⚡ Smart Tip</div>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7" id="smartTip">Log at least 3 workouts to receive personalised progressive overload suggestions.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+// Set default date to today
+document.getElementById('exDate').value=new Date().toISOString().split('T')[0];
+
+function setEx(name){document.getElementById('exName').value=name;}
+
+let setCount=3;
+function addSetRow(){
+  setCount++;
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td style="font-size:12px;color:var(--muted);text-align:center">${setCount}</td><td><input type="number" placeholder="10" min="1" max="100"/></td><td><input type="number" placeholder="40" min="0" max="500"/></td><td><input type="number" placeholder="8" min="1" max="10"/></td>`;
+  document.getElementById('setRows').appendChild(tr);
+}
+
+async function logWorkout(){
+  const name=document.getElementById('exName').value.trim();
+  if(!name){FMToast.error('Please enter an exercise name');return;}
+  const rows=[...document.getElementById('setRows').querySelectorAll('tr')];
+  const sets=rows.map((r,i)=>{
+    const inputs=r.querySelectorAll('input');
+    return{set:i+1,reps:parseInt(inputs[0].value)||0,weight:parseFloat(inputs[1].value)||0,rpe:parseInt(inputs[2].value)||0};
+  }).filter(s=>s.reps>0);
+  if(sets.length===0){FMToast.error('Log at least one set with reps');return;}
+  const entry={
+    exercise:name,muscle:document.getElementById('exMuscle').value,
+    date:document.getElementById('exDate').value,
+    sets,duration:parseInt(document.getElementById('exDuration').value)||0,
+    calories:parseInt(document.getElementById('exCal').value)||Math.round(sets.length*sets.reduce((a,s)=>a+s.reps,0)*0.5),
+    notes:document.getElementById('exNotes').value
+  };
+  // Save locally + sync to backend
+  await FMSync.saveWorkout(entry);
+  renderLog(); updateSummary(); updateChart();
+  document.getElementById('exName').value = '';
+  document.getElementById('exNotes').value = '';
+  // Reset sets
+  setCount=3;
+  document.getElementById('setRows').innerHTML=`<tr><td style="font-size:12px;color:var(--muted);text-align:center">1</td><td><input type="number" placeholder="10"/></td><td><input type="number" placeholder="40"/></td><td><input type="number" placeholder="7"/></td></tr><tr><td style="font-size:12px;color:var(--muted);text-align:center">2</td><td><input type="number" placeholder="10"/></td><td><input type="number" placeholder="40"/></td><td><input type="number" placeholder="7"/></td></tr><tr><td style="font-size:12px;color:var(--muted);text-align:center">3</td><td><input type="number" placeholder="10"/></td><td><input type="number" placeholder="40"/></td><td><input type="number" placeholder="8"/></td></tr>`;
+  FMToast.success('Workout logged successfully!');
+  updateTip();
+}
+
+function renderLog(){
+  const logs=FM.getWorkouts();
+  if(logs.length===0){document.getElementById('logList').innerHTML='<div style="color:var(--muted);font-size:14px;padding:24px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:16px">No workouts logged yet. Add your first one! 💪</div>';return;}
+  document.getElementById('logList').innerHTML=logs.slice(0,20).map(e=>`
+    <div class="log-entry">
+      <div class="le-header">
+        <div><div class="le-name">${e.exercise}</div><div class="le-date">${e.date} · ${e.muscle}</div></div>
+        <button class="delete-btn" onclick="deleteWorkout(${e.id})">🗑</button>
+      </div>
+      <div class="le-metrics">
+        <div class="le-m"><div class="le-mn">${e.sets.length}</div><div class="le-ml">Sets</div></div>
+        <div class="le-m"><div class="le-mn">${e.sets.reduce((a,s)=>a+s.reps,0)}</div><div class="le-ml">Total Reps</div></div>
+        <div class="le-m"><div class="le-mn">${Math.max(...e.sets.map(s=>s.weight))||0}kg</div><div class="le-ml">Max Weight</div></div>
+        ${e.calories?`<div class="le-m"><div class="le-mn">${e.calories}</div><div class="le-ml">kcal</div></div>`:''}
+        ${e.duration?`<div class="le-m"><div class="le-mn">${e.duration}m</div><div class="le-ml">Duration</div></div>`:''}
+      </div>
+      <div class="le-sets">${e.sets.map(s=>`<div class="le-set">${s.set}: ${s.reps}×${s.weight}kg</div>`).join('')}</div>
+      ${e.notes?`<div style="margin-top:10px;font-size:13px;color:var(--muted);font-style:italic">"${e.notes}"</div>`:''}
+    </div>`).join('');
+}
+
+function deleteWorkout(id){
+  const logs = FM.getWorkouts();
+  const entry = logs.find(w => w.id === id);
+  const updated = logs.filter(w => w.id !== id);
+  FM.save('workouts', updated);
+  renderLog(); updateSummary(); updateChart();
+  // Try backend delete if has serverId
+  if (entry && entry.serverId) {
+    FMAPI.del('/workouts/' + entry.serverId).catch(() => {});
+  }
+  FMToast.info('Entry removed');
+}
+function clearAllLogs(){if(!confirm('Clear all workout logs?'))return;FM.save('workouts',[]);renderLog();updateSummary();updateChart();}
+
+function updateSummary(){
+  const logs=FM.getWorkouts();
+  const now=new Date();const weekStart=new Date(now);weekStart.setDate(now.getDate()-7);
+  document.getElementById('totalWorkouts').textContent=logs.length;
+  document.getElementById('totalSets').textContent=logs.reduce((a,w)=>a+w.sets.length,0);
+  document.getElementById('totalCal').textContent=logs.reduce((a,w)=>a+(w.calories||0),0);
+  document.getElementById('thisWeek').textContent=logs.filter(w=>new Date(w.date)>=weekStart).length;
+}
+
+let weekChart;
+function updateChart(){
+  const logs=FM.getWorkouts();
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const now=new Date();
+  const data=days.map((_,i)=>{
+    const d=new Date(now);d.setDate(now.getDate()-now.getDay()+i+1);
+    const ds=d.toISOString().split('T')[0];
+    return logs.filter(w=>w.date===ds).reduce((a,w)=>a+w.sets.reduce((b,s)=>b+s.reps*s.weight,0),0);
+  });
+  if(weekChart)weekChart.destroy();
+  weekChart=new Chart(document.getElementById('weekChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:days,datasets:[{data,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,140);g.addColorStop(0,'rgba(181,255,71,0.8)');g.addColorStop(1,'rgba(45,212,191,0.3)');return g;},borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.04)'},beginAtZero:true}}}
+  });
+}
+
+function updateTip(){
+  const logs=FM.getWorkouts();
+  if(logs.length<3){document.getElementById('smartTip').textContent='Log at least 3 workouts to receive personalised progressive overload suggestions.';return;}
+  const last=logs[0];const prev=logs.find(l=>l.exercise===last.exercise&&l.id!==last.id);
+  if(prev){
+    const lastMax=Math.max(...last.sets.map(s=>s.weight));
+    const prevMax=Math.max(...prev.sets.map(s=>s.weight));
+    if(lastMax>=prevMax)document.getElementById('smartTip').textContent=`Great work on ${last.exercise}! Try adding 2.5kg next session for progressive overload.`;
+    else document.getElementById('smartTip').textContent=`You can push ${last.exercise} heavier — you lifted ${prevMax}kg before. Aim for ${prevMax}kg next time!`;
+  } else document.getElementById('smartTip').textContent=`Keep logging ${last.exercise} consistently to unlock progressive overload insights.`;
+}
+
+renderLog();updateSummary();updateChart();updateTip();
+</script>
+</body>
+</html>

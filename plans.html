@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Plans & Pricing — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.plan-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto}
+@media(max-width:900px){.plan-cards{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.plan-cards{grid-template-columns:1fr}}
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:36px;position:relative;overflow:hidden;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
+.plan-card:hover{transform:translateY(-6px);border-color:rgba(181,255,71,.15);box-shadow:0 28px 60px rgba(0,0,0,.5)}
+.plan-card.featured{background:var(--card2);border-color:rgba(181,255,71,.35);box-shadow:0 0 60px rgba(181,255,71,.06)}
+.plan-card.featured::before{content:'';position:absolute;inset:-1px;border-radius:24px;background:linear-gradient(135deg,rgba(181,255,71,.15),transparent 60%,rgba(45,212,191,.08));pointer-events:none}
+.featured-badge{position:absolute;top:20px;right:20px;background:var(--volt);color:var(--bg);font-size:10px;font-weight:800;padding:4px 12px;border-radius:100px;letter-spacing:1px;font-family:'Syne',sans-serif}
+.plan-name{font-size:11px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;font-family:'Syne',sans-serif}
+.plan-price{display:flex;align-items:flex-start;gap:4px;margin-bottom:6px}
+.plan-rs{font-size:20px;font-weight:700;color:var(--muted);margin-top:8px}
+.plan-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:56px;line-height:1;letter-spacing:-2px;color:var(--white)}
+.plan-amount.volt{color:var(--volt)}
+.plan-period{font-size:14px;color:var(--muted);align-self:flex-end;margin-bottom:6px}
+.plan-tagline{font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.plan-divider{height:1px;background:var(--border);margin-bottom:24px}
+.plan-features{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:32px}
+.pf{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);line-height:1.6}
+.pf-check{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
+.pf-check.ok{background:var(--volt-dim);color:var(--volt);border:1px solid rgba(181,255,71,.2)}
+.pf-check.no{background:var(--border);color:var(--muted2)}
+.pf.yes .pf-text{color:var(--white)}
+/* Toggle billing -->
+.billing-toggle{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:52px}
+.billing-label{font-size:14px;font-weight:500}
+.toggle-switch{position:relative;width:52px;height:28px;cursor:pointer}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-switch .slider{position:absolute;inset:0;background:var(--border2);border-radius:100px;transition:.3s}
+.toggle-switch .slider::before{content:'';position:absolute;width:20px;height:20px;left:4px;bottom:4px;background:var(--white);border-radius:50%;transition:.3s}
+.toggle-switch input:checked+.slider{background:var(--volt)}
+.toggle-switch input:checked+.slider::before{transform:translateX(24px);background:var(--bg)}
+.save-pill{background:var(--volt-dim);border:1px solid rgba(181,255,71,.2);padding:3px 10px;border-radius:100px;font-size:11px;font-weight:700;color:var(--volt)}
+/* Comparison table */
+.comp-section{max-width:1100px;margin:80px auto 0}
+.comp-grid{overflow-x:auto}
+.comp-t{width:100%;border-collapse:collapse}
+.comp-t th{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:16px 20px;text-align:center;border-bottom:1px solid var(--border);color:var(--muted)}
+.comp-t th:first-child{text-align:left}
+.comp-t td{padding:14px 20px;text-align:center;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted)}
+.comp-t td:first-child{text-align:left;color:var(--white);font-weight:500}
+.comp-t tr:last-child td{border-bottom:none}
+.comp-t .ok{color:var(--volt);font-size:16px}
+.comp-t .no{color:var(--muted2)}
+/* FAQ -->
+.faq-list{max-width:760px;margin:60px auto 0;display:flex;flex-direction:column;gap:4px}
+.faq-item{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.faq-q{padding:20px 24px;font-weight:600;font-size:15px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:color .25s}
+.faq-q:hover{color:var(--volt)}
+.faq-icon{font-size:18px;transition:transform .35s var(--ease);flex-shrink:0}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .5s var(--ease),padding .3s}
+.faq-a-inner{padding:0 24px 20px;font-size:14px;color:var(--muted);line-height:1.8}
+.faq-item.open .faq-icon{transform:rotate(45deg)}
+.faq-item.open .faq-a{max-height:300px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a><a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="bmi-calculator.html">BMI</a>
+    <a class="nav-a on" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header" style="text-align:center">
+  <span class="stag" style="justify-content:center">Simple, Transparent Pricing</span>
+  <h1 class="sh2" style="max-width:700px;margin:0 auto 16px">Choose Your<br><em style="font-family:'Instrument Serif',serif;font-style:italic;color:var(--volt);font-weight:400">Perfect</em> Plan</h1>
+  <p class="ssub" style="margin:0 auto;text-align:center">All plans include a 7-day free trial. No credit card required to start.</p>
+</div>
+
+<div class="wrap section" style="padding-top:40px">
+  <!-- Billing toggle -->
+  <div class="billing-toggle rv">
+    <span class="billing-label">Monthly</span>
+    <label class="toggle-switch"><input type="checkbox" id="annualToggle" onchange="toggleBilling(this.checked)"/><span class="slider"></span></label>
+    <span class="billing-label">Annual <span class="save-pill">Save 20%</span></span>
+  </div>
+
+  <!-- Plan cards -->
+  <div class="plan-cards">
+    <!-- BASIC -->
+    <div class="plan-card rv d1">
+      <div class="plan-name">Basic</div>
+      <div class="plan-price">
+        <span class="plan-rs">Rs</span>
+        <span class="plan-amount" id="p0">0</span>
+        <span class="plan-period">/mo</span>
+      </div>
+      <div class="plan-tagline">Perfect for getting started. Free forever with essential tracking tools.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">BMI Calculator</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Basic Workout Tracker (10 logs/mo)</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Diet Plan (Standard)</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Health Vitals Logger</span></li>
+        <li class="pf"><span class="pf-check no">✕</span><span class="pf-text">AI-Powered Plans</span></li>
+        <li class="pf"><span class="pf-check no">✕</span><span class="pf-text">Doctor Consultation</span></li>
+        <li class="pf"><span class="pf-check no">✕</span><span class="pf-text">Progress Charts & Analytics</span></li>
+        <li class="pf"><span class="pf-check no">✕</span><span class="pf-text">Gym Class Bookings</span></li>
+      </ul>
+      <a class="btn-outline btn-full" href="auth-register.html">Start Free →</a>
+    </div>
+
+    <!-- PRO (featured) -->
+    <div class="plan-card featured rv d2">
+      <div class="featured-badge">MOST POPULAR</div>
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">
+        <span class="plan-rs" style="color:var(--volt)">Rs</span>
+        <span class="plan-amount volt" id="p1">2,999</span>
+        <span class="plan-period">/mo</span>
+      </div>
+      <div class="plan-tagline">Everything you need for serious fitness progress with AI guidance.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Unlimited Workout Tracking</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">AI Workout Plan Generator</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">AI Personalised Diet Plans</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Full Progress Analytics & Charts</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Health Vitals + Trend Alerts</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">2 Doctor Consultations / mo</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Gym Class Bookings (5/mo)</span></li>
+        <li class="pf"><span class="pf-check no">✕</span><span class="pf-text">Unlimited Doctor Access</span></li>
+      </ul>
+      <a class="btn-main btn-full" href="auth-register.html">Start Free Trial →</a>
+    </div>
+
+    <!-- ELITE -->
+    <div class="plan-card rv d3">
+      <div class="plan-name">Elite</div>
+      <div class="plan-price">
+        <span class="plan-rs">Rs</span>
+        <span class="plan-amount" id="p2">5,999</span>
+        <span class="plan-period">/mo</span>
+      </div>
+      <div class="plan-tagline">Complete medical + fitness integration for total wellness mastery.</div>
+      <div class="plan-divider"></div>
+      <ul class="plan-features">
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Everything in Pro</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Unlimited Doctor Consultations</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Dedicated Personal Trainer</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Monthly Lab Reports</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Tele-Medicine Access</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Physiotherapy Sessions (4/mo)</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Unlimited Gym Classes</span></li>
+        <li class="pf yes"><span class="pf-check ok">✓</span><span class="pf-text">Priority Support 24/7</span></li>
+      </ul>
+      <a class="btn-teal btn-full" href="auth-register.html">Get Elite →</a>
+    </div>
+  </div>
+
+  <!-- Comparison table -->
+  <div class="comp-section rv" style="padding:0 0 80px">
+    <div style="text-align:center;margin-bottom:40px">
+      <span class="stag" style="justify-content:center">Full Comparison</span>
+      <h2 class="sh2">What's Included</h2>
+    </div>
+    <div class="comp-grid">
+      <table class="comp-t">
+        <thead><tr><th>Feature</th><th>Basic</th><th style="color:var(--volt)">Pro</th><th>Elite</th></tr></thead>
+        <tbody>
+          <tr><td>BMI Calculator</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+          <tr><td>Workout Logs / Month</td><td>10</td><td style="color:var(--volt);font-weight:700">Unlimited</td><td style="color:var(--volt);font-weight:700">Unlimited</td></tr>
+          <tr><td>AI Workout Plan Generator</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+          <tr><td>AI Diet Plans</td><td>Basic</td><td class="ok">Personalised</td><td class="ok">Personalised + Dietitian</td></tr>
+          <tr><td>Progress Charts & Analytics</td><td class="no">—</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+          <tr><td>Health Vitals Tracking</td><td class="ok">✓</td><td class="ok">✓ + Alerts</td><td class="ok">✓ + Alerts + Lab</td></tr>
+          <tr><td>Doctor Consultations</td><td class="no">—</td><td>2 / month</td><td style="color:var(--volt);font-weight:700">Unlimited</td></tr>
+          <tr><td>Gym Class Bookings</td><td class="no">—</td><td>5 / month</td><td style="color:var(--volt);font-weight:700">Unlimited</td></tr>
+          <tr><td>Personal Trainer</td><td class="no">—</td><td class="no">—</td><td class="ok">✓</td></tr>
+          <tr><td>Physiotherapy</td><td class="no">—</td><td class="no">—</td><td>4 / month</td></tr>
+          <tr><td>Tele-Medicine</td><td class="no">—</td><td class="no">—</td><td class="ok">✓</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div style="text-align:center;margin-bottom:40px" class="rv">
+    <span class="stag" style="justify-content:center">FAQ</span>
+    <h2 class="sh2">Common Questions</h2>
+  </div>
+  <div class="faq-list rv d1">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Is there a free trial? <span class="faq-icon">+</span></div><div class="faq-a"><div class="faq-a-inner">Yes — all paid plans come with a 7-day free trial. No credit card is required to start. You'll only be charged after the trial period, and you can cancel anytime.</div></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Can I change my plan later? <span class="faq-icon">+</span></div><div class="faq-a"><div class="faq-a-inner">Absolutely. You can upgrade, downgrade, or cancel your plan from your account dashboard at any time. Upgrades take effect immediately; downgrades apply at the start of the next billing cycle.</div></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Are doctor consultations video calls? <span class="faq-icon">+</span></div><div class="faq-a"><div class="faq-a-inner">Yes — consultations are conducted via secure video call through our integrated tele-medicine platform. You can also opt for in-clinic visits if you're in Rawalpindi or Islamabad.</div></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">How does the AI plan generator work? <span class="faq-icon">+</span></div><div class="faq-a"><div class="faq-a-inner">Our AI uses Claude (Anthropic's model) to analyse your age, weight, height, health conditions, injuries, and fitness goals to generate a safe, personalised workout and diet plan. Doctor-reviewed templates are always available as an alternative.</div></div></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFAQ(this)">Is my health data secure? <span class="faq-icon">+</span></div><div class="faq-a"><div class="faq-a-inner">All health data is encrypted in transit (TLS 1.3) and at rest (AES-256). We comply with Pakistan's Data Protection Bill and follow HIPAA-aligned practices. Your data is never sold to third parties.</div></div></div>
+  </div>
+</div>
+
+<!-- CTA -->
+<section style="padding:100px 0;text-align:center;background:var(--bg2);border-top:1px solid var(--border);margin-top:80px">
+  <div class="wrap rv">
+    <h2 class="sh2">Ready to Start?</h2>
+    <p class="ssub" style="margin:0 auto 40px;text-align:center">Join 15,000+ members already on their wellness journey.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a class="btn-main" href="auth-register.html">Start Free Trial →</a>
+      <a class="btn-outline" href="bmi-calculator.html">Try BMI Calculator First</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="wrap"><div class="fbottom" style="border:none;padding-top:0"><p>© 2025 FitMart. All rights reserved.</p><div style="display:flex;gap:20px"><a href="index.html">Home</a><a href="plans.html">Plans</a><a href="auth-login.html">Login</a></div></div></div></footer>
+
+<script src="assets/app.js"></script>
+<script>
+const prices={monthly:[0,2999,5999],annual:[0,2399,4799]};
+function toggleBilling(annual){
+  const p=annual?prices.annual:prices.monthly;
+  document.getElementById('p0').textContent=p[0].toLocaleString();
+  document.getElementById('p1').textContent=p[1].toLocaleString();
+  document.getElementById('p2').textContent=p[2].toLocaleString();
+}
+function toggleFAQ(btn){
+  const item=btn.parentElement;
+  const wasOpen=item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));
+  if(!wasOpen)item.classList.add('open');
+}
+</script>
+
+<script>
+/* ── LOAD LIVE PLANS FROM BACKEND/ADMIN ── */
+(async function loadLivePlans(){
+  // Try backend first
+  try {
+    const plans = await FMAPI.get('/admin/plans');
+    if (plans && plans.length >= 3) applyPlans(plans);
+    return;
+  } catch {}
+  // Fallback: check localStorage (admin may have saved edits)
+  const saved = FM.load('admin_plans');
+  if (saved && saved.length >= 3) applyPlans(saved);
+})();
+
+function applyPlans(plans) {
+  const annual = document.getElementById('annualToggle')?.checked;
+  plans.forEach(p => {
+    const monthly = annual ? p.priceAnnual : p.price;
+    const id = p.id; // basic | pro | elite
+    const idx = {basic:0, pro:1, elite:2}[id];
+    if (idx === undefined) return;
+    const priceEl = document.getElementById('p' + idx);
+    if (priceEl) priceEl.textContent = monthly.toLocaleString();
+    // Update feature list if elements exist
+  });
+  // Also update annual toggle
+  const orig = window.toggleBilling;
+  window.toggleBilling = function(annual) {
+    const prices = annual
+      ? plans.map(p => p.priceAnnual)
+      : plans.map(p => p.price);
+    [0,1,2].forEach(i => {
+      const el = document.getElementById('p'+i);
+      if (el) el.textContent = prices[i].toLocaleString();
+    });
+  };
+}
+</script>
+
+</body>
+</html>

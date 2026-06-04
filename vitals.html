@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Health Vitals — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.vitals-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+@media(max-width:1000px){.vitals-grid{grid-template-columns:1fr}}
+.log-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:sticky;top:110px}
+/* Vital metric cards */
+.vital-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:800px){.vital-row{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.vital-row{grid-template-columns:1fr}}
+.vm-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;position:relative;overflow:hidden;transition:border-color .3s,transform .3s var(--ease)}
+.vm-card:hover{border-color:rgba(181,255,71,.18);transform:translateY(-3px)}
+.vm-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.vm-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.vm-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.5px}
+.vm-val{font-family:'Syne',sans-serif;font-weight:800;font-size:36px;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.vm-unit{font-size:12px;color:var(--muted);margin-bottom:12px}
+.vm-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2)}
+.vm-trend{display:flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;font-weight:600}
+.vm-trend.up{color:#4ade80}.vm-trend.down{color:var(--coral)}.vm-trend.neutral{color:var(--muted)}
+/* Range indicators */
+.range-bar{position:relative;height:4px;background:var(--border);border-radius:2px;margin-top:12px}
+.range-fill{position:absolute;height:100%;border-radius:2px;transition:width .8s var(--ease)}
+.range-marker{position:absolute;top:-4px;width:12px;height:12px;border-radius:50%;border:2px solid var(--bg);transform:translateX(-50%);transition:left .8s var(--ease)}
+/* Alert banner */
+.alert-banner{display:flex;align-items:center;gap:14px;background:rgba(255,99,71,.07);border:1px solid rgba(255,99,71,.2);border-radius:14px;padding:16px 20px;margin-bottom:20px}
+.alert-banner.warning{background:rgba(245,158,11,.07);border-color:rgba(245,158,11,.2)}
+.alert-banner.ok{background:var(--volt-dim);border-color:rgba(181,255,71,.2)}
+.alert-icon{font-size:20px;flex-shrink:0}
+.alert-text strong{display:block;font-size:14px;margin-bottom:2px}
+.alert-text span{font-size:12px;color:var(--muted)}
+/* Log history */
+.history-wrap{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-top:20px}
+.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.input-hint{font-size:11px;color:var(--muted);margin-top:6px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="workout-tracker.html">Workouts</a>
+    <a class="nav-a" href="progress-tracking.html">Progress</a>
+    <a class="nav-a on" href="vitals.html">Vitals</a>
+    <a class="nav-a" href="diet.html">Diet</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Back</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Health Care Module</span>
+  <h1>Health Vitals</h1>
+  <p>Log and monitor your heart rate, blood pressure, blood sugar, sleep, and steps. Alerts trigger automatically when values leave safe ranges.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Alert -->
+  <div class="alert-banner ok rv" id="alertBanner">
+    <span class="alert-icon">✅</span>
+    <div class="alert-text"><strong>All Vitals Normal</strong><span>Your last logged vitals are within healthy ranges. Keep it up!</span></div>
+  </div>
+
+  <!-- Vital snapshot cards -->
+  <div class="vital-row rv">
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:var(--coral-dim)">❤️</div><span class="vm-status badge-green" id="hrStatus">Normal</span></div>
+      <div class="vm-val" id="hrVal" style="color:var(--coral)">—</div>
+      <div class="vm-unit">beats / min</div>
+      <div class="vm-label">Heart Rate</div>
+      <div class="range-bar"><div class="range-fill" id="hrFill" style="background:var(--coral);width:0%"></div><div class="range-marker" id="hrMark" style="background:var(--coral);left:0%"></div></div>
+      <div class="vm-trend neutral" id="hrTrend">— No data yet</div>
+    </div>
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:var(--teal-dim)">🩺</div><span class="vm-status badge-green" id="bpStatus">Normal</span></div>
+      <div class="vm-val" id="bpVal" style="color:var(--teal)">—</div>
+      <div class="vm-unit">systolic / diastolic mmHg</div>
+      <div class="vm-label">Blood Pressure</div>
+      <div class="range-bar"><div class="range-fill" id="bpFill" style="background:var(--teal);width:0%"></div><div class="range-marker" id="bpMark" style="background:var(--teal);left:0%"></div></div>
+      <div class="vm-trend neutral" id="bpTrend">— No data yet</div>
+    </div>
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:var(--volt-dim)">🩸</div><span class="vm-status badge-green" id="sugarStatus">Normal</span></div>
+      <div class="vm-val" id="sugarVal" style="color:var(--volt)">—</div>
+      <div class="vm-unit">mg / dL (fasting)</div>
+      <div class="vm-label">Blood Sugar</div>
+      <div class="range-bar"><div class="range-fill" id="sugarFill" style="background:var(--volt);width:0%"></div><div class="range-marker" id="sugarMark" style="background:var(--volt);left:0%"></div></div>
+      <div class="vm-trend neutral" id="sugarTrend">— No data yet</div>
+    </div>
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:rgba(139,92,246,.1)">💤</div><span class="vm-status badge-green" id="sleepStatus">Good</span></div>
+      <div class="vm-val" id="sleepVal" style="color:#a78bfa">—</div>
+      <div class="vm-unit">hours</div>
+      <div class="vm-label">Sleep</div>
+      <div class="range-bar"><div class="range-fill" id="sleepFill" style="background:#a78bfa;width:0%"></div><div class="range-marker" id="sleepMark" style="background:#a78bfa;left:0%"></div></div>
+      <div class="vm-trend neutral" id="sleepTrend">— No data yet</div>
+    </div>
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:var(--teal-dim)">👟</div><span class="vm-status badge-teal" id="stepsStatus">Active</span></div>
+      <div class="vm-val" id="stepsVal" style="color:var(--teal)">—</div>
+      <div class="vm-unit">steps today</div>
+      <div class="vm-label">Steps</div>
+      <div class="range-bar"><div class="range-fill" id="stepsFill" style="background:var(--teal);width:0%"></div><div class="range-marker" id="stepsMark" style="background:var(--teal);left:0%"></div></div>
+      <div class="vm-trend neutral" id="stepsTrend">— No data yet</div>
+    </div>
+    <div class="vm-card">
+      <div class="vm-top"><div class="vm-icon" style="background:rgba(59,130,246,.1)">💧</div><span class="vm-status badge-teal" id="spo2Status">Normal</span></div>
+      <div class="vm-val" id="spo2Val" style="color:#60a5fa">—</div>
+      <div class="vm-unit">% oxygen saturation</div>
+      <div class="vm-label">SpO2</div>
+      <div class="range-bar"><div class="range-fill" id="spo2Fill" style="background:#60a5fa;width:0%"></div><div class="range-marker" id="spo2Mark" style="background:#60a5fa;left:0%"></div></div>
+      <div class="vm-trend neutral" id="spo2Trend">— No data yet</div>
+    </div>
+  </div>
+
+  <div class="vitals-grid">
+    <!-- Charts + History -->
+    <div>
+      <div class="chart-wrap rv">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+          <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Vitals Trend</div><div style="font-size:12px;color:var(--muted)">Last 10 entries</div></div>
+          <div style="display:flex;gap:8px">
+            <button class="ctab on" id="tabHR" onclick="switchVChart('hr',this)">Heart Rate</button>
+            <button class="ctab" id="tabBP" onclick="switchVChart('bp',this)">BP</button>
+            <button class="ctab" id="tabSugar" onclick="switchVChart('sugar',this)">Sugar</button>
+          </div>
+        </div>
+        <canvas id="vitalsChart" height="160"></canvas>
+      </div>
+
+      <div class="history-wrap rv d1">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Log History</div>
+          <button class="btn-ghost btn-sm" onclick="clearVitals()">Clear All</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="fm-table" id="vitalsTable">
+            <thead><tr><th>Date & Time</th><th>HR</th><th>BP</th><th>Sugar</th><th>Sleep</th><th>Steps</th><th>SpO2</th><th></th></tr></thead>
+            <tbody id="vitalsBody"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No vitals logged yet</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log Form -->
+    <div class="log-card rv d2">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:6px">Log Vitals</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Enter today's measurements</div>
+
+      <div class="form-group">
+        <label class="form-label">Date & Time</label>
+        <input class="form-input" type="datetime-local" id="vDate"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Heart Rate (bpm)</label>
+        <input class="form-input" type="number" id="vHR" placeholder="72" min="30" max="220"/>
+        <div class="input-hint">Normal: 60–100 bpm</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Blood Pressure</label>
+        <div class="form-grid-2">
+          <div><input class="form-input" type="number" id="vBPSys" placeholder="120" min="70" max="220"/><div class="input-hint">Systolic</div></div>
+          <div><input class="form-input" type="number" id="vBPDia" placeholder="80" min="40" max="140"/><div class="input-hint">Diastolic</div></div>
+        </div>
+        <div class="input-hint" style="margin-top:0">Normal: 90–120 / 60–80 mmHg</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Blood Sugar (mg/dL)</label>
+        <input class="form-input" type="number" id="vSugar" placeholder="95" min="40" max="400"/>
+        <div class="input-hint">Fasting normal: 70–100 mg/dL</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sleep (hours)</label>
+        <input class="form-input" type="number" id="vSleep" placeholder="7.5" min="0" max="24" step="0.5"/>
+        <div class="input-hint">Target: 7–9 hours</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Steps Today</label>
+        <input class="form-input" type="number" id="vSteps" placeholder="8500" min="0" max="100000"/>
+        <div class="input-hint">Target: 8,000–10,000 steps</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SpO2 (%)</label>
+        <input class="form-input" type="number" id="vSpo2" placeholder="98" min="80" max="100"/>
+        <div class="input-hint">Normal: 95–100%</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="form-textarea" id="vNotes" placeholder="How are you feeling?" style="min-height:72px"></textarea>
+      </div>
+      <button class="btn-main btn-full" onclick="logVitals()">Save Vitals</button>
+
+      <!-- Healthy ranges reference -->
+      <div style="margin-top:24px;padding:16px;background:var(--bg3);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:12px">Reference Ranges</div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted)">
+          <div style="display:flex;justify-content:space-between"><span>❤️ Heart Rate</span><span style="color:var(--white)">60–100 bpm</span></div>
+          <div style="display:flex;justify-content:space-between"><span>🩺 Blood Pressure</span><span style="color:var(--white)">&lt;120/80 mmHg</span></div>
+          <div style="display:flex;justify-content:space-between"><span>🩸 Blood Sugar</span><span style="color:var(--white)">70–100 mg/dL</span></div>
+          <div style="display:flex;justify-content:space-between"><span>💤 Sleep</span><span style="color:var(--white)">7–9 hours</span></div>
+          <div style="display:flex;justify-content:space-between"><span>💧 SpO2</span><span style="color:var(--white)">95–100%</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+// Set default datetime
+const now=new Date();now.setSeconds(0);
+document.getElementById('vDate').value=now.toISOString().slice(0,16);
+
+const ranges={
+  hr:{min:60,max:100,warn_low:50,warn_high:120,unit:'bpm'},
+  bpSys:{min:90,max:120,warn_low:80,warn_high:140},
+  bpDia:{min:60,max:80,warn_low:50,warn_high:100},
+  sugar:{min:70,max:100,warn_low:60,warn_high:126,unit:'mg/dL'},
+  sleep:{min:7,max:9,warn_low:5,warn_high:12,unit:'h'},
+  steps:{min:8000,max:12000,warn_low:2000,warn_high:30000,unit:'steps'},
+  spo2:{min:95,max:100,warn_low:90,warn_high:100,unit:'%'},
+};
+
+function getStatus(val,r){if(!val)return{label:'No data',cls:'badge-teal'};if(val<r.warn_low||val>r.warn_high)return{label:'Alert ⚠',cls:'badge-red'};if(val<r.min||val>r.max)return{label:'Borderline',cls:'badge badge-coral'};return{label:'Normal ✓',cls:'badge-green'};}
+
+function updateCards(v){
+  if(!v)return;
+  const fields=[
+    {id:'hr',val:v.heartRate,r:ranges.hr,color:'var(--coral)',label:'Heart Rate'},
+    {id:'bp',val:v.bpSys,r:ranges.bpSys,color:'var(--teal)',label:'Blood Pressure',disp:(v.bpSys&&v.bpDia)?v.bpSys+'/'+v.bpDia:null},
+    {id:'sugar',val:v.sugar,r:ranges.sugar,color:'var(--volt)',label:'Sugar'},
+    {id:'sleep',val:v.sleep,r:ranges.sleep,color:'#a78bfa',label:'Sleep'},
+    {id:'steps',val:v.steps,r:ranges.steps,color:'var(--teal)',label:'Steps'},
+    {id:'spo2',val:v.spo2,r:ranges.spo2,color:'#60a5fa',label:'SpO2'},
+  ];
+  let hasAlert=false,hasWarn=false;
+  fields.forEach(f=>{
+    if(!f.val)return;
+    const dispVal=f.disp||f.val;
+    const st=getStatus(f.val,f.r);
+    const el={hr:['hrVal','hrStatus','hrFill','hrMark','hrTrend'],bp:['bpVal','bpStatus','bpFill','bpMark','bpTrend'],sugar:['sugarVal','sugarStatus','sugarFill','sugarMark','sugarTrend'],sleep:['sleepVal','sleepStatus','sleepFill','sleepMark','sleepTrend'],steps:['stepsVal','stepsStatus','stepsFill','stepsMark','stepsTrend'],spo2:['spo2Val','spo2Status','spo2Fill','spo2Mark','spo2Trend']}[f.id];
+    document.getElementById(el[0]).textContent=dispVal;
+    document.getElementById(el[1]).textContent=st.label;
+    document.getElementById(el[1]).className='vm-status '+st.cls;
+    const pct=Math.min(100,Math.max(0,((f.val-f.r.warn_low)/(f.r.warn_high-f.r.warn_low))*100));
+    document.getElementById(el[2]).style.width=pct+'%';
+    document.getElementById(el[3]).style.left=pct+'%';
+    if(st.label.includes('Alert'))hasAlert=true;
+    if(st.label.includes('Borderline'))hasWarn=true;
+  });
+  const banner=document.getElementById('alertBanner');
+  if(hasAlert){banner.className='alert-banner rv';banner.innerHTML='<span class="alert-icon">⚠️</span><div class="alert-text"><strong>Abnormal Vital Detected</strong><span>One or more vitals are outside safe range. Consider contacting your doctor.</span></div>';}
+  else if(hasWarn){banner.className='alert-banner warning rv';banner.innerHTML='<span class="alert-icon">⚡</span><div class="alert-text"><strong>Borderline Reading</strong><span>Some vitals are slightly outside optimal range. Monitor closely.</span></div>';}
+  else{banner.className='alert-banner ok rv';banner.innerHTML='<span class="alert-icon">✅</span><div class="alert-text"><strong>All Vitals Normal</strong><span>Your latest logged vitals are within healthy ranges. Keep it up!</span></div>';}
+}
+
+async function logVitals(){
+  const hr=document.getElementById('vHR').value;
+  const bpSys=document.getElementById('vBPSys').value;
+  const bpDia=document.getElementById('vBPDia').value;
+  const sugar=document.getElementById('vSugar').value;
+  const sleep=document.getElementById('vSleep').value;
+  const steps=document.getElementById('vSteps').value;
+  const spo2=document.getElementById('vSpo2').value;
+  if(!hr&&!bpSys&&!sugar){FMToast.error('Please log at least one vital');return;}
+  const entry={
+    heartRate:hr?parseFloat(hr):null,
+    bpSys:bpSys?parseFloat(bpSys):null,bpDia:bpDia?parseFloat(bpDia):null,
+    bp:(bpSys&&bpDia)?bpSys+'/'+bpDia:null,
+    sugar:sugar?parseFloat(sugar):null,sleep:sleep?parseFloat(sleep):null,
+    steps:steps?parseInt(steps):null,spo2:spo2?parseFloat(spo2):null,
+    notes:document.getElementById('vNotes').value,
+    datetime:document.getElementById('vDate').value
+  };
+  // Save locally + sync backend
+  await FMSync.saveVitals(entry);
+  renderHistory(); updateCards(entry); updateVChart('hr');
+  FMToast.success('Vitals saved!');
+  document.getElementById('vNotes').value = '';
+}
+
+function renderHistory(){
+  const vitals=FM.getVitals();
+  if(!vitals.length){document.getElementById('vitalsBody').innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No vitals logged yet</td></tr>';return;}
+  document.getElementById('vitalsBody').innerHTML=vitals.slice(0,15).map(v=>`
+    <tr>
+      <td>${new Date(v.timestamp).toLocaleString('en-PK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${v.heartRate?'<span class="badge '+(getStatus(v.heartRate,ranges.hr).cls)+'">'+v.heartRate+' bpm</span>':'—'}</td>
+      <td>${v.bp||'—'}</td>
+      <td>${v.sugar?v.sugar+' mg/dL':'—'}</td>
+      <td>${v.sleep?v.sleep+'h':'—'}</td>
+      <td>${v.steps?v.steps.toLocaleString():'—'}</td>
+      <td>${v.spo2?v.spo2+'%':'—'}</td>
+      <td><button class="btn-ghost btn-sm" style="padding:4px 10px;font-size:11px" onclick="deleteVital(${v.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function deleteVital(id){
+  const v=FM.getVitals().filter(x=>x.id!==id);FM.save('vitals',v);renderHistory();
+  if(v.length)updateCards(v[0]);FMToast.info('Entry removed');
+}
+function clearVitals(){if(!confirm('Clear all vitals history?'))return;FM.save('vitals',[]);renderHistory();FMToast.info('Cleared');}
+
+let vChart;
+function updateVChart(type){
+  const vitals=FM.getVitals().slice(0,10).reverse();
+  const labels=vitals.map(v=>new Date(v.timestamp).toLocaleDateString('en-PK',{month:'short',day:'numeric'}));
+  const datasets={
+    hr:{data:vitals.map(v=>v.heartRate),label:'Heart Rate (bpm)',color:'#ff6347'},
+    bp:{data:vitals.map(v=>v.bpSys),label:'BP Systolic (mmHg)',color:'#2dd4bf'},
+    sugar:{data:vitals.map(v=>v.sugar),label:'Blood Sugar (mg/dL)',color:'#b5ff47'},
+  };
+  const ds=datasets[type];
+  if(vChart)vChart.destroy();
+  vChart=new Chart(document.getElementById('vitalsChart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{data:ds.data,label:ds.label,borderColor:ds.color,backgroundColor:ds.color.replace(')',',0.08)').replace('rgb','rgba').replace('#b5ff47','rgba(181,255,71,0.08)').replace('#2dd4bf','rgba(45,212,191,0.08)').replace('#ff6347','rgba(255,99,71,0.08)'),fill:true,tension:0.4,pointBackgroundColor:ds.color,pointRadius:5,borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(14,28,36,.95)',borderColor:'rgba(255,255,255,.1)',borderWidth:1}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:false}}}
+  });
+}
+
+function switchVChart(type,btn){
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  updateVChart(type);
+}
+
+// Init
+const vitals=FM.getVitals();
+if(vitals.length)updateCards(vitals[0]);
+renderHistory();updateVChart('hr');
+</script>
+</body>
+</html>

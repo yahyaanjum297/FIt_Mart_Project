@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Class Schedule — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.day-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:28px}
+.day-tab{padding:10px 20px;border-radius:100px;font-size:13px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s;position:relative}
+.day-tab:hover{border-color:var(--border3);color:var(--white)}
+.day-tab.on{border-color:var(--volt);color:var(--volt);background:var(--volt-dim)}
+.day-tab .day-date{font-size:9px;color:var(--muted);display:block;margin-top:2px}
+.day-tab.today-tab::after{content:'TODAY';position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:700;letter-spacing:1px;background:var(--volt);color:var(--bg);padding:1px 6px;border-radius:4px}
+/* Class grid */
+.class-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:900px){.class-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.class-grid{grid-template-columns:1fr}}
+.class-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:border-color .3s,transform .35s var(--ease)}
+.class-card:hover{border-color:rgba(181,255,71,.2);transform:translateY(-4px)}
+.class-card.full{opacity:.6;pointer-events:none}
+.cc-top{padding:20px 20px 14px;border-bottom:1px solid var(--border)}
+.cc-time{font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--volt);margin-bottom:6px}
+.cc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px}
+.cc-trainer{font-size:13px;color:var(--muted)}
+.cc-body{padding:14px 20px}
+.cc-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px}
+.cc-row:last-child{margin-bottom:0}
+.cc-label{color:var(--muted)}
+.cc-value{font-weight:600}
+.spots-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:10px}
+.spots-fill{height:100%;border-radius:2px;transition:width .6s var(--ease)}
+.cc-foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px}
+.book-btn{flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;cursor:pointer;border:none;transition:all .25s;text-align:center}
+.book-btn.available{background:var(--volt);color:var(--bg)}
+.book-btn.available:hover{transform:translateY(-1px);box-shadow:0 6px 16px var(--volt-glow)}
+.book-btn.waitlist{background:transparent;border:1.5px solid var(--border2);color:var(--muted)}
+.book-btn.full-btn{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(255,99,71,.2)}
+/* Filter bar */
+.filter-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:20px}
+.type-filter{padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s}
+.type-filter.on,.type-filter:hover{border-color:rgba(45,212,191,.4);color:var(--teal);background:var(--teal-dim)}
+/* Week stats */
+.week-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px}
+@media(max-width:700px){.week-stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a on" href="schedule.html">Schedule</a>
+    <a class="nav-a" href="appointment.html">Appointments</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Gym Module</span>
+  <h1>Class Schedule</h1>
+  <p>Browse all weekly group classes, check availability, and book your spot in seconds. Schedule updates every Sunday.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Week stats -->
+  <div class="week-stats rv">
+    <div class="stat-box"><div class="stat-n">52</div><div class="stat-l">Classes / Week</div></div>
+    <div class="stat-box"><div class="stat-n teal">12</div><div class="stat-l">Instructors</div></div>
+    <div class="stat-box"><div class="stat-n white">6</div><div class="stat-l">Class Types</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:#a78bfa">340</div><div class="stat-l">Spots Available</div></div>
+  </div>
+
+  <!-- Day tabs -->
+  <div class="day-tabs rv" id="dayTabs"></div>
+
+  <!-- Type filter -->
+  <div class="filter-bar rv d1">
+    <span style="font-size:12px;font-weight:600;color:var(--muted)">Filter:</span>
+    <button class="type-filter on" onclick="setType('all',this)">All Classes</button>
+    <button class="type-filter" onclick="setType('Yoga',this)">🧘 Yoga</button>
+    <button class="type-filter" onclick="setType('HIIT',this)">🔥 HIIT</button>
+    <button class="type-filter" onclick="setType('Spin',this)">🚴 Spin</button>
+    <button class="type-filter" onclick="setType('Zumba',this)">💃 Zumba</button>
+    <button class="type-filter" onclick="setType('Strength',this)">💪 Strength</button>
+    <button class="type-filter" onclick="setType('Pilates',this)">⚡ Pilates</button>
+  </div>
+
+  <!-- Class grid -->
+  <div class="class-grid rv d2" id="classGrid"></div>
+</div>
+
+<!-- Booking confirmation modal -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <button class="modal-close" onclick="FMModal.close('bookModal')">×</button>
+    <div style="font-size:32px;text-align:center;margin-bottom:14px" id="bookModalIcon">🧘</div>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;text-align:center;margin-bottom:6px" id="bookModalTitle">Book Class</div>
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px" id="bookModalSub">Confirm your spot</div>
+    <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="bookName" placeholder="Ali Raza"/></div>
+    <div class="form-group"><label class="form-label">Phone</label><input class="form-input" id="bookPhone" placeholder="+92 300 000 0000"/></div>
+    <div style="padding:14px;background:var(--volt-dim);border:1px solid rgba(181,255,71,.18);border-radius:12px;font-size:13px;color:var(--volt);margin-bottom:20px" id="bookDetails"></div>
+    <button class="btn-main btn-full" onclick="confirmClassBooking()">Confirm Booking →</button>
+  </div>
+</div>
+
+<footer class="footer" style="margin-top:60px">
+  <div class="wrap"><div class="fbottom" style="border:none;padding-top:0">
+    <p>© 2025 FitMart · All classes subject to change · Check WhatsApp for last-minute updates</p>
+    <div style="display:flex;gap:20px"><a href="gym.html">Gym</a><a href="plans.html">Plans</a><a href="contact.html">Contact</a></div>
+  </div></div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>60),{passive:true});
+
+const CLASSES_DATA = [
+  // Monday
+  [{time:'6:00 AM',name:'Morning Yoga',type:'Yoga',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:15,total:15,icon:'🧘',color:'#a78bfa'},
+   {time:'8:00 AM',name:'HIIT Blast',type:'HIIT',trainer:'Bilal Mahmood',duration:'45 min',level:'Intermediate',spots:3,total:20,icon:'🔥',color:'var(--coral)'},
+   {time:'12:00 PM',name:'Spin Cycle',type:'Spin',trainer:'Ahmad Qureshi',duration:'50 min',level:'All Levels',spots:8,total:20,icon:'🚴',color:'var(--teal)'},
+   {time:'5:30 PM',name:'Power Yoga',type:'Yoga',trainer:'Nadia Hussain',duration:'60 min',level:'Intermediate',spots:12,total:15,icon:'🧘',color:'#a78bfa'},
+   {time:'7:00 PM',name:'Evening HIIT',type:'HIIT',trainer:'Bilal Mahmood',duration:'45 min',level:'Advanced',spots:0,total:20,icon:'🔥',color:'var(--coral)'}],
+  // Tuesday
+  [{time:'7:00 AM',name:'Zumba Fiesta',type:'Zumba',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:18,total:25,icon:'💃',color:'#f59e0b'},
+   {time:'9:00 AM',name:'Strength Basics',type:'Strength',trainer:'Ahmad Qureshi',duration:'60 min',level:'Beginner',spots:6,total:12,icon:'💪',color:'var(--volt)'},
+   {time:'6:00 PM',name:'Yoga Flow',type:'Yoga',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:14,total:15,icon:'🧘',color:'#a78bfa'}],
+  // Wednesday
+  [{time:'6:30 AM',name:'Cardio Burn',type:'HIIT',trainer:'Bilal Mahmood',duration:'45 min',level:'All Levels',spots:0,total:18,icon:'🔥',color:'var(--coral)'},
+   {time:'11:00 AM',name:'Pilates Core',type:'Pilates',trainer:'Sana Riaz',duration:'50 min',level:'All Levels',spots:7,total:12,icon:'⚡',color:'var(--teal)'},
+   {time:'5:00 PM',name:'Power HIIT',type:'HIIT',trainer:'Bilal Mahmood',duration:'45 min',level:'Advanced',spots:5,total:20,icon:'🔥',color:'var(--coral)'},
+   {time:'7:30 PM',name:'Spin & Burn',type:'Spin',trainer:'Ahmad Qureshi',duration:'50 min',level:'All Levels',spots:11,total:20,icon:'🚴',color:'var(--teal)'}],
+  // Thursday
+  [{time:'7:00 AM',name:'Yoga Flow',type:'Yoga',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:10,total:15,icon:'🧘',color:'#a78bfa'},
+   {time:'9:30 AM',name:'Kettlebell',type:'Strength',trainer:'Ahmad Qureshi',duration:'50 min',level:'Intermediate',spots:4,total:14,icon:'💪',color:'var(--volt)'},
+   {time:'6:00 PM',name:'Zumba Party',type:'Zumba',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:20,total:25,icon:'💃',color:'#f59e0b'}],
+  // Friday
+  [{time:'6:00 AM',name:'Morning HIIT',type:'HIIT',trainer:'Bilal Mahmood',duration:'45 min',level:'All Levels',spots:9,total:20,icon:'🔥',color:'var(--coral)'},
+   {time:'10:00 AM',name:'Friday Zumba',type:'Zumba',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:15,total:25,icon:'💃',color:'#f59e0b'},
+   {time:'6:00 PM',name:'Evening Yoga',type:'Yoga',trainer:'Nadia Hussain',duration:'75 min',level:'All Levels',spots:13,total:15,icon:'🧘',color:'#a78bfa'},
+   {time:'7:30 PM',name:'Spin Night',type:'Spin',trainer:'Ahmad Qureshi',duration:'50 min',level:'All Levels',spots:6,total:20,icon:'🚴',color:'var(--teal)'}],
+  // Saturday
+  [{time:'8:00 AM',name:'Weekend Spin',type:'Spin',trainer:'Ahmad Qureshi',duration:'60 min',level:'All Levels',spots:4,total:20,icon:'🚴',color:'var(--teal)'},
+   {time:'10:00 AM',name:'Total Body',type:'Strength',trainer:'Bilal Mahmood',duration:'60 min',level:'All Levels',spots:8,total:18,icon:'💪',color:'var(--volt)'},
+   {time:'12:00 PM',name:'Nutrition Talk',type:'Pilates',trainer:'Sana Riaz',duration:'45 min',level:'All Levels',spots:25,total:30,icon:'🥗',color:'var(--teal)'},
+   {time:'3:00 PM',name:'Zumba Blast',type:'Zumba',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:22,total:25,icon:'💃',color:'#f59e0b'}],
+  // Sunday
+  [{time:'9:00 AM',name:'Gentle Yoga',type:'Yoga',trainer:'Nadia Hussain',duration:'75 min',level:'Beginners',spots:14,total:15,icon:'🧘',color:'#a78bfa'},
+   {time:'11:00 AM',name:'Recovery Flow',type:'Pilates',trainer:'Sana Riaz',duration:'50 min',level:'All Levels',spots:10,total:12,icon:'⚡',color:'var(--teal)'},
+   {time:'4:00 PM',name:'Active Stretch',type:'Yoga',trainer:'Nadia Hussain',duration:'60 min',level:'All Levels',spots:12,total:15,icon:'🧘',color:'#a78bfa'}],
+];
+const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+let currentDay = 0, currentType = 'all';
+let pendingClass = null;
+
+// Set today to correct day
+const today = new Date().getDay(); // 0=Sun,1=Mon,...
+currentDay = today === 0 ? 6 : today - 1;
+
+function buildDayTabs(){
+  const now = new Date();
+  document.getElementById('dayTabs').innerHTML = DAYS.map((d,i) => {
+    const dt = new Date(now);
+    dt.setDate(now.getDate() - (now.getDay()===0?6:now.getDay()-1) + i);
+    const isToday = i === currentDay;
+    return `<button class="day-tab${i===currentDay?' on':''}${isToday?' today-tab':''}" onclick="setDay(${i},this)">
+      ${d}<span class="day-date">${dt.toLocaleDateString('en-PK',{month:'short',day:'numeric'})}</span>
+    </button>`;
+  }).join('');
+}
+
+function setDay(idx, btn){
+  currentDay = idx;
+  document.querySelectorAll('.day-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderClasses();
+}
+
+function setType(type, btn){
+  currentType = type;
+  document.querySelectorAll('.type-filter').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderClasses();
+}
+
+function renderClasses(){
+  let classes = CLASSES_DATA[currentDay] || [];
+  if(currentType !== 'all') classes = classes.filter(c=>c.type===currentType);
+  if(!classes.length){
+    document.getElementById('classGrid').innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:48px;color:var(--muted);font-size:14px">No ${currentType==='all'?'':currentType+' '}classes scheduled for ${DAYS[currentDay]}.</div>`;
+    return;
+  }
+  document.getElementById('classGrid').innerHTML = classes.map(c => {
+    const pct = Math.round((c.total - c.spots) / c.total * 100);
+    const isFull = c.spots === 0;
+    const isLow = c.spots > 0 && c.spots <= 4;
+    const spotColor = isFull ? 'var(--coral)' : isLow ? '#f59e0b' : '#4ade80';
+    const spotsLabel = isFull ? 'Class Full' : isLow ? `Only ${c.spots} left!` : `${c.spots} spots left`;
+    return `<div class="class-card${isFull?' full':''}">
+      <div class="cc-top" style="border-left:3px solid ${c.color}">
+        <div class="cc-time">${c.time}</div>
+        <div class="cc-name">${c.icon} ${c.name}</div>
+        <div class="cc-trainer">👤 ${c.trainer}</div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-row"><span class="cc-label">Duration</span><span class="cc-value">⏱ ${c.duration}</span></div>
+        <div class="cc-row"><span class="cc-label">Level</span><span class="cc-value">${c.level}</span></div>
+        <div class="cc-row"><span class="cc-label">Availability</span><span class="cc-value" style="color:${spotColor}">${spotsLabel}</span></div>
+        <div class="spots-bar"><div class="spots-fill" style="width:${pct}%;background:${spotColor}"></div></div>
+      </div>
+      <div class="cc-foot">
+        ${isFull
+          ? `<div class="book-btn full-btn" style="flex:1;padding:10px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:12px;text-align:center">Class Full</div>
+             <button class="book-btn waitlist" onclick="joinWaitlist('${c.name}','${c.time}')">Join Waitlist</button>`
+          : `<button class="book-btn available" onclick="openBookModal('${c.name}','${c.time}','${c.trainer}','${c.icon}','${c.duration}')">Book Now →</button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openBookModal(name, time, trainer, icon, duration){
+  pendingClass = {name, time, trainer, duration, day: DAYS[currentDay]};
+  document.getElementById('bookModalIcon').textContent = icon;
+  document.getElementById('bookModalTitle').textContent = name;
+  document.getElementById('bookModalSub').textContent = DAYS[currentDay] + ' · ' + time + ' · ' + trainer;
+  document.getElementById('bookDetails').innerHTML = `📅 ${DAYS[currentDay]} · ⏰ ${time} · ⏱ ${duration} · 👤 ${trainer}`;
+  const user = FM.getUser();
+  if(user?.name) document.getElementById('bookName').value = user.name;
+  FMModal.open('bookModal');
+}
+
+function joinWaitlist(name, time){
+  FMToast.info(`Added to waitlist for ${name} at ${time}. We'll notify you if a spot opens.`);
+}
+
+async function confirmClassBooking(){
+  const bname = document.getElementById('bookName').value.trim();
+  if(!bname){ FMToast.error('Please enter your name'); return; }
+  if(!pendingClass) return;
+  const booking = { ...pendingClass, name: bname, phone: document.getElementById('bookPhone').value, bookedAt: new Date().toISOString() };
+  const bookings = FM.load('class_bookings', []) || [];
+  bookings.push(booking);
+  FM.save('class_bookings', bookings);
+  // Try backend
+  const user = FM.getUser();
+  if(user?.id){
+    // Class booking saved locally; backend endpoint available via /appointments/ as workaround
+try{ await FMAPI.post('/appointments/'+user.id, { doctor_name: pendingClass.trainer||'Trainer', appt_date: new Date().toISOString().split('T')[0], appt_time: pendingClass.time, appt_type: 'In-Clinic', reason: 'Class: '+pendingClass.name }); }catch{}
+  }
+  FMModal.close('bookModal');
+  FMToast.success(`✅ Booked: ${pendingClass.name} on ${pendingClass.day} at ${pendingClass.time}!`);
+}
+
+buildDayTabs();
+renderClasses();
+</script>
+</body>
+</html>

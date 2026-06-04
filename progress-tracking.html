@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Progress Tracking — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.prog-section{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:20px}
+.log-form{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:sticky;top:110px}
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+@media(max-width:1000px){.main-grid{grid-template-columns:1fr}}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:800px){.kpi-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.kpi-row{grid-template-columns:1fr 1fr}}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center;transition:border-color .3s}
+.kpi:hover{border-color:rgba(181,255,71,.2)}
+.kpi-n{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;letter-spacing:-1px;color:var(--volt);line-height:1;margin-bottom:4px}
+.kpi-n.teal{color:var(--teal)}.kpi-n.coral{color:var(--coral)}.kpi-n.white{color:var(--white)}.kpi-n.purple{color:#a78bfa}
+.kpi-l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.kpi-change{font-size:11px;font-weight:600;margin-top:6px}
+.ch{color:#4ade80}.red{color:var(--coral)}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px}
+.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px}
+.chart-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.chart-tabs{display:flex;gap:6px;flex-wrap:wrap}
+/* PR highlights */
+.pr-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.pr-grid{grid-template-columns:1fr 1fr}}
+.pr-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.pr-n{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--volt);letter-spacing:-1px;margin-bottom:2px}
+.pr-exercise{font-size:12px;font-weight:600;margin-bottom:3px}
+.pr-date{font-size:10px;color:var(--muted)}
+/* Comparison table */
+.comp-table{width:100%;border-collapse:collapse}
+.comp-table th{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+.comp-table td{padding:13px 14px;font-size:13px;border-bottom:1px solid var(--border)}
+.comp-table td:first-child{color:var(--white);font-weight:500}
+.comp-table tr:last-child td{border-bottom:none}
+.delta{font-size:12px;font-weight:700}
+/* Body measurements form */
+.measurements-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="workout-tracker.html">Workouts</a>
+    <a class="nav-a on" href="progress-tracking.html">Progress</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a" href="diet.html">Diet</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Back</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Gym Module</span>
+  <h1>Progress Tracking</h1>
+  <p>Weight trend, BMI history, body measurements, strength progression, and weekly performance overview — all in one place.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- KPI row -->
+  <div class="kpi-row rv">
+    <div class="kpi"><div class="kpi-n" id="kpiWeight">—</div><div class="kpi-l">Current Weight</div><div class="kpi-change ch" id="kpiWtChange">—</div></div>
+    <div class="kpi"><div class="kpi-n teal" id="kpiBMI">—</div><div class="kpi-l">BMI</div><div class="kpi-change" id="kpiBMIcat" style="color:var(--muted)">—</div></div>
+    <div class="kpi"><div class="kpi-n coral" id="kpiBodyFat">—</div><div class="kpi-l">Body Fat %</div><div class="kpi-change" id="kpiBFGoal" style="color:var(--muted)">Goal: 15%</div></div>
+    <div class="kpi"><div class="kpi-n white" id="kpiWorkouts">0</div><div class="kpi-l">Workouts Logged</div><div class="kpi-change ch">↑ Keep it up!</div></div>
+    <div class="kpi"><div class="kpi-n purple" id="kpiStreak">0</div><div class="kpi-l">Day Streak</div><div class="kpi-change ch">🔥 Active</div></div>
+  </div>
+
+  <div class="main-grid">
+    <!-- LEFT -->
+    <div>
+      <!-- Weight chart -->
+      <div class="prog-section rv">
+        <div class="chart-header">
+          <div><div class="chart-title">Weight Trend</div><div class="chart-sub">Track your body weight over time (kg)</div></div>
+          <div class="chart-tabs">
+            <button class="ctab on" onclick="switchWt('month',this)">Month</button>
+            <button class="ctab" onclick="switchWt('all',this)">All Time</button>
+          </div>
+        </div>
+        <canvas id="weightChart" height="180"></canvas>
+      </div>
+
+      <!-- BMI history -->
+      <div class="prog-section rv d1">
+        <div class="chart-header">
+          <div><div class="chart-title">BMI History</div><div class="chart-sub">Based on logged weight and your height</div></div>
+        </div>
+        <canvas id="bmiChart" height="140"></canvas>
+        <div style="display:flex;gap:16px;margin-top:16px;font-size:12px;color:var(--muted)">
+          <div><span style="display:inline-block;width:10px;height:2px;background:#22c55e;margin-right:6px;border-radius:1px;vertical-align:middle"></span>Normal (18.5–24.9)</div>
+          <div><span style="display:inline-block;width:10px;height:2px;background:#f59e0b;margin-right:6px;border-radius:1px;vertical-align:middle"></span>Overweight (25–29.9)</div>
+          <div><span style="display:inline-block;width:10px;height:2px;background:#ef4444;margin-right:6px;border-radius:1px;vertical-align:middle"></span>Obese (30+)</div>
+        </div>
+      </div>
+
+      <!-- Strength PRs -->
+      <div class="prog-section rv d2">
+        <div class="chart-header"><div><div class="chart-title">Personal Records 🏆</div><div class="chart-sub">Your best lifts from the workout log</div></div></div>
+        <div class="pr-grid" id="prGrid">
+          <div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:12px">Log workouts in the Tracker to see your personal records here.</div>
+        </div>
+      </div>
+
+      <!-- Workout volume chart -->
+      <div class="prog-section rv d3">
+        <div class="chart-header"><div><div class="chart-title">Weekly Volume</div><div class="chart-sub">Total training volume (sets × reps × weight)</div></div></div>
+        <canvas id="volumeChart" height="140"></canvas>
+      </div>
+
+      <!-- Progress comparison table -->
+      <div class="prog-section rv d4">
+        <div class="chart-header"><div><div class="chart-title">Before vs Now</div><div class="chart-sub">Comparing your first and latest body measurements</div></div></div>
+        <table class="comp-table" id="compTable">
+          <thead><tr><th>Metric</th><th>Start</th><th>Current</th><th>Change</th></tr></thead>
+          <tbody id="compBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Log body measurements to see your transformation.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- RIGHT: Log form -->
+    <div>
+      <div class="log-form rv">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:6px">Log Measurements</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:22px">Update weekly for best results</div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" id="logDate"/></div>
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Weight (kg)</label><input class="form-input" type="number" id="logWeight" placeholder="70.5" step="0.1"/></div>
+          <div class="form-group"><label class="form-label">Body Fat (%)</label><input class="form-input" type="number" id="logBodyFat" placeholder="18" step="0.1"/></div>
+        </div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px">Body Measurements (cm)</div>
+        <div class="measurements-grid">
+          <div class="form-group"><label class="form-label">Chest</label><input class="form-input" type="number" id="mChest" placeholder="95"/></div>
+          <div class="form-group"><label class="form-label">Waist</label><input class="form-input" type="number" id="mWaist" placeholder="82"/></div>
+          <div class="form-group"><label class="form-label">Hips</label><input class="form-input" type="number" id="mHips" placeholder="96"/></div>
+          <div class="form-group"><label class="form-label">Bicep</label><input class="form-input" type="number" id="mBicep" placeholder="35"/></div>
+          <div class="form-group"><label class="form-label">Thigh</label><input class="form-input" type="number" id="mThigh" placeholder="55"/></div>
+          <div class="form-group"><label class="form-label">Neck</label><input class="form-input" type="number" id="mNeck" placeholder="38"/></div>
+        </div>
+        <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" id="logNotes" placeholder="Energy levels, how you feel..." style="min-height:72px"></textarea></div>
+        <button class="btn-main btn-full" onclick="saveProgress()">Save Progress Entry</button>
+        <button class="btn-outline btn-full" style="margin-top:10px" onclick="clearProgress()">Clear All History</button>
+      </div>
+
+      <!-- Goal tracking -->
+      <div class="prog-section rv d1" style="margin-top:20px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px">Goal Progress</div>
+        <div style="display:flex;flex-direction:column;gap:14px" id="goalBars">
+          <div style="color:var(--muted);font-size:13px">Log measurements to see goal progress.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+document.getElementById('logDate').value=new Date().toISOString().split('T')[0];
+const user=FM.getUser()||{};
+const heightM=(parseFloat(user.height)||175)/100;
+
+// Load progress history
+function getProgress(){return FM.load('progress',[]);}
+function saveProgress(){
+  const wt=parseFloat(document.getElementById('logWeight').value);
+  const bf=parseFloat(document.getElementById('logBodyFat').value)||null;
+  if(!wt){FMToast.error('Please enter your weight');return;}
+  const entry={
+    id:Date.now(),date:document.getElementById('logDate').value,weight:wt,bodyFat:bf,
+    chest:document.getElementById('mChest').value||null,waist:document.getElementById('mWaist').value||null,
+    hips:document.getElementById('mHips').value||null,bicep:document.getElementById('mBicep').value||null,
+    thigh:document.getElementById('mThigh').value||null,neck:document.getElementById('mNeck').value||null,
+    notes:document.getElementById('logNotes').value
+  };
+  FMSync.saveProgress(entry);
+  renderAll();FMToast.success('Progress entry saved!');
+  document.getElementById('logNotes').value='';
+}
+function clearProgress(){if(!confirm('Clear all progress history?'))return;FM.save('progress',[]);renderAll();}
+
+// Render everything
+function renderAll(){
+  const prog=getProgress();
+  const wkl=FM.getWorkouts();
+  const bmiHist=FM.getBMIHistory();
+
+  // KPIs
+  if(prog.length){
+    const cur=prog[0];const prev=prog[prog.length-1];
+    const bmi=parseFloat((cur.weight/(heightM**2)).toFixed(1));
+    const bmiCat=bmi<18.5?'Underweight':bmi<25?'Normal ✓':bmi<30?'Overweight':'Obese';
+    document.getElementById('kpiWeight').textContent=cur.weight+'kg';
+    document.getElementById('kpiBMI').textContent=bmi;document.getElementById('kpiBMIcat').textContent=bmiCat;
+    if(cur.bodyFat)document.getElementById('kpiBodyFat').textContent=cur.bodyFat+'%';
+    const delta=parseFloat((cur.weight-prev.weight).toFixed(1));
+    document.getElementById('kpiWtChange').textContent=(delta>0?'↑ +':'↓ ')+Math.abs(delta)+'kg vs start';
+    document.getElementById('kpiWtChange').className='kpi-change '+(delta<0?'ch':'red');
+  }else if(user.weight){
+    const bmi=parseFloat((parseFloat(user.weight)/(heightM**2)).toFixed(1));
+    document.getElementById('kpiBMI').textContent=bmi;
+  }
+  document.getElementById('kpiWorkouts').textContent=wkl.length;
+  document.getElementById('kpiStreak').textContent=Math.min(wkl.length,7);
+
+  // Weight chart
+  buildWeightChart(prog,'month');
+
+  // BMI chart
+  const bmiData=prog.slice(0,12).reverse().map(p=>parseFloat((p.weight/(heightM**2)).toFixed(1)));
+  const bmiLabels=prog.slice(0,12).reverse().map(p=>p.date);
+  buildBMIChart(bmiData,bmiLabels);
+
+  // Volume chart
+  buildVolumeChart(wkl);
+
+  // PRs
+  buildPRs(wkl);
+
+  // Comparison table
+  buildCompTable(prog);
+
+  // Goal bars
+  buildGoalBars(prog);
+}
+
+let wtChart;
+function buildWeightChart(prog,range){
+  const data=prog.slice(0,range==='month'?30:prog.length).reverse();
+  const labels=data.map(p=>p.date);
+  const vals=data.map(p=>p.weight);
+  if(wtChart)wtChart.destroy();
+  wtChart=new Chart(document.getElementById('weightChart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{data:vals,label:'Weight (kg)',borderColor:'var(--volt)',backgroundColor:'rgba(181,255,71,0.06)',fill:true,tension:0.4,pointBackgroundColor:'var(--volt)',pointRadius:4,borderWidth:2}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(14,28,36,.95)',borderColor:'rgba(255,255,255,.1)',borderWidth:1}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>v+'kg'}}}}
+  });
+}
+function switchWt(range,btn){document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');buildWeightChart(getProgress(),range);}
+
+function buildBMIChart(bmiData,bmiLabels){
+  new Chart(document.getElementById('bmiChart').getContext('2d'),{
+    type:'line',
+    data:{labels:bmiLabels,datasets:[{data:bmiData,borderColor:'#2dd4bf',backgroundColor:'rgba(45,212,191,0.07)',fill:true,tension:0.4,pointBackgroundColor:bmiData.map(v=>v<18.5?'#3b82f6':v<25?'#22c55e':v<30?'#f59e0b':'#ef4444'),pointRadius:5,borderWidth:2},{label:'Normal max',data:bmiLabels.map(()=>24.9),borderColor:'rgba(34,197,94,0.3)',borderDash:[4,4],pointRadius:0,fill:false},{label:'Overweight max',data:bmiLabels.map(()=>29.9),borderColor:'rgba(245,158,11,0.3)',borderDash:[4,4],pointRadius:0,fill:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{maxTicksLimit:8}},y:{min:15,max:40,grid:{color:'rgba(255,255,255,.04)'}}}}
+  });
+}
+
+function buildVolumeChart(wkl){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const now=new Date();
+  const data=days.map((_,i)=>{const d=new Date(now);d.setDate(now.getDate()-now.getDay()+i+1);const ds=d.toISOString().split('T')[0];return wkl.filter(w=>w.date===ds).reduce((a,w)=>a+w.sets.reduce((b,s)=>b+s.reps*(s.weight||1),0),0);});
+  new Chart(document.getElementById('volumeChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:days,datasets:[{data,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,140);g.addColorStop(0,'rgba(181,255,71,0.7)');g.addColorStop(1,'rgba(45,212,191,0.2)');return g;},borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true}}}
+  });
+}
+
+function buildPRs(wkl){
+  if(!wkl.length){return;}
+  const prs={};
+  wkl.forEach(w=>{const max=Math.max(...w.sets.map(s=>s.weight||0));if(!prs[w.exercise]||max>prs[w.exercise].max)prs[w.exercise]={max,date:w.date};});
+  const top=Object.entries(prs).sort((a,b)=>b[1].max-a[1].max).slice(0,6);
+  document.getElementById('prGrid').innerHTML=top.map(([name,data])=>`
+    <div class="pr-card">
+      <div class="pr-n">${data.max}<span style="font-size:16px;color:var(--muted)">kg</span></div>
+      <div class="pr-exercise">${name}</div>
+      <div class="pr-date">${data.date}</div>
+    </div>`).join('');
+}
+
+function buildCompTable(prog){
+  if(prog.length<2){return;}
+  const cur=prog[0],first=prog[prog.length-1];
+  const curBMI=parseFloat((cur.weight/(heightM**2)).toFixed(1));
+  const firstBMI=parseFloat((first.weight/(heightM**2)).toFixed(1));
+  const rows=[
+    {metric:'Weight',first:first.weight+'kg',cur:cur.weight+'kg',delta:cur.weight-first.weight,unit:'kg'},
+    {metric:'BMI',first:firstBMI,cur:curBMI,delta:curBMI-firstBMI,unit:''},
+    {metric:'Body Fat',first:first.bodyFat?first.bodyFat+'%':'—',cur:cur.bodyFat?cur.bodyFat+'%':'—',delta:cur.bodyFat&&first.bodyFat?cur.bodyFat-first.bodyFat:null,unit:'%'},
+    {metric:'Waist',first:first.waist?first.waist+'cm':'—',cur:cur.waist?cur.waist+'cm':'—',delta:cur.waist&&first.waist?cur.waist-first.waist:null,unit:'cm'},
+    {metric:'Bicep',first:first.bicep?first.bicep+'cm':'—',cur:cur.bicep?cur.bicep+'cm':'—',delta:cur.bicep&&first.bicep?cur.bicep-first.bicep:null,unit:'cm'},
+  ];
+  document.getElementById('compBody').innerHTML=rows.map(r=>{
+    const d=r.delta!==null?parseFloat(r.delta.toFixed(1)):null;
+    const isGood=r.metric==='Weight'||r.metric==='BMI'||r.metric==='Body Fat'||r.metric==='Waist'?d<0:d>0;
+    return`<tr><td>${r.metric}</td><td style="color:var(--muted)">${r.first}</td><td>${r.cur}</td><td><span class="delta ${d!==null?(isGood?'ch':'red'):''}">${d!==null?(d>0?'↑ +':d<0?'↓ ':'↔ ')+Math.abs(d)+r.unit:'—'}</span></td></tr>`;
+  }).join('');
+}
+
+function buildGoalBars(prog){
+  if(!prog.length){return;}
+  const cur=prog[0];const wt=cur.weight;const userGoalWt=parseFloat(user.weight)||wt;
+  const targetWt=user.goal==='Weight Loss'?userGoalWt*0.85:user.goal==='Muscle Gain'?userGoalWt*1.08:userGoalWt;
+  const wtProg=Math.min(100,Math.max(0,Math.abs(userGoalWt-wt)/Math.abs(userGoalWt-targetWt)*100||0));
+  const wkl=FM.getWorkouts();
+  document.getElementById('goalBars').innerHTML=`
+    <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><span style="color:var(--muted)">Weight Goal (${targetWt.toFixed(1)}kg)</span><span>${wt}kg → ${targetWt.toFixed(1)}kg</span></div><div class="prog-wrap"><div class="prog-fill" style="width:${wtProg.toFixed(0)}%"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><span style="color:var(--muted)">Workouts This Week</span><span>${Math.min(wkl.filter(w=>new Date(w.date)>=new Date(Date.now()-7*86400000)).length,5)} / 5</span></div><div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,wkl.filter(w=>new Date(w.date)>=new Date(Date.now()-7*86400000)).length/5*100)}%;background:linear-gradient(90deg,var(--teal),#60a5fa)"></div></div></div>
+    <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px"><span style="color:var(--muted)">Consistency (30 days)</span><span>${wkl.length} sessions</span></div><div class="prog-wrap"><div class="prog-fill" style="width:${Math.min(100,wkl.length/20*100)}%;background:linear-gradient(90deg,var(--coral),#f59e0b)"></div></div></div>`;
+}
+
+renderAll();
+</script>
+</body>
+</html>

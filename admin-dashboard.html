@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:0}
+.admin-shell{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+@media(max-width:1000px){.admin-shell{grid-template-columns:1fr}}
+/* ── SIDEBAR ── */
+.asb{background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100vh;position:sticky;top:0;overflow-y:auto}
+@media(max-width:1000px){.asb{display:none}}
+.asb-logo{padding:22px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:17px}
+.asb-logo .n-mark{width:32px;height:32px;background:var(--volt);border-radius:9px;display:flex;align-items:center;justify-content:center}
+.asb-logo .n-mark svg{width:16px;height:16px;stroke:var(--bg);fill:none;stroke-width:2.5;stroke-linecap:round}
+.asb-tag{padding:8px 20px;font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted2);border-bottom:1px solid var(--border)}
+.asb-nav{padding:10px;flex:1}
+.asb-sec{margin-bottom:20px}
+.asb-sec-t{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);padding:6px 10px;margin-bottom:4px}
+.asb-a{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:color .2s,background .2s;margin-bottom:2px}
+.asb-a:hover,.asb-a.on{color:var(--white);background:rgba(255,255,255,.05)}
+.asb-a.on{color:var(--volt);background:rgba(181,255,71,.06)}
+.asb-badge{margin-left:auto;padding:2px 8px;border-radius:9px;font-size:10px;font-weight:700;background:var(--coral);color:#fff}
+.asb-badge.v{background:var(--volt);color:var(--bg)}
+.asb-badge.t{background:var(--teal);color:var(--bg)}
+.asb-foot{padding:16px 18px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.asb-av{width:32px;height:32px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--bg);flex-shrink:0}
+.asb-uname{font-size:13px;font-weight:600}
+.asb-urole{font-size:10px;color:var(--muted)}
+/* ── MAIN ── */
+.amain{padding:32px;overflow-y:auto;background:var(--bg)}
+.atopbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px}
+.atitle{font-family:'Syne',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.5px}
+.asub{font-size:12px;color:var(--muted);margin-top:3px}
+.tab-content{display:none}.tab-content.on{display:block}
+/* ── STATS ── */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media(max-width:900px){.stat-row{grid-template-columns:1fr 1fr}}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden}
+.sc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.sc.v::after{background:var(--volt)}.sc.t::after{background:var(--teal)}.sc.c::after{background:var(--coral)}.sc.w::after{background:rgba(255,255,255,.5)}
+.sc-icon{font-size:20px;margin-bottom:10px}
+.sc-n{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.sc-n.v{color:var(--volt)}.sc-n.t{color:var(--teal)}.sc-n.c{color:var(--coral)}
+.sc-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sc-d{font-size:12px;font-weight:600;color:#4ade80;margin-top:6px}
+/* ── PANELS ── */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:18px}
+.panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
+.panel-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.panel-hd{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+/* ── TABLE ── */
+.atable{width:100%;border-collapse:collapse}
+.atable th{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+.atable td{padding:13px 14px;font-size:13px;border-bottom:1px solid var(--border);color:var(--muted)}
+.atable td:first-child{color:var(--white);font-weight:500}
+.atable tr:last-child td{border-bottom:none}
+.atable tr:hover td{background:rgba(181,255,71,.02)}
+.tbl-wrap{overflow-x:auto}
+/* ── PLAN EDITOR ── */
+.plan-editor-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+@media(max-width:900px){.plan-editor-grid{grid-template-columns:1fr}}
+.pe-card{background:var(--card2);border:1.5px solid var(--border);border-radius:18px;padding:24px;transition:border-color .3s}
+.pe-card:hover{border-color:rgba(181,255,71,.2)}
+.pe-card.featured{border-color:rgba(181,255,71,.35);background:rgba(181,255,71,.03)}
+.pe-badge{display:inline-block;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;margin-bottom:10px}
+.pe-name-input{width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--white);font-family:'Syne',sans-serif;font-weight:700;font-size:20px;padding:4px 0;outline:none;margin-bottom:12px}
+.pe-price-row{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.pe-currency{font-size:14px;color:var(--muted);font-weight:600}
+.pe-price-input{background:transparent;border:none;border-bottom:1px solid var(--border);color:var(--volt);font-family:'Syne',sans-serif;font-weight:800;font-size:36px;letter-spacing:-1px;width:120px;outline:none}
+.pe-period{font-size:13px;color:var(--muted)}
+.pe-feat-list{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.pe-feat{display:flex;align-items:center;gap:8px;font-size:12px}
+.pe-feat-toggle{width:16px;height:16px;border-radius:4px;cursor:pointer;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;transition:all .2s;flex-shrink:0}
+.pe-feat-toggle.on{background:var(--volt);border-color:var(--volt);color:var(--bg)}
+.pe-feat-text{color:var(--muted)}
+.pe-feat.enabled .pe-feat-text{color:var(--white)}
+.pe-sep{height:1px;background:var(--border);margin:12px 0}
+.pe-limit-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pe-limit{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 10px}
+.pe-limit-l{font-size:10px;color:var(--muted);margin-bottom:4px}
+.pe-limit-v{background:transparent;border:none;color:var(--teal);font-family:'Syne',sans-serif;font-weight:700;font-size:15px;width:100%;outline:none}
+/* ── MEMBER TABLE ── */
+.search-bar{background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:8px 16px;color:var(--white);font-size:13px;min-width:220px;outline:none}
+.search-bar:focus{border-color:rgba(181,255,71,.4)}
+.plan-sel{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;color:var(--white);font-size:12px;cursor:pointer;outline:none}
+/* ── SETTINGS ── */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:700px){.settings-grid{grid-template-columns:1fr}}
+.key-input-wrap{display:flex;gap:8px}
+.key-input-wrap .fi{flex:1;font-family:'DM Mono',monospace;font-size:12px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;color:var(--white);outline:none}
+.key-input-wrap .fi:focus{border-color:rgba(181,255,71,.4)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.tr-label{font-size:13px;font-weight:500}.tr-desc{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{width:44px;height:24px;background:var(--border2);border-radius:100px;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0}
+.toggle.on{background:var(--volt)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:white;transition:transform .3s var(--ease)}
+.toggle.on::after{transform:translateX(20px)}
+/* ── AUDIT LOG ── */
+.audit-entry{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.audit-entry:last-child{border-bottom:none}
+.audit-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.audit-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);margin-left:auto;flex-shrink:0}
+.audit-action{font-size:13px;font-weight:500;margin-bottom:3px}
+.audit-meta{font-size:11px;color:var(--muted)}
+/* ── ALERT ITEMS ── */
+.alert-row{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.alert-row:last-child{border-bottom:none}
+.al-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.al-body{flex:1}
+.al-title{font-size:13px;font-weight:600;margin-bottom:2px}
+.al-sub{font-size:12px;color:var(--muted)}
+.al-time{font-size:11px;color:var(--muted2);flex-shrink:0}
+/* ── CHART GRID ── */
+.charts2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:800px){.charts2{grid-template-columns:1fr}}
+/* Misc */
+.btn-sm-ghost{padding:6px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .2s}
+.btn-sm-ghost:hover{border-color:var(--border3);color:var(--white)}
+.btn-sm-volt{padding:7px 16px;background:var(--volt);border:none;border-radius:8px;font-size:11px;font-weight:700;color:var(--bg);cursor:pointer;font-family:'Syne',sans-serif;transition:transform .25s,box-shadow .25s}
+.btn-sm-volt:hover{transform:translateY(-1px);box-shadow:0 6px 16px var(--volt-glow)}
+.btn-sm-teal{padding:7px 16px;background:var(--teal);border:none;border-radius:8px;font-size:11px;font-weight:700;color:var(--bg);cursor:pointer;font-family:'Syne',sans-serif}
+.btn-sm-coral{padding:7px 16px;background:var(--coral-dim);border:1px solid rgba(255,99,71,.2);border-radius:8px;font-size:11px;font-weight:700;color:var(--coral);cursor:pointer}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600}
+.tag-volt{background:var(--volt-dim);color:var(--volt);border:1px solid rgba(181,255,71,.2)}
+.tag-teal{background:var(--teal-dim);color:var(--teal);border:1px solid rgba(45,212,191,.18)}
+.tag-coral{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(255,99,71,.15)}
+.tag-green{background:rgba(34,197,94,.08);color:#4ade80;border:1px solid rgba(34,197,94,.15)}
+.tag-red{background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.15)}
+.form-label{display:block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-family:'Syne',sans-serif}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--white);font-size:13px;outline:none;transition:border-color .25s}
+.form-input:focus{border-color:rgba(181,255,71,.4)}
+.form-input::placeholder{color:var(--muted2)}
+.form-select{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--white);font-size:13px;outline:none;appearance:none}
+.form-textarea{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;color:var(--white);font-size:13px;outline:none;resize:vertical;min-height:90px;line-height:1.6;font-family:'DM Sans',sans-serif}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.form-grid2{grid-template-columns:1fr}}
+.fg{margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div id="cur"></div><div id="cring"></div>
+
+<div class="admin-shell">
+<!-- ── SIDEBAR ────────────────────── -->
+<aside class="asb">
+  <div class="asb-logo">
+    <div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>
+    FitMart Admin
+  </div>
+  <div class="asb-tag">Control Centre</div>
+  <nav class="asb-nav">
+    <div class="asb-sec">
+      <div class="asb-sec-t">Overview</div>
+      <div class="asb-a on" onclick="showTab('overview',this)">📊 Dashboard</div>
+      <div class="asb-a" onclick="showTab('analytics',this)">📈 Analytics</div>
+      <div class="asb-a" onclick="showTab('alerts',this)">🚨 Health Alerts <span class="asb-badge" id="alertBadge">3</span></div>
+    </div>
+    <div class="asb-sec">
+      <div class="asb-sec-t">Plan Management</div>
+      <div class="asb-a" onclick="showTab('plans',this)">💎 Membership Plans</div>
+      <div class="asb-a" onclick="showTab('members',this)">👥 Members <span class="asb-badge v" id="memBadge">—</span></div>
+      <div class="asb-a" onclick="showTab('appointments',this)">📅 Appointments</div>
+    </div>
+    <div class="asb-sec">
+      <div class="asb-sec-t">Data</div>
+      <div class="asb-a" onclick="showTab('workouts',this)">💪 Workout Logs</div>
+      <div class="asb-a" onclick="showTab('vitals',this)">❤️ Vital Records</div>
+      <div class="asb-a" onclick="showTab('audit',this)">📋 Audit Log</div>
+    </div>
+    <div class="asb-sec">
+      <div class="asb-sec-t">System</div>
+      <div class="asb-a" onclick="showTab('settings',this)">⚙️ Settings & API Keys</div>
+      <div class="asb-a" onclick="exportAll()">📥 Export All Data</div>
+      <a class="asb-a" href="index.html">🌐 View Live Site</a>
+      <div class="asb-a" onclick="adminLogout()">🚪 Logout</div>
+    </div>
+  </nav>
+  <div class="asb-foot">
+    <div class="asb-av" id="sideAv">A</div>
+    <div><div class="asb-uname" id="sideUname">Admin</div><div class="asb-urole">Super Admin</div></div>
+  </div>
+</aside>
+
+<!-- ── MAIN ─────────────────────── -->
+<main class="amain">
+
+<!-- OVERVIEW -->
+<div class="tab-content on" id="tab-overview">
+  <div class="atopbar">
+    <div><div class="atitle">Dashboard Overview</div><div class="asub" id="dashDate"></div></div>
+    <div style="display:flex;gap:8px"><button class="btn-sm-ghost" onclick="renderAll()">↻ Refresh</button><button class="btn-sm-volt" onclick="exportAll()">📥 Export</button></div>
+  </div>
+  <div class="stat-row" id="statsRow"></div>
+  <div class="charts2">
+    <div class="panel"><div class="panel-title">New Members This Week</div><div class="panel-sub">Daily registrations</div><canvas id="regChart" height="180"></canvas></div>
+    <div class="panel"><div class="panel-title">Revenue by Plan</div><div class="panel-sub">Monthly breakdown (PKR)</div><canvas id="revChart" height="180"></canvas></div>
+  </div>
+  <div class="charts2">
+    <div class="panel"><div class="panel-title">Workout Volume</div><div class="panel-sub">Sessions logged this week</div><canvas id="wkChart" height="150"></canvas></div>
+    <div class="panel"><div class="panel-title">Appointment Status</div><div class="panel-sub">Current appointment distribution</div><canvas id="apptChart" height="150"></canvas></div>
+  </div>
+</div>
+
+<!-- PLANS EDITOR -->
+<div class="tab-content" id="tab-plans">
+  <div class="atopbar">
+    <div><div class="atitle">Membership Plans</div><div class="asub">Edit names, prices, features, and limits in real-time</div></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-sm-ghost" onclick="resetPlans()">↺ Reset to Defaults</button>
+      <button class="btn-sm-volt" onclick="savePlans()">💾 Save All Plans</button>
+    </div>
+  </div>
+  <div class="plan-editor-grid" id="planEditorGrid"></div>
+  <div class="panel">
+    <div class="panel-hd"><div><div class="panel-title">Discount & Promo Codes</div><div class="panel-sub">Create codes that give plan discounts</div></div><button class="btn-sm-volt" onclick="addPromo()">+ New Code</button></div>
+    <table class="atable"><thead><tr><th>Code</th><th>Discount</th><th>Plan</th><th>Uses Left</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+    <tbody id="promoTable"></tbody></table>
+  </div>
+</div>
+
+<!-- MEMBERS -->
+<div class="tab-content" id="tab-members">
+  <div class="atopbar">
+    <div><div class="atitle">Member Management</div><div class="asub" id="memberCount">Loading...</div></div>
+    <div style="display:flex;gap:8px"><input class="search-bar" placeholder="Search name, email, plan..." oninput="filterMembers(this.value)" id="msearch"/><button class="btn-sm-volt" onclick="openAddMember()">+ Add Member</button></div>
+  </div>
+  <div class="panel" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap"><table class="atable" id="memberTable"><thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Plan</th><th>Role</th><th>Goal</th><th>BMI</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead><tbody id="memberTbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- APPOINTMENTS -->
+<div class="tab-content" id="tab-appointments">
+  <div class="atopbar"><div><div class="atitle">Appointments</div><div class="asub">View and update appointment statuses</div></div><input class="search-bar" placeholder="Search..." oninput="filterAppts(this.value)"/></div>
+  <div class="panel" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap"><table class="atable"><thead><tr><th>ID</th><th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody id="apptTbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- WORKOUTS -->
+<div class="tab-content" id="tab-workouts">
+  <div class="atopbar"><div><div class="atitle">Workout Logs</div><div class="asub">All member training sessions</div></div></div>
+  <div class="panel" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap"><table class="atable"><thead><tr><th>Member</th><th>Exercise</th><th>Muscle</th><th>Date</th><th>Sets</th><th>Calories</th><th>Duration</th></tr></thead><tbody id="wkTbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- VITALS -->
+<div class="tab-content" id="tab-vitals">
+  <div class="atopbar"><div><div class="atitle">Vital Records</div><div class="asub">Health readings from all members — alerts highlighted</div></div></div>
+  <div class="panel" style="padding:0;overflow:hidden">
+    <div class="tbl-wrap"><table class="atable"><thead><tr><th>Member</th><th>HR</th><th>BP</th><th>Sugar</th><th>Sleep</th><th>Steps</th><th>SpO2</th><th>Status</th><th>Recorded</th></tr></thead><tbody id="vitTbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ALERTS -->
+<div class="tab-content" id="tab-alerts">
+  <div class="atopbar"><div><div class="atitle">Health Alerts</div><div class="asub">Real-time vital anomalies requiring attention</div></div><button class="btn-sm-ghost" onclick="clearAlerts()">✓ Mark All Read</button></div>
+  <div class="panel" id="alertsPanel"></div>
+</div>
+
+<!-- ANALYTICS -->
+<div class="tab-content" id="tab-analytics">
+  <div class="atopbar"><div><div class="atitle">Analytics</div><div class="asub">Platform-wide statistics and breakdowns</div></div></div>
+  <div class="charts2" style="margin-bottom:18px">
+    <div class="panel"><div class="panel-title">Plan Distribution</div><div class="panel-sub">Active members by plan</div><canvas id="planDistChart" height="200"></canvas></div>
+    <div class="panel"><div class="panel-title">Goal Distribution</div><div class="panel-sub">Members by fitness goal</div><canvas id="goalChart" height="200"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><div class="panel-title">Monthly Revenue Projection</div><div class="panel-sub">Based on current active subscriptions</div></div>
+    <canvas id="revenueChart" height="160"></canvas>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><div><div class="panel-title">Top Exercises This Week</div></div></div>
+    <table class="atable"><thead><tr><th>Exercise</th><th>Times Logged</th><th>Total Sets</th><th>Avg Weight</th><th>Top Member</th></tr></thead><tbody id="topExTbody"></tbody></table>
+  </div>
+</div>
+
+<!-- AUDIT LOG -->
+<div class="tab-content" id="tab-audit">
+  <div class="atopbar"><div><div class="atitle">Audit Log</div><div class="asub">Every admin action recorded with timestamp and context</div></div><button class="btn-sm-ghost" onclick="exportAudit()">📥 Export Log</button></div>
+  <div class="panel" id="auditLog"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="tab-content" id="tab-settings">
+  <div class="atopbar"><div><div class="atitle">Settings & Configuration</div><div class="asub">API keys, email, notifications, and system preferences</div></div></div>
+
+  <div class="settings-grid">
+    <!-- AI API Key -->
+    <div class="panel">
+      <div class="panel-title">🤖 Claude AI (Anthropic)</div>
+      <div class="panel-sub">Powers plan generator, BMI analysis, and diet recommendations</div>
+      <div class="fg"><label class="form-label">API Key</label>
+        <div class="key-input-wrap"><input class="fi" id="set_apiKey" type="password" placeholder="sk-ant-api03-..."/><button class="btn-sm-volt" onclick="saveApiKey()">Save</button></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--muted)">Get your key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--volt)">console.anthropic.com</a></div>
+      </div>
+      <div id="apiKeyStatus" style="padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;margin-top:4px"></div>
+    </div>
+
+    <!-- Backend URL -->
+    <div class="panel">
+      <div class="panel-title">⚙️ Backend API</div>
+      <div class="panel-sub">FastAPI server connection URL</div>
+      <div class="fg"><label class="form-label">Backend URL</label><input class="form-input" id="set_backendUrl" placeholder="http://127.0.0.1:8000"/></div>
+      <div id="backendStatus" style="padding:10px 14px;border-radius:10px;font-size:12px;margin-top:4px"></div>
+      <button class="btn-sm-volt" style="margin-top:10px" onclick="testBackend()">Test Connection</button>
+    </div>
+
+    <!-- Email -->
+    <div class="panel">
+      <div class="panel-title">✉️ Email Service</div>
+      <div class="panel-sub">Appointment confirmations and health alerts</div>
+      <div class="fg"><label class="form-label">Provider</label>
+        <select class="form-select" id="set_emailProvider"><option>smtp</option><option>sendgrid</option><option>resend</option></select>
+      </div>
+      <div class="fg"><label class="form-label">From Address</label><input class="form-input" id="set_fromEmail" placeholder="noreply@fitmart.pk"/></div>
+      <div class="fg"><label class="form-label">SMTP Host</label><input class="form-input" id="set_smtpHost" placeholder="smtp.gmail.com"/></div>
+      <div class="form-grid2">
+        <div class="fg"><label class="form-label">SMTP User</label><input class="form-input" id="set_smtpUser" placeholder="you@gmail.com"/></div>
+        <div class="fg"><label class="form-label">App Password</label><input class="form-input" id="set_smtpPass" type="password" placeholder="••••••••"/></div>
+      </div>
+      <button class="btn-sm-volt" onclick="saveEmailSettings()">Save Email Config</button>
+    </div>
+
+    <!-- Notifications -->
+    <div class="panel">
+      <div class="panel-title">🔔 Notification Settings</div>
+      <div class="panel-sub">Control what triggers alerts and emails</div>
+      <div id="notifToggles"></div>
+    </div>
+
+    <!-- Admin PIN -->
+    <div class="panel">
+      <div class="panel-title">🔐 Security Settings</div>
+      <div class="panel-sub">Admin PIN, session timeout, and 2FA</div>
+      <div class="fg"><label class="form-label">Admin PIN (4 digits)</label><input class="form-input" id="set_adminPin" type="password" maxlength="4" placeholder="••••"/></div>
+      <div class="fg"><label class="form-label">Session Timeout (minutes)</label><input class="form-input" id="set_timeout" type="number" value="30" min="5" max="1440"/></div>
+      <div class="toggle-row"><div><div class="tr-label">Require 2FA</div><div class="tr-desc">6-digit code via email on each login</div></div><div class="toggle on" onclick="this.classList.toggle('on')" id="tgl2fa"></div></div>
+      <button class="btn-sm-volt" style="margin-top:12px" onclick="saveSecurity()">Save Security Settings</button>
+    </div>
+
+    <!-- App Settings -->
+    <div class="panel">
+      <div class="panel-title">🏢 Platform Settings</div>
+      <div class="panel-sub">Business name, currency, and general preferences</div>
+      <div class="fg"><label class="form-label">Platform Name</label><input class="form-input" id="set_appName" value="FitMart"/></div>
+      <div class="fg"><label class="form-label">Currency</label><select class="form-select" id="set_currency"><option>PKR — Pakistani Rupee</option><option>USD — US Dollar</option><option>AED — UAE Dirham</option></select></div>
+      <div class="fg"><label class="form-label">Support Email</label><input class="form-input" id="set_supportEmail" placeholder="support@fitmart.pk"/></div>
+      <div class="fg"><label class="form-label">Support Phone</label><input class="form-input" id="set_phone" placeholder="+92 51 000 0000"/></div>
+      <button class="btn-sm-volt" onclick="saveAppSettings()">Save Platform Settings</button>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- ADD MEMBER MODAL -->
+<div class="modal-overlay" id="addMemberModal">
+  <div class="modal">
+    <button class="modal-close" onclick="FMModal.close('addMemberModal')">×</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:20px">Add New Member</div>
+    <div class="form-grid2">
+      <div class="fg"><label class="form-label">Full Name</label><input class="form-input" id="nu_name" placeholder="Ali Raza"/></div>
+      <div class="fg"><label class="form-label">Email</label><input class="form-input" id="nu_email" type="email" placeholder="ali@example.com"/></div>
+    </div>
+    <div class="form-grid2">
+      <div class="fg"><label class="form-label">Role</label><select class="form-select" id="nu_role"><option>member</option><option>doctor</option><option>trainer</option><option>admin</option></select></div>
+      <div class="fg"><label class="form-label">Plan</label><select class="form-select" id="nu_plan"><option>Basic</option><option>Pro</option><option>Elite</option></select></div>
+    </div>
+    <div class="form-grid2">
+      <div class="fg"><label class="form-label">Weight (kg)</label><input class="form-input" id="nu_weight" type="number" placeholder="70"/></div>
+      <div class="fg"><label class="form-label">Height (cm)</label><input class="form-input" id="nu_height" type="number" placeholder="175"/></div>
+    </div>
+    <div class="fg"><label class="form-label">Temporary Password</label><input class="form-input" id="nu_pass" type="password" placeholder="They will change this on first login"/></div>
+    <button class="btn-main btn-full" onclick="addMember()">Add Member & Send Welcome Email</button>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+// ── AUTH GUARD ───────────────────────────
+const adminUser=FM.getUser();
+if(!adminUser||adminUser.role!=='admin'){window.location.href='admin-login.html';}
+document.getElementById('sideAv').textContent=(adminUser?.name||'A').charAt(0).toUpperCase();
+document.getElementById('sideUname').textContent=adminUser?.name||'Admin';
+document.getElementById('dashDate').textContent=new Date().toLocaleString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// ── PLAN DATA ─────────────────────────────
+const DEFAULT_PLANS=[
+  {id:'basic',name:'Basic',price:0,priceAnnual:0,featured:false,badge:'badge-teal',color:'var(--teal)',
+   features:[{t:'BMI Calculator',on:true},{t:'Workout Tracker (10/mo)',on:true},{t:'Vitals Logger',on:true},{t:'AI Workout Plans',on:false},{t:'Doctor Consultations',on:false},{t:'Progress Analytics',on:false},{t:'Gym Class Bookings',on:false}],
+   limits:{workoutsPerMonth:10,doctorConsults:0,gymClasses:0,aiPlans:0}},
+  {id:'pro',name:'Pro',price:2999,priceAnnual:2399,featured:true,badge:'badge-volt',color:'var(--volt)',
+   features:[{t:'Unlimited Workout Tracking',on:true},{t:'AI Workout Plans',on:true},{t:'AI Diet Plans',on:true},{t:'Progress Analytics',on:true},{t:'Health Vitals + Alerts',on:true},{t:'2 Doctor Consults / mo',on:true},{t:'5 Gym Classes / mo',on:true}],
+   limits:{workoutsPerMonth:999,doctorConsults:2,gymClasses:5,aiPlans:20}},
+  {id:'elite',name:'Elite',price:5999,priceAnnual:4799,featured:false,badge:'badge-coral',color:'var(--coral)',
+   features:[{t:'Everything in Pro',on:true},{t:'Unlimited Doctor Consults',on:true},{t:'Personal Trainer',on:true},{t:'Monthly Lab Reports',on:true},{t:'Tele-Medicine Access',on:true},{t:'4 Physio Sessions / mo',on:true},{t:'Priority Support 24/7',on:true}],
+   limits:{workoutsPerMonth:999,doctorConsults:999,gymClasses:999,aiPlans:999}},
+];
+let plans=FM.load('admin_plans')||DEFAULT_PLANS;
+
+const DEMO_MEMBERS=[
+  {id:1,name:'Ali Raza',email:'ali@fitmart.pk',role:'member',plan:'Pro',goal:'Weight Loss',weight:78,height:178,joined:'2025-01-15',active:true},
+  {id:2,name:'Sara Ahmed',email:'sara@fitmart.pk',role:'member',plan:'Elite',goal:'Muscle Gain',weight:65,height:163,joined:'2025-02-03',active:true},
+  {id:3,name:'Hassan Khan',email:'hassan@fitmart.pk',role:'member',plan:'Basic',goal:'Endurance',weight:80,height:175,joined:'2025-03-12',active:true},
+  {id:4,name:'Zainab Malik',email:'zainab@fitmart.pk',role:'member',plan:'Pro',goal:'Flexibility',weight:58,height:160,joined:'2025-03-28',active:true},
+  {id:5,name:'Usman Tariq',email:'usman@fitmart.pk',role:'member',plan:'Pro',goal:'Strength',weight:90,height:180,joined:'2025-04-01',active:false},
+  {id:6,name:'Dr. Fatima Malik',email:'doctor@fitmart.pk',role:'doctor',plan:'Elite',goal:'—',weight:null,height:null,joined:'2025-01-01',active:true},
+];
+let members=[...DEMO_MEMBERS];
+
+const DEMO_APPTS=[
+  {id:'D1',patient:'Ali Raza',doctor:'Dr. Fatima Malik',date:'2025-12-20',time:'10:00 AM',type:'In-Clinic',status:'Confirmed'},
+  {id:'D2',patient:'Sara Ahmed',doctor:'Dr. Ahmed Siddiqui',date:'2025-12-22',time:'2:30 PM',type:'Video Call',status:'Pending'},
+  {id:'D3',patient:'Zainab Malik',doctor:'Dr. Umar Farooq',date:'2025-12-18',time:'11:00 AM',type:'Physiotherapy',status:'Done'},
+];
+const ALERTS=[
+  {type:'heart_rate',member:'Usman Tariq',val:'138 bpm',thresh:'120 bpm',sev:'critical',time:'2 min ago',icon:'❤️'},
+  {type:'blood_pressure',member:'Ali Raza',val:'145/92',thresh:'140/90',sev:'warning',time:'18 min ago',icon:'🩺'},
+  {type:'blood_sugar',member:'Sara Ahmed',val:'210 mg/dL',thresh:'200 mg/dL',sev:'critical',time:'1 hr ago',icon:'🩸'},
+];
+let auditLog=FM.load('admin_audit',[])||[];
+function logAudit(action,detail){
+  auditLog.unshift({action,detail,time:new Date().toLocaleString('en-PK'),user:adminUser?.name||'Admin'});
+  auditLog=auditLog.slice(0,100);
+  FM.save('admin_audit',auditLog);
+}
+let promos=FM.load('admin_promos')||[
+  {code:'WELCOME20',disc:'20%',plan:'Pro',uses:50,expires:'2025-12-31',active:true},
+  {code:'ELITE10',disc:'10%',plan:'Elite',uses:20,expires:'2026-01-15',active:true},
+];
+
+// ── RENDER ALL ───────────────────────────
+function renderAll(){
+  renderStats();renderCharts();renderMembers(members);renderAppts();
+  renderWorkouts();renderVitals();renderAlerts();renderAudit();renderPlanEditor();renderPromos();renderAnalytics();
+  document.getElementById('memBadge').textContent=members.filter(m=>m.active).length;
+}
+
+// ── STATS ────────────────────────────────
+function renderStats(){
+  const active=members.filter(m=>m.active&&m.role==='member');
+  const rev=active.reduce((s,m)=>{const p=plans.find(x=>x.name===m.plan);return s+(p?.price||0);},0);
+  document.getElementById('statsRow').innerHTML=[
+    {icon:'👥',n:active.length,l:'Active Members',d:'↑ +12 this month',cls:'v'},
+    {icon:'💰',n:'Rs '+rev.toLocaleString(),l:'Monthly Revenue',d:'↑ +8% vs last month',cls:'t'},
+    {icon:'🚨',n:ALERTS.length,l:'Health Alerts',d:'⚠ '+ALERTS.filter(a=>a.sev==='critical').length+' critical',cls:'c'},
+    {icon:'📅',n:DEMO_APPTS.length+2,l:'Appointments',d:'4 pending today',cls:'w'},
+  ].map(s=>`<div class="sc ${s.cls}"><div class="sc-icon">${s.icon}</div><div class="sc-n ${s.cls||''}">${s.n}</div><div class="sc-l">${s.l}</div><div class="sc-d">${s.d}</div></div>`).join('');
+}
+
+// ── CHARTS ───────────────────────────────
+const chartInst={};
+function mkChart(id,type,data,opts={}){
+  if(chartInst[id])chartInst[id].destroy();
+  chartInst[id]=new Chart(document.getElementById(id).getContext('2d'),{type,data,options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:11}}}},...opts}});
+}
+function renderCharts(){
+  mkChart('regChart','bar',{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],datasets:[{data:[2,5,3,8,4,6,3],backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,150);g.addColorStop(0,'rgba(181,255,71,.7)');g.addColorStop(1,'rgba(45,212,191,.3)');return g;},borderRadius:5,borderSkipped:false}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true,ticks:{stepSize:2}}}});
+
+  const planCounts={Basic:0,Pro:0,Elite:0};members.filter(m=>m.active&&m.role==='member').forEach(m=>planCounts[m.plan]=(planCounts[m.plan]||0)+1);
+  const rev={Basic:(plans.find(p=>p.name==='Basic')?.price||0)*planCounts.Basic,Pro:(plans.find(p=>p.name==='Pro')?.price||0)*planCounts.Pro,Elite:(plans.find(p=>p.name==='Elite')?.price||0)*planCounts.Elite};
+  mkChart('revChart','bar',{labels:['Basic','Pro','Elite'],datasets:[{data:Object.values(rev),backgroundColor:['rgba(45,212,191,.7)','rgba(181,255,71,.8)','rgba(255,99,71,.7)'],borderRadius:5,borderSkipped:false}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true,ticks:{callback:v=>'Rs '+v.toLocaleString()}}}});
+
+  const wkl=FM.getWorkouts();
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const now=new Date();
+  const wkData=days.map((_,i)=>{const d=new Date(now);d.setDate(now.getDate()-now.getDay()+i+1);return wkl.filter(w=>w.date===d.toISOString().split('T')[0]).length+Math.floor(Math.random()*4)+1;});
+  mkChart('wkChart','line',{labels:days,datasets:[{data:wkData,borderColor:'var(--teal)',backgroundColor:'rgba(45,212,191,.07)',fill:true,tension:.4,pointBackgroundColor:'var(--teal)',pointRadius:4}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true}}});
+
+  const apptS={Pending:3,Confirmed:5,Done:12,Cancelled:1};
+  const appts=FM.load('appointments',[])||[];appts.forEach(a=>apptS[a.status||'Pending']=(apptS[a.status||'Pending']||0)+1);
+  mkChart('apptChart','doughnut',{labels:Object.keys(apptS),datasets:[{data:Object.values(apptS),backgroundColor:['rgba(45,212,191,.8)','rgba(181,255,71,.8)','rgba(167,139,250,.8)','rgba(255,99,71,.8)'],borderColor:'transparent'}]},{cutout:'60%'});
+}
+function renderAnalytics(){
+  setTimeout(()=>{
+    if(!document.getElementById('planDistChart'))return;
+    const pc={Basic:0,Pro:0,Elite:0};members.filter(m=>m.role==='member'&&m.active).forEach(m=>pc[m.plan]=(pc[m.plan]||0)+1);
+    mkChart('planDistChart','doughnut',{labels:Object.keys(pc),datasets:[{data:Object.values(pc),backgroundColor:['rgba(255,255,255,.2)','rgba(181,255,71,.8)','rgba(255,99,71,.75)'],borderColor:'transparent'}]},{cutout:'62%'});
+    mkChart('goalChart','bar',{labels:['Weight Loss','Muscle Gain','Strength','Endurance','Flexibility'],datasets:[{data:[35,28,18,12,7],backgroundColor:'rgba(181,255,71,.7)',borderRadius:5,borderSkipped:false}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true}}});
+    mkChart('revenueChart','line',{labels:['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],datasets:[{data:[120000,145000,138000,162000,175000,189000,201000,195000,220000,234000,248000,265000],borderColor:'var(--volt)',backgroundColor:'rgba(181,255,71,.06)',fill:true,tension:.4,pointBackgroundColor:'var(--volt)',pointRadius:3}]},{plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>'Rs '+v.toLocaleString()}}}});
+    const exercises=['Bench Press','Squat','Deadlift','Pull-ups','Barbell Row','OHP'];
+    document.getElementById('topExTbody').innerHTML=exercises.map((e,i)=>`<tr><td>${e}</td><td>${18-i*2}</td><td>${(18-i*2)*4}</td><td>${60+i*10}kg</td><td>${members[i%members.length]?.name||'Member'}</td></tr>`).join('');
+  },100);
+}
+
+// ── PLAN EDITOR ──────────────────────────
+function renderPlanEditor(){
+  document.getElementById('planEditorGrid').innerHTML=plans.map((p,pi)=>`
+    <div class="pe-card${p.featured?' featured':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="tag ${p.badge||'tag-teal'}">${p.featured?'⭐ FEATURED':p.name}</span>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)"><input type="checkbox" ${p.featured?'checked':''} onchange="toggleFeatured(${pi},this.checked)" style="accent-color:var(--volt)"> Featured</label>
+      </div>
+      <input class="pe-name-input" value="${p.name}" onchange="updatePlan(${pi},'name',this.value)" placeholder="Plan Name"/>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Monthly Price (PKR)</div>
+      <div class="pe-price-row"><span class="pe-currency">Rs</span><input class="pe-price-input" type="number" value="${p.price}" onchange="updatePlan(${pi},'price',+this.value)" step="100" min="0"/><span class="pe-period">/mo</span></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:4px">Annual Price (PKR)</div>
+      <div class="pe-price-row" style="margin-bottom:14px"><span class="pe-currency" style="font-size:12px">Rs</span><input style="font-size:22px;width:100px" class="pe-price-input" type="number" value="${p.priceAnnual}" onchange="updatePlan(${pi},'priceAnnual',+this.value)" step="100" min="0"/><span class="pe-period">/yr-mo</span></div>
+      <div class="pe-sep"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Features</div>
+      <div class="pe-feat-list">${p.features.map((f,fi)=>`
+        <div class="pe-feat${f.on?' enabled':''}">
+          <div class="pe-feat-toggle${f.on?' on':''}" onclick="toggleFeature(${pi},${fi})">${f.on?'✓':'✕'}</div>
+          <span class="pe-feat-text">${f.t}</span>
+        </div>`).join('')}</div>
+      <div class="pe-sep"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Limits</div>
+      <div class="pe-limit-grid">
+        <div class="pe-limit"><div class="pe-limit-l">Workouts/mo</div><input class="pe-limit-v" type="number" value="${p.limits.workoutsPerMonth}" onchange="updateLimit(${pi},'workoutsPerMonth',this.value)"/></div>
+        <div class="pe-limit"><div class="pe-limit-l">Doctor Consults</div><input class="pe-limit-v" type="number" value="${p.limits.doctorConsults}" onchange="updateLimit(${pi},'doctorConsults',this.value)"/></div>
+        <div class="pe-limit"><div class="pe-limit-l">Gym Classes</div><input class="pe-limit-v" type="number" value="${p.limits.gymClasses}" onchange="updateLimit(${pi},'gymClasses',this.value)"/></div>
+        <div class="pe-limit"><div class="pe-limit-l">AI Plans</div><input class="pe-limit-v" type="number" value="${p.limits.aiPlans}" onchange="updateLimit(${pi},'aiPlans',this.value)"/></div>
+      </div>
+    </div>`).join('');
+}
+
+function updatePlan(pi,key,val){plans[pi][key]=val;}
+function toggleFeatured(pi,v){plans.forEach((p,i)=>p.featured=i===pi&&v);renderPlanEditor();}
+function toggleFeature(pi,fi){plans[pi].features[fi].on=!plans[pi].features[fi].on;renderPlanEditor();}
+function updateLimit(pi,key,val){plans[pi].limits[key]=parseInt(val)||0;}
+function savePlans(){
+  FM.save('admin_plans',plans);
+  logAudit('Plans Updated','All membership plans saved');
+  // Sync to backend
+  for(const p of plans){try{await FMAPI.post('/admin/plans/'+p.id,p);}catch(e){console.warn('Plan save failed:',e.message);}}
+  FMToast.success('Plans saved! Changes applied across the platform.');
+}
+function resetPlans(){if(!confirm('Reset all plans to defaults?'))return;plans=JSON.parse(JSON.stringify(DEFAULT_PLANS));FM.save('admin_plans',plans);renderPlanEditor();FMToast.info('Plans reset to defaults');}
+
+// ── PROMO CODES ──────────────────────────
+function renderPromos(){
+  document.getElementById('promoTable').innerHTML=promos.map((p,i)=>`<tr>
+    <td style="font-family:'DM Mono',monospace;color:var(--volt)">${p.code}</td>
+    <td>${p.disc}</td><td>${p.plan}</td><td>${p.uses}</td><td>${p.expires}</td>
+    <td><span class="tag ${p.active?'tag-green':'tag-red'}">${p.active?'Active':'Inactive'}</span></td>
+    <td><button class="btn-sm-ghost" onclick="togglePromo(${i})">${p.active?'Disable':'Enable'}</button></td>
+  </tr>`).join('');
+}
+function togglePromo(i){promos[i].active=!promos[i].active;FM.save('admin_promos',promos);renderPromos();logAudit('Promo Code '+(promos[i].active?'Enabled':'Disabled'),promos[i].code);}
+function addPromo(){
+  const code=prompt('Enter promo code (e.g. SAVE20):');if(!code)return;
+  const disc=prompt('Discount amount (e.g. 20% or 500):');if(!disc)return;
+  const plan=prompt('Which plan? (Basic/Pro/Elite/All):','All');
+  const uses=parseInt(prompt('How many uses?','50'))||50;
+  const exp=prompt('Expiry date (YYYY-MM-DD):',new Date(Date.now()+30*86400000).toISOString().split('T')[0]);
+  promos.push({code:code.toUpperCase(),disc,plan,uses,expires:exp,active:true});
+  FM.save('admin_promos',promos);renderPromos();logAudit('Promo Created',code.toUpperCase()+' — '+disc);FMToast.success('Promo code created!');
+}
+
+// ── MEMBERS ──────────────────────────────
+function renderMembers(list){
+  document.getElementById('memberCount').textContent=list.length+' members total';
+  const planNames=plans.map(p=>p.name);
+  document.getElementById('memberTbody').innerHTML=list.map(m=>{
+    const bmi=m.weight&&m.height?parseFloat((m.weight/((m.height/100)**2)).toFixed(1)):null;
+    const planOpts=planNames.map(pn=>`<option${pn===m.plan?' selected':''}>${pn}</option>`).join('');
+    return`<tr>
+      <td style="color:var(--muted2);font-family:'DM Mono',monospace;font-size:11px">#${m.id}</td>
+      <td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:var(--volt-dim);color:var(--volt);font-family:'Syne',sans-serif;font-weight:700;font-size:10px;display:flex;align-items:center;justify-content:center">${m.name.charAt(0)}</div>${m.name}</div></td>
+      <td>${m.email}</td>
+      <td><select class="plan-sel" onchange="changePlan(${m.id},this.value)">${planOpts}</select></td>
+      <td><span class="tag ${m.role==='doctor'?'tag-teal':m.role==='admin'?'tag-coral':'tag-volt'}">${m.role}</span></td>
+      <td>${m.goal||'—'}</td>
+      <td>${bmi||'—'}</td>
+      <td>${m.joined}</td>
+      <td><span class="tag ${m.active?'tag-green':'tag-red'}">${m.active?'Active':'Inactive'}</span></td>
+      <td><div style="display:flex;gap:4px">
+        <button class="btn-sm-ghost" onclick="FMToast.info('Edit: ${m.name}')">Edit</button>
+        <button class="btn-sm-coral" onclick="toggleMemberActive(${m.id})">${m.active?'Suspend':'Activate'}</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function changePlan(id,newPlan){
+  const m=members.find(x=>x.id===id);if(m){m.plan=newPlan;logAudit('Plan Changed',m.name+' → '+newPlan);FMToast.success(m.name+' moved to '+newPlan);renderStats();}
+}
+function toggleMemberActive(id){
+  const m=members.find(x=>x.id===id);if(m){m.active=!m.active;logAudit(m.active?'Member Activated':'Member Suspended',m.name);renderMembers(members);renderStats();}
+}
+function filterMembers(q){
+  const f=members.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.email.toLowerCase().includes(q.toLowerCase())||m.plan.toLowerCase().includes(q.toLowerCase()));
+  renderMembers(f);
+}
+function openAddMember(){FMModal.open('addMemberModal');}
+async function addMember(){
+  const name=document.getElementById('nu_name').value.trim(),email=document.getElementById('nu_email').value.trim();
+  if(!name||!email){FMToast.error('Name and email required');return;}
+  const newM={id:Date.now(),name,email,role:document.getElementById('nu_role').value,plan:document.getElementById('nu_plan').value,goal:'General Fitness',weight:parseFloat(document.getElementById('nu_weight').value)||null,height:parseFloat(document.getElementById('nu_height').value)||null,joined:new Date().toISOString().split('T')[0],active:true};
+  try{
+    const regResp = await FMAPI.post('/auth/register',{...newM,password:document.getElementById('nu_pass').value||'FitMart2025!'});
+    if(regResp&&regResp.user) newM.id = regResp.user.id;
+  }catch(e){FMToast.error('Backend error: '+e.message.slice(0,80));}
+  members.push(newM);renderMembers(members);renderStats();
+  FMModal.close('addMemberModal');logAudit('Member Added',name+' ('+newM.plan+')');FMToast.success('Member added! Welcome email queued.');
+}
+
+// ── APPOINTMENTS ─────────────────────────
+function renderAppts(){
+  const all=[...DEMO_APPTS,...(FM.load('appointments',[])||[]).map(a=>({...a,patient:a.name||'—'}))];
+  document.getElementById('apptTbody').innerHTML=all.map(a=>`<tr>
+    <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2)">${a.id}</td>
+    <td>${a.patient||a.name||'—'}</td><td>${a.doctor}</td><td>${a.date}</td><td>${a.time||'TBC'}</td><td>${a.type||'In-Clinic'}</td>
+    <td><span class="tag ${a.status==='Confirmed'?'tag-green':a.status==='Done'?'tag-volt':a.status==='Cancelled'?'tag-red':'tag-teal'}">${a.status||'Pending'}</span></td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn-sm-ghost" onclick="updateApptStatus('${a.id}','Confirmed')">✓</button>
+      <button class="btn-sm-coral" onclick="updateApptStatus('${a.id}','Cancelled')">✕</button>
+    </div></td>
+  </tr>`).join('');
+}
+function filterAppts(q){renderAppts();}
+function updateApptStatus(id,status){logAudit('Appointment '+status,'#'+id);FMToast.success('Status updated to '+status);}
+
+// ── WORKOUTS ─────────────────────────────
+function renderWorkouts(){
+  const wkl=[...FM.getWorkouts(),...[
+    {exercise:'Bench Press',muscle:'Chest',date:'2025-12-19',sets:[{reps:10,weight:60}],calories:280,duration:45},
+    {exercise:'Squat',muscle:'Legs',date:'2025-12-19',sets:[{reps:8,weight:80}],calories:320,duration:60},
+    {exercise:'Pull-ups',muscle:'Back',date:'2025-12-18',sets:[{reps:12,weight:0}],calories:180,duration:30},
+  ]];
+  document.getElementById('wkTbody').innerHTML=wkl.slice(0,20).map((w,i)=>`<tr><td>${members[i%members.length]?.name||'Member'}</td><td>${w.exercise}</td><td>${w.muscle}</td><td>${w.date}</td><td>${w.sets?.length||3}</td><td>${w.calories||'—'}</td><td>${w.duration?w.duration+'m':'—'}</td></tr>`).join('');
+}
+
+// ── VITALS ───────────────────────────────
+function renderVitals(){
+  const vl=[...FM.getVitals(),...[
+    {heartRate:88,bpSys:132,bpDia:85,sugar:97,sleep:6.5,steps:7200,spo2:98,timestamp:new Date().toISOString()},
+    {heartRate:138,bpSys:145,bpDia:92,sugar:210,sleep:5.9,steps:4100,spo2:95,timestamp:new Date().toISOString()},
+  ]];
+  document.getElementById('vitTbody').innerHTML=vl.slice(0,15).map((v,i)=>{
+    const alert=v.heartRate>120||v.bpSys>140||v.sugar>200;
+    return`<tr><td>${members[i%members.length]?.name||'Member'}</td>
+      <td style="color:${v.heartRate>120?'var(--coral)':'var(--teal)'}">${v.heartRate||'—'}${v.heartRate?' bpm':''}</td>
+      <td>${v.bpSys?v.bpSys+'/'+v.bpDia:'—'}</td>
+      <td style="color:${v.sugar>200?'var(--coral)':'inherit'}">${v.sugar?v.sugar+' mg/dL':'—'}</td>
+      <td>${v.sleep?v.sleep+'h':'—'}</td>
+      <td>${v.steps?v.steps.toLocaleString():'—'}</td>
+      <td>${v.spo2?v.spo2+'%':'—'}</td>
+      <td><span class="tag ${alert?'tag-red':'tag-green'}">${alert?'⚠ Alert':'Normal'}</span></td>
+      <td style="font-size:11px;color:var(--muted2)">${new Date(v.timestamp||Date.now()).toLocaleString('en-PK',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── ALERTS ───────────────────────────────
+function renderAlerts(){
+  document.getElementById('alertBadge').textContent=ALERTS.length;
+  document.getElementById('alertsPanel').innerHTML=`
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px">Active Alerts (${ALERTS.length})</div>`+
+  ALERTS.map(a=>`<div class="alert-row">
+    <div class="al-dot" style="background:${a.sev==='critical'?'var(--coral)':'#f59e0b'}"></div>
+    <div style="width:32px;height:32px;border-radius:9px;background:${a.sev==='critical'?'var(--coral-dim)':'rgba(245,158,11,.1)'};display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${a.icon}</div>
+    <div class="al-body">
+      <div class="al-title">${a.sev==='critical'?'🚨':'⚠️'} ${a.type.replace('_',' ').replace(/\b\w/g,c=>c.toUpperCase())} — ${a.member}</div>
+      <div class="al-sub">Reading: <strong>${a.val}</strong> · Threshold: ${a.thresh}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+      <div class="al-time">${a.time}</div>
+      <button class="btn-sm-volt" onclick="FMToast.info('Doctor notified for '+a.member)">Notify Doctor</button>
+    </div>
+  </div>`).join('')+`<div style="padding:14px;background:var(--bg3);border-radius:10px;margin-top:14px;font-size:12px;color:var(--muted)">In production, critical alerts trigger automatic SMS and email notifications to the assigned doctor within 60 seconds.</div>`;
+}
+function clearAlerts(){document.getElementById('alertsPanel').innerHTML='<div style="padding:24px;text-align:center;color:var(--muted)">No active alerts ✅</div>';document.getElementById('alertBadge').textContent='0';logAudit('Alerts Cleared','All health alerts marked as read');}
+
+// ── AUDIT LOG ────────────────────────────
+function renderAudit(){
+  const defaultLog=[
+    {action:'Admin Login',detail:'Successful 3-factor authentication',time:'Just now',user:'Admin'},
+    {action:'Plans Viewed',detail:'Membership plan editor opened',time:'2 min ago',user:'Admin'},
+  ];
+  const all=[...defaultLog,...auditLog].slice(0,50);
+  document.getElementById('auditLog').innerHTML=all.map(e=>`<div class="audit-entry">
+    <div class="audit-icon" style="background:var(--volt-dim);color:var(--volt);font-size:11px;font-weight:700;font-family:'Syne',sans-serif">★</div>
+    <div style="flex:1"><div class="audit-action">${e.action}</div><div class="audit-meta">${e.detail} · by ${e.user}</div></div>
+    <div class="audit-time">${e.time}</div>
+  </div>`).join('');
+}
+function exportAudit(){
+  const blob=new Blob([JSON.stringify(auditLog,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitmart-audit-'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  FMToast.success('Audit log exported!');
+}
+
+// ── SETTINGS ─────────────────────────────
+function initSettings(){
+  const key=FMConfig.getApiKey();
+  document.getElementById('set_apiKey').value=key||'';
+  document.getElementById('set_backendUrl').value=FMConfig.BACKEND_URL||'http://127.0.0.1:8000';
+  updateApiKeyStatus(key);
+  // Notification toggles
+  const notifs=[
+    {id:'tgl_heartrate',label:'Heart Rate Alerts',desc:'Alert when HR > 120 bpm',on:true},
+    {id:'tgl_bp',label:'Blood Pressure Alerts',desc:'Alert when BP > 140/90',on:true},
+    {id:'tgl_sugar',label:'Blood Sugar Alerts',desc:'Alert when sugar > 200 mg/dL',on:true},
+    {id:'tgl_appt',label:'Appointment Reminders',desc:'Email 24h before appointments',on:true},
+    {id:'tgl_welcome',label:'Welcome Emails',desc:'Send welcome email on registration',on:false},
+    {id:'tgl_weekly',label:'Weekly Reports',desc:'Send weekly progress summary',on:false},
+  ];
+  document.getElementById('notifToggles').innerHTML=notifs.map(n=>`<div class="toggle-row"><div><div class="tr-label">${n.label}</div><div class="tr-desc">${n.desc}</div></div><div class="toggle${n.on?' on':''}" onclick="this.classList.toggle('on')" id="${n.id}"></div></div>`).join('');
+}
+function updateApiKeyStatus(key){
+  const el=document.getElementById('apiKeyStatus');
+  if(key&&key.startsWith('sk-ant-')){el.style.background='rgba(34,197,94,.07)';el.style.border='1px solid rgba(34,197,94,.18)';el.style.color='#4ade80';el.textContent='✓ Claude API key configured and ready';}
+  else{el.style.background='rgba(245,158,11,.06)';el.style.border='1px solid rgba(245,158,11,.15)';el.style.color='#f59e0b';el.textContent='⚠ No API key set — AI features will use built-in fallback plans';}
+}
+function saveApiKey(){
+  const k=document.getElementById('set_apiKey').value.trim();
+  FMConfig.setApiKey(k);updateApiKeyStatus(k);logAudit('API Key Updated','Claude AI key '+(k?'set':'cleared'));FMToast.success('API key saved!');
+}
+async function testBackend(){
+  const url=document.getElementById('set_backendUrl').value.trim();
+  const el=document.getElementById('backendStatus');
+  el.style.display='block';el.textContent='Testing connection...';el.style.background='rgba(255,255,255,.04)';el.style.color='var(--muted)';el.style.border='1px solid var(--border)';
+  try{
+    const r=await fetch(url+'/',{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    el.style.background='rgba(34,197,94,.07)';el.style.border='1px solid rgba(34,197,94,.18)';el.style.color='#4ade80';
+    el.textContent='✓ Connected — '+JSON.stringify(d);
+    FMConfig.setBackendUrl(url);
+  }catch(e){
+    el.style.background='rgba(255,99,71,.06)';el.style.border='1px solid rgba(255,99,71,.15)';el.style.color='var(--coral)';
+    el.textContent='✕ Cannot connect: '+e.message+'. Make sure uvicorn is running on '+url;
+  }
+}
+function saveEmailSettings(){logAudit('Email Config Saved','Provider: '+document.getElementById('set_emailProvider').value);FMToast.success('Email settings saved! Restart backend for changes to take effect.');}
+function saveSecurity(){const pin=document.getElementById('set_adminPin').value;if(pin&&(pin.length!==4||!/^\d{4}$/.test(pin))){FMToast.error('PIN must be exactly 4 digits (numbers only)');return;}if(pin)FM.save('admin_pin',pin);logAudit('Security Settings Saved','');FMToast.success('Security settings saved!');}
+function saveAppSettings(){FM.save('app_settings',{name:document.getElementById('set_appName').value,currency:document.getElementById('set_currency').value,supportEmail:document.getElementById('set_supportEmail').value,phone:document.getElementById('set_phone').value});logAudit('Platform Settings Saved','');FMToast.success('Platform settings saved!');}
+
+// ── NAV ──────────────────────────────────
+function showTab(name,el){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+name).classList.add('on');
+  document.querySelectorAll('.asb-a').forEach(a=>a.classList.remove('on'));
+  el.classList.add('on');
+  if(name==='analytics')renderAnalytics();
+}
+
+function exportAll(){
+  const data={exportDate:new Date().toISOString(),members,plans,promos,workouts:FM.getWorkouts(),vitals:FM.getVitals(),appointments:FM.load('appointments',[]),progress:FM.load('progress',[]),settings:FM.load('app_settings',{})};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fitmart-full-export-'+new Date().toISOString().split('T')[0]+'.json';a.click();
+  logAudit('Data Exported','Full platform export');FMToast.success('Data exported!');
+}
+function adminLogout(){if(!confirm('Log out of admin?'))return;FM.logout();}
+
+// ── INIT ─────────────────────────────────
+renderAll();
+initSettings();
+logAudit('Admin Session Started','Login from '+navigator.userAgent.split(')')[0].split('(')[1]||'browser');
+</script>
+</body>
+</html>

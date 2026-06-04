@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trainer Dashboard — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.trainer-layout{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+@media(max-width:1000px){.trainer-layout{grid-template-columns:1fr}}
+.member-list{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;position:sticky;top:110px}
+.ml-header{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ml-title{font-family:'Syne',sans-serif;font-weight:700;font-size:14px}
+.ml-search{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:9px 14px;color:var(--white);font-size:13px;margin:12px 16px;width:calc(100% - 32px)}
+.ml-search:focus{border-color:rgba(181,255,71,.4);outline:none}
+.member-item{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .2s}
+.member-item:hover,.member-item.on{background:rgba(181,255,71,.04)}
+.member-item.on{border-left:3px solid var(--volt)}
+.member-item:last-child{border-bottom:none}
+.mi-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:14px;flex-shrink:0}
+.mi-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.mi-goal{font-size:11px;color:var(--muted)}
+.mi-streak{margin-left:auto;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--volt)}
+/* Detail panels */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+@media(max-width:700px){.detail-grid{grid-template-columns:1fr}}
+.tp{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;margin-bottom:16px}
+.tp-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
+.tp-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.stat-mini{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+.sm-n{font-family:'Syne',sans-serif;font-weight:700;font-size:24px;color:var(--volt);letter-spacing:-1px;margin-bottom:3px}
+.sm-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+/* Plan assignment */
+.plan-option{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .25s}
+.plan-option:hover,.plan-option.on{border-color:rgba(181,255,71,.35);background:var(--volt-dim)}
+.po-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.po-desc{font-size:11px;color:var(--muted)}
+/* Chat / Notes */
+.chat-wrap{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.chat-msg{max-width:80%;padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.65}
+.chat-msg.trainer{background:var(--volt-dim);border:1px solid rgba(181,255,71,.15);align-self:flex-end;color:var(--white)}
+.chat-msg.member{background:var(--bg3);border:1px solid var(--border);align-self:flex-start;color:var(--muted)}
+.chat-meta{font-size:10px;color:var(--muted2);margin-top:4px;text-align:right}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a on" href="trainer-dashboard.html">My Members</a>
+    <a class="nav-a" href="workout-plans.html">Plans Library</a>
+    <a class="nav-a" href="exercise-library.html">Exercise Library</a>
+    <a class="nav-a" href="dashboard.html">Portal Home</a>
+  </div>
+  <div class="nav-right">
+    <span style="font-size:12px;color:var(--muted);padding:8px 14px">💪 Trainer</span>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Gym Module</span>
+  <h1>Trainer Dashboard</h1>
+  <p>Assign workout plans, monitor member progress, send feedback, and track attendance — all from one view.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Summary row -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px" class="rv">
+    <div class="stat-box"><div class="stat-n">8</div><div class="stat-l">Active Members</div></div>
+    <div class="stat-box"><div class="stat-n teal">23</div><div class="stat-l">Sessions This Week</div></div>
+    <div class="stat-box"><div class="stat-n white">94%</div><div class="stat-l">Attendance Rate</div></div>
+    <div class="stat-box"><div class="stat-n" style="color:#a78bfa">3</div><div class="stat-l">Plans Assigned</div></div>
+  </div>
+
+  <div class="trainer-layout">
+    <!-- Member list -->
+    <div>
+      <div class="member-list rv">
+        <div class="ml-header"><span class="ml-title">My Members</span><span class="badge badge-volt">8</span></div>
+        <input class="ml-search" placeholder="Search members..." oninput="filterMembers(this.value)" id="memberSearch"/>
+        <div id="memberListEl"></div>
+      </div>
+    </div>
+
+    <!-- Member detail -->
+    <div id="memberDetail">
+      <!-- Header -->
+      <div class="tp rv" style="background:var(--card2);border-color:rgba(181,255,71,.1)">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)">
+          <div id="detAv" style="width:56px;height:56px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:var(--bg)">A</div>
+          <div style="flex:1">
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:4px" id="detName">Select a member</div>
+            <div style="font-size:13px;color:var(--muted)" id="detMeta">Click any member from the list to view their profile</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap" id="detBadges"></div>
+        </div>
+        <!-- Mini stats -->
+        <div class="detail-grid" id="detStats">
+          <div class="stat-mini"><div class="sm-n">—</div><div class="sm-l">Workouts / Week</div></div>
+          <div class="stat-mini"><div class="sm-n teal">—</div><div class="sm-l">Current BMI</div></div>
+          <div class="stat-mini"><div class="sm-n coral">—</div><div class="sm-l">Weight</div></div>
+          <div class="stat-mini"><div class="sm-n white">—</div><div class="sm-l">Streak</div></div>
+        </div>
+        <!-- Progress chart -->
+        <canvas id="memberChart" height="120" style="margin-top:8px"></canvas>
+      </div>
+
+      <!-- Plan Assignment -->
+      <div class="tp rv d1">
+        <div class="tp-title">Assign Workout Plan</div>
+        <div class="tp-sub">Select a programme for this member based on their goals and restrictions</div>
+        <div id="planOptions"></div>
+        <div style="margin-top:14px">
+          <label class="form-label">Custom Plan Notes</label>
+          <textarea class="form-textarea" id="planNotes" placeholder="Special instructions, modifications, tempo guidance..." style="min-height:80px"></textarea>
+          <button class="btn-main btn-sm" style="margin-top:10px" onclick="assignPlan()">Assign Plan</button>
+        </div>
+      </div>
+
+      <!-- Progress tracking -->
+      <div class="tp rv d2">
+        <div class="tp-title">Progress Snapshot</div>
+        <div class="tp-sub">Last 4 weeks of training data</div>
+        <canvas id="progressChart" height="140"></canvas>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px" id="prBadges"></div>
+      </div>
+
+      <!-- Feedback / Chat -->
+      <div class="tp rv d3">
+        <div class="tp-title">Trainer Feedback</div>
+        <div class="tp-sub">Messages visible to member in their dashboard</div>
+        <div class="chat-wrap" id="chatWrap"></div>
+        <div style="display:flex;gap:10px">
+          <input class="form-input" id="feedbackMsg" placeholder="Write feedback or instructions..." style="flex:1"/>
+          <button class="btn-main btn-sm" onclick="sendFeedback()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+requireRole('trainer', 'auth-login.html');
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+const MEMBERS=[
+  {id:1,name:'Ali Raza',goal:'Weight Loss',level:'Intermediate',weight:78,height:178,streak:5,sessions:4,avatar:'A',color:'#b5ff47',condition:'None',injury:'None',activePlan:'Fat Burner 6-Week'},
+  {id:2,name:'Sara Ahmed',goal:'Muscle Gain',level:'Beginner',weight:65,height:163,streak:3,sessions:3,avatar:'S',color:'#2dd4bf',condition:'None',injury:'None',activePlan:'Beginner Kickstart'},
+  {id:3,name:'Hassan Khan',goal:'Strength',level:'Advanced',weight:90,height:180,streak:7,sessions:5,avatar:'H',color:'#ff6347',condition:'Mild hypertension',injury:'None',activePlan:'Powerlifting Foundation'},
+  {id:4,name:'Zainab Malik',goal:'Flexibility',level:'Beginner',weight:58,height:160,streak:2,sessions:2,avatar:'Z',color:'#a78bfa',condition:'None',injury:'Mild knee pain',activePlan:'Beginner Kickstart'},
+  {id:5,name:'Bilal Farooq',goal:'Endurance',level:'Intermediate',weight:72,height:175,streak:6,sessions:5,avatar:'B',color:'#f59e0b',condition:'None',injury:'None',activePlan:'Marathon Prep'},
+  {id:6,name:'Aisha Qureshi',goal:'Weight Loss',level:'Beginner',weight:68,height:162,streak:1,sessions:2,avatar:'A',color:'#60a5fa',condition:'Diabetes Type 2',injury:'None',activePlan:'None'},
+];
+const PLANS=['Fat Burner 6-Week','Mass Builder 8-Week','Powerlifting Foundation','Beginner Kickstart 4-Week','Home HIIT & Strength','Marathon Prep 12-Week'];
+const FEEDBACK_STORE={};
+
+let selectedMember=null,mChart=null,pChart=null;
+
+function renderMemberList(list){
+  document.getElementById('memberListEl').innerHTML=list.map(m=>`
+    <div class="member-item${selectedMember&&selectedMember.id===m.id?' on':''}" onclick="selectMember(${m.id})">
+      <div class="mi-av" style="background:${m.color}22;color:${m.color}">${m.avatar}</div>
+      <div>
+        <div class="mi-name">${m.name}</div>
+        <div class="mi-goal">${m.goal} · ${m.level}${m.injury!=='None'?` · ⚠ ${m.injury}`:''}</div>
+      </div>
+      <div class="mi-streak">🔥${m.streak}</div>
+    </div>`).join('');
+}
+function filterMembers(q){renderMemberList(MEMBERS.filter(m=>m.name.toLowerCase().includes(q.toLowerCase())||m.goal.toLowerCase().includes(q.toLowerCase())));}
+
+function selectMember(id){
+  selectedMember=MEMBERS.find(m=>m.id===id);
+  renderMemberList(MEMBERS);
+  const m=selectedMember;
+  const bmi=parseFloat((m.weight/((m.height/100)**2)).toFixed(1));
+  document.getElementById('detAv').textContent=m.avatar;
+  document.getElementById('detAv').style.background=m.color+'22';
+  document.getElementById('detAv').style.color=m.color;
+  document.getElementById('detName').textContent=m.name;
+  document.getElementById('detMeta').textContent=`${m.level} · ${m.goal} · BMI ${bmi}`;
+  document.getElementById('detBadges').innerHTML=`
+    <span class="badge badge-volt">${m.goal}</span>
+    ${m.condition!=='None'?`<span class="badge badge-coral">${m.condition}</span>`:''}
+    ${m.injury!=='None'?`<span class="badge badge-teal">⚠ ${m.injury}</span>`:''}`;
+
+  document.getElementById('detStats').innerHTML=`
+    <div class="stat-mini"><div class="sm-n">${m.sessions}</div><div class="sm-l">Sessions / Week</div></div>
+    <div class="stat-mini"><div class="sm-n teal">${bmi}</div><div class="sm-l">Current BMI</div></div>
+    <div class="stat-mini"><div class="sm-n coral">${m.weight}kg</div><div class="sm-l">Weight</div></div>
+    <div class="stat-mini"><div class="sm-n white">🔥${m.streak}</div><div class="sm-l">Day Streak</div></div>`;
+
+  // Member performance chart
+  if(mChart)mChart.destroy();
+  mChart=new Chart(document.getElementById('memberChart').getContext('2d'),{
+    type:'bar',
+    data:{labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      datasets:[{data:[1,1,0,1,1,0,1].map(v=>v*Math.floor(Math.random()*3+2)+1),backgroundColor:'rgba(181,255,71,.7)',borderRadius:5,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},beginAtZero:true,ticks:{stepSize:1}}}}
+  });
+
+  // Plan options
+  document.getElementById('planOptions').innerHTML=PLANS.map(p=>`
+    <div class="plan-option${m.activePlan===p?' on':''}" onclick="selectPlan(this,'${p}')">
+      <div><div class="po-name">${p}</div><div class="po-desc">${m.activePlan===p?'✅ Currently assigned':'Available'}</div></div>
+      ${m.activePlan===p?'<span class="badge badge-volt">Active</span>':''}
+    </div>`).join('');
+
+  // Progress chart
+  if(pChart)pChart.destroy();
+  const wts=[m.weight+2,m.weight+1.5,m.weight+0.8,m.weight];
+  pChart=new Chart(document.getElementById('progressChart').getContext('2d'),{
+    type:'line',
+    data:{labels:['Week 1','Week 2','Week 3','Week 4'],
+      datasets:[{data:wts,label:'Weight (kg)',borderColor:m.color,backgroundColor:m.color.replace('#','rgba(')+(m.color.length===7?',0.07)':'0.07)'),fill:true,tension:.4,pointBackgroundColor:m.color,pointRadius:5}]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,.04)'},ticks:{callback:v=>v+'kg'}}}}
+  });
+
+  document.getElementById('prBadges').innerHTML=`
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center"><div style="font-weight:700;font-size:15px;color:var(--volt)">-${(2).toFixed(1)}kg</div><div style="font-size:10px;color:var(--muted)">Weight Change</div></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center"><div style="font-weight:700;font-size:15px;color:var(--teal)">${m.sessions*4}</div><div style="font-size:10px;color:var(--muted)">Total Sessions</div></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center"><div style="font-weight:700;font-size:15px;color:#4ade80">↑${Math.round(m.sessions/5*100)}%</div><div style="font-size:10px;color:var(--muted)">Attendance</div></div>`;
+
+  // Load feedback
+  renderChat();
+}
+
+function selectPlan(el,name){document.querySelectorAll('.plan-option').forEach(p=>p.classList.remove('on'));el.classList.add('on');selectedMember.activePlan=name;}
+function assignPlan(){
+  if(!selectedMember){FMToast.error('Select a member first');return;}
+  FMToast.success(`✅ "${selectedMember.activePlan}" assigned to ${selectedMember.name}`);
+  // Update list
+  renderMemberList(MEMBERS);
+}
+
+function renderChat(){
+  const msgs=FEEDBACK_STORE[selectedMember?.id]||[
+    {role:'trainer',text:'Great work this week! Your bench press form has improved a lot.',time:'2 days ago'},
+    {role:'member',text:'Thanks! The cues you gave on elbow position really helped.',time:'2 days ago'},
+    {role:'trainer',text:`Next session focus on legs — let's push for 80kg squat.`,time:'Yesterday'},
+  ];
+  document.getElementById('chatWrap').innerHTML=msgs.map(m=>`
+    <div class="chat-msg ${m.role}">
+      ${m.text}
+      <div class="chat-meta">${m.time}</div>
+    </div>`).join('');
+  const cw=document.getElementById('chatWrap');cw.scrollTop=cw.scrollHeight;
+}
+
+function sendFeedback(){
+  if(!selectedMember){FMToast.error('Select a member first');return;}
+  const msg=document.getElementById('feedbackMsg').value.trim();
+  if(!msg)return;
+  if(!FEEDBACK_STORE[selectedMember.id])FEEDBACK_STORE[selectedMember.id]=[];
+  FEEDBACK_STORE[selectedMember.id].push({role:'trainer',text:msg,time:'Just now'});
+  document.getElementById('feedbackMsg').value='';
+  renderChat();FMToast.success('Feedback sent');
+}
+
+renderMemberList(MEMBERS);selectMember(1);
+</script>
+</body>
+</html>

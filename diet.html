@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Diet & Nutrition — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.diet-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+@media(max-width:1000px){.diet-grid{grid-template-columns:1fr}}
+.meal-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;transition:border-color .3s,transform .3s var(--ease)}
+.meal-card:hover{border-color:rgba(181,255,71,.18);transform:translateY(-3px)}
+.meal-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.meal-icon{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.meal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.meal-time{font-size:11px;color:var(--muted);margin-top:2px}
+.meal-items{display:flex;flex-direction:column;gap:10px}
+.mi-row{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px}
+.mi-name{font-size:13px;font-weight:500}
+.mi-macros{display:flex;gap:10px;font-size:11px;color:var(--muted)}
+.mi-cal{font-size:12px;font-weight:700;color:var(--volt)}
+.mi-done{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:9px;cursor:pointer;transition:all .25s;flex-shrink:0}
+.mi-done.checked{background:var(--volt);border-color:var(--volt);color:var(--bg)}
+/* Macro ring */
+.macro-ring-wrap{position:relative;width:160px;height:160px;margin:0 auto 20px}
+.macro-ring-wrap canvas{position:absolute;inset:0}
+.macro-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.macro-n{font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--volt);letter-spacing:-1px}
+.macro-l{font-size:11px;color:var(--muted)}
+.macro-legend{display:flex;justify-content:center;gap:16px;margin-bottom:24px}
+.ml-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.ml-dot{width:8px;height:8px;border-radius:50%}
+/* Water tracker */
+.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin:16px 0}
+.water-cup{width:100%;aspect-ratio:1;border-radius:8px;background:var(--border);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .25s}
+.water-cup.filled{background:rgba(45,212,191,.15);border-color:rgba(45,212,191,.4)}
+.water-cup:hover{border-color:rgba(45,212,191,.5)}
+/* Sidebar form */
+.diet-sidebar{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:sticky;top:110px}
+/* Nutrition log */
+.food-log{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-top:20px}
+.fl-entry{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.fl-entry:last-child{border-bottom:none}
+.fl-name{font-weight:500;font-size:14px}
+.fl-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.fl-cal{font-size:13px;font-weight:700;color:var(--volt)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="workout-tracker.html">Workouts</a>
+    <a class="nav-a" href="progress-tracking.html">Progress</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a on" href="diet.html">Diet</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Back</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Nutrition Module</span>
+  <h1>Diet & Nutrition</h1>
+  <p>Your AI-generated meal plan tailored to your goals, health profile, and preferences. Log meals, track macros, and hydration daily.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="diet-grid">
+    <!-- MAIN CONTENT -->
+    <div>
+      <!-- Daily summary bar -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px" class="rv">
+        <div class="stat-box"><div class="stat-n" id="calConsumed">0</div><div class="stat-l">kcal Consumed</div></div>
+        <div class="stat-box"><div class="stat-n teal" id="calRemain">2000</div><div class="stat-l">kcal Remaining</div></div>
+        <div class="stat-box"><div class="stat-n white" id="proteinTotal">0g</div><div class="stat-l">Protein</div></div>
+        <div class="stat-box"><div class="stat-n white" id="carbsTotal">0g</div><div class="stat-l">Carbs</div></div>
+      </div>
+
+      <!-- Macro chart + water -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px" class="rv d1">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;text-align:center">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px">Macro Distribution</div>
+          <div class="macro-ring-wrap">
+            <canvas id="macroChart"></canvas>
+            <div class="macro-center"><div class="macro-n" id="macroCalNum">1,900</div><div class="macro-l">kcal / day</div></div>
+          </div>
+          <div class="macro-legend">
+            <div class="ml-item"><div class="ml-dot" style="background:#b5ff47"></div>Protein</div>
+            <div class="ml-item"><div class="ml-dot" style="background:#2dd4bf"></div>Carbs</div>
+            <div class="ml-item"><div class="ml-dot" style="background:#ff6347"></div>Fats</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center"><div style="font-weight:700;font-size:16px;color:#b5ff47" id="protG">140g</div><div style="font-size:10px;color:var(--muted)">Protein</div></div>
+            <div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center"><div style="font-weight:700;font-size:16px;color:#2dd4bf" id="carbG">220g</div><div style="font-size:10px;color:var(--muted)">Carbs</div></div>
+            <div style="background:var(--bg3);border-radius:10px;padding:10px;text-align:center"><div style="font-weight:700;font-size:16px;color:#ff6347" id="fatG">65g</div><div style="font-size:10px;color:var(--muted)">Fats</div></div>
+          </div>
+        </div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:6px">Water Intake 💧</div>
+          <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Tap each glass to mark as consumed (250ml each)</div>
+          <div class="water-grid" id="waterGrid"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <div style="font-size:13px;color:var(--muted)"><span id="waterCount">0</span> / 8 glasses</div>
+            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--teal)" id="waterML">0 ml</div>
+          </div>
+          <div class="prog-wrap" style="margin-top:10px"><div class="prog-fill" id="waterProg" style="background:linear-gradient(90deg,var(--teal),#60a5fa);width:0%"></div></div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px">Target: 2,000 ml (2L)</div>
+          <button class="btn-outline btn-full" style="margin-top:16px;padding:10px" onclick="resetWater()">Reset</button>
+        </div>
+      </div>
+
+      <!-- Meal plan -->
+      <div style="display:flex;flex-direction:column;gap:16px" class="rv d2" id="mealPlanWrap">
+        <!-- Meals injected by JS -->
+      </div>
+
+      <!-- Food log -->
+      <div class="food-log rv d3" style="margin-top:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Today's Food Log</div>
+          <button class="btn-ghost btn-sm" onclick="clearFoodLog()">Clear</button>
+        </div>
+        <div id="foodLogList"><div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">No food logged yet. Add items using the form →</div></div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div>
+      <div class="diet-sidebar rv">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:6px">Log Food</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:20px">Add what you ate</div>
+        <div class="form-group"><label class="form-label">Food Item</label><input class="form-input" id="foodName" placeholder="e.g. Chicken breast" list="foodList"/><datalist id="foodList"><option value="Chicken Breast (100g)"/><option value="Brown Rice (100g)"/><option value="Oats (50g)"/><option value="Egg (1 whole)"/><option value="Greek Yogurt (150g)"/><option value="Banana"/><option value="Almonds (30g)"/><option value="Salmon (100g)"/><option value="Broccoli (100g)"/><option value="Sweet Potato (100g)"/></datalist></div>
+        <div class="form-group"><label class="form-label">Meal</label><select class="form-select" id="foodMeal"><option>Breakfast</option><option>Morning Snack</option><option>Lunch</option><option>Afternoon Snack</option><option>Dinner</option></select></div>
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Calories</label><input class="form-input" type="number" id="foodCal" placeholder="250"/></div>
+          <div class="form-group"><label class="form-label">Protein (g)</label><input class="form-input" type="number" id="foodProt" placeholder="30"/></div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group"><label class="form-label">Carbs (g)</label><input class="form-input" type="number" id="foodCarb" placeholder="20"/></div>
+          <div class="form-group"><label class="form-label">Fats (g)</label><input class="form-input" type="number" id="foodFat" placeholder="8"/></div>
+        </div>
+        <button class="btn-main btn-full" onclick="logFood()" style="margin-bottom:16px">+ Add to Log</button>
+
+        <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px">Your Targets</div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--muted)">Calories</span><span id="tgt_cal">1,900 kcal</span></div><div class="prog-wrap"><div class="prog-fill" id="p_cal" style="width:0%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--muted)">Protein</span><span id="tgt_prot">140g</span></div><div class="prog-wrap"><div class="prog-fill" id="p_prot" style="width:0%"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--muted)">Carbs</span><span id="tgt_carb">220g</span></div><div class="prog-wrap"><div class="prog-fill" id="p_carb" style="width:0%;background:linear-gradient(90deg,var(--teal),#60a5fa)"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--muted)">Fats</span><span id="tgt_fat">65g</span></div><div class="prog-wrap"><div class="prog-fill" id="p_fat" style="width:0%;background:linear-gradient(90deg,var(--coral),#f59e0b)"></div></div></div>
+          </div>
+        </div>
+
+        <button class="btn-outline btn-full" style="margin-top:24px" onclick="getAIDietPlan()">⚡ Generate AI Meal Plan</button>
+      </div>
+
+      <!-- AI Plan result -->
+      <div class="res-box" id="aiDietBox" style="margin-top:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border)">
+          <div style="width:32px;height:32px;background:var(--volt-dim);border-radius:9px;display:flex;align-items:center;justify-content:center">🥗</div>
+          <div><div style="font-weight:600;font-size:14px">AI Meal Plan</div><div style="font-size:11px;color:var(--muted)">Personalised · Not clinical advice</div></div>
+        </div>
+        <div id="aiDietBody"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+Chart.defaults.color='rgba(237,244,240,0.46)';
+const user=FM.getUser()||{};
+const goal=user.goal||'Weight Loss';
+const wt=parseFloat(user.weight)||70;
+const TARGETS={cal:goal==='Muscle Gain'?Math.round(wt*40):goal==='Weight Loss'?1600:1900,prot:Math.round(wt*(goal==='Muscle Gain'?2.2:1.6)),carb:goal==='Weight Loss'?150:220,fat:goal==='Weight Loss'?55:65};
+
+// Set targets display
+document.getElementById('tgt_cal').textContent=TARGETS.cal+' kcal';
+document.getElementById('tgt_prot').textContent=TARGETS.prot+'g';
+document.getElementById('tgt_carb').textContent=TARGETS.carb+'g';
+document.getElementById('tgt_fat').textContent=TARGETS.fat+'g';
+document.getElementById('protG').textContent=TARGETS.prot+'g';
+document.getElementById('carbG').textContent=TARGETS.carb+'g';
+document.getElementById('fatG').textContent=TARGETS.fat+'g';
+document.getElementById('macroCalNum').textContent=TARGETS.cal.toLocaleString();
+document.getElementById('calRemain').textContent=TARGETS.cal;
+
+// Macro donut chart
+const macroChart=new Chart(document.getElementById('macroChart').getContext('2d'),{
+  type:'doughnut',
+  data:{datasets:[{data:[TARGETS.prot*4,TARGETS.carb*4,TARGETS.fat*9],backgroundColor:['rgba(181,255,71,0.8)','rgba(45,212,191,0.8)','rgba(255,99,71,0.8)'],borderColor:'transparent',borderWidth:0}]},
+  options:{responsive:true,cutout:'72%',plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(14,28,36,.95)',callbacks:{label:ctx=>['Protein','Carbs','Fats'][ctx.dataIndex]+': '+ctx.raw+' kcal'}}}}
+});
+
+// Meal plans per goal
+const MEALS={
+  'Weight Loss':[
+    {name:'Breakfast',time:'7:00 AM',icon:'🌅',color:'var(--volt)',items:[{n:'Oats (50g)',cal:177,p:6,c:30,f:3},{n:'Egg whites × 3',cal:51,p:11,c:0,f:0},{n:'Blueberries (80g)',cal:46,p:1,c:11,f:0}]},
+    {name:'Morning Snack',time:'10:00 AM',icon:'🍎',color:'var(--teal)',items:[{n:'Greek Yogurt (150g)',cal:87,p:15,c:6,f:1},{n:'Almonds (20g)',cal:117,p:4,c:2,f:10}]},
+    {name:'Lunch',time:'1:00 PM',icon:'🥗',color:'var(--coral)',items:[{n:'Chicken Breast (150g)',cal:248,p:46,c:0,f:5},{n:'Brown Rice (80g dry)',cal:289,p:6,c:63,f:2},{n:'Mixed Salad',cal:25,p:2,c:5,f:0}]},
+    {name:'Dinner',time:'7:00 PM',icon:'🌙',color:'#a78bfa',items:[{n:'Grilled Fish (150g)',cal:195,p:42,c:0,f:4},{n:'Steamed Broccoli (150g)',cal:51,p:4,c:10,f:1},{n:'Sweet Potato (100g)',cal:86,p:2,c:20,f:0}]},
+  ],
+  'Muscle Gain':[
+    {name:'Breakfast',time:'7:00 AM',icon:'🌅',color:'var(--volt)',items:[{n:'Oats (100g)',cal:354,p:12,c:60,f:6},{n:'Whole Eggs × 4',cal:280,p:24,c:2,f:20},{n:'Banana',cal:89,p:1,c:23,f:0}]},
+    {name:'Mid Morning',time:'10:00 AM',icon:'💪',color:'var(--teal)',items:[{n:'Protein Shake (1 scoop)',cal:120,p:25,c:3,f:2},{n:'Peanut Butter (30g)',cal:188,p:8,c:6,f:16}]},
+    {name:'Lunch',time:'1:00 PM',icon:'🥗',color:'var(--coral)',items:[{n:'Beef (200g)',cal:340,p:62,c:0,f:10},{n:'White Rice (120g dry)',cal:428,p:9,c:94,f:1},{n:'Vegetables',cal:50,p:3,c:10,f:0}]},
+    {name:'Dinner',time:'7:00 PM',icon:'🌙',color:'#a78bfa',items:[{n:'Chicken Breast (200g)',cal:330,p:62,c:0,f:7},{n:'Pasta (100g dry)',cal:371,p:13,c:74,f:2},{n:'Olive Oil (1 tbsp)',cal:119,p:0,c:0,f:14}]},
+  ],
+};
+const plan=MEALS[goal]||MEALS['Weight Loss'];
+
+// Render meal cards
+document.getElementById('mealPlanWrap').innerHTML=plan.map((m,i)=>`
+  <div class="meal-card">
+    <div class="meal-header">
+      <div class="meal-icon" style="background:${m.color.replace('var(--volt)','var(--volt-dim)').replace('var(--teal)','var(--teal-dim)').replace('var(--coral)','var(--coral-dim)').replace('#a78bfa','rgba(167,139,250,.1)')}">${m.icon}</div>
+      <div>
+        <div class="meal-title">${m.name}</div>
+        <div class="meal-time">${m.time} · ${m.items.reduce((a,x)=>a+x.cal,0)} kcal</div>
+      </div>
+      <div style="margin-left:auto;font-size:12px;color:var(--muted)">P: ${m.items.reduce((a,x)=>a+x.p,0)}g · C: ${m.items.reduce((a,x)=>a+x.c,0)}g · F: ${m.items.reduce((a,x)=>a+x.f,0)}g</div>
+    </div>
+    <div class="meal-items">
+      ${m.items.map(it=>`
+        <div class="mi-row">
+          <div><div class="mi-name">${it.n}</div><div class="mi-macros"><span>P ${it.p}g</span><span>C ${it.c}g</span><span>F ${it.f}g</span></div></div>
+          <div style="display:flex;align-items:center;gap:10px"><span class="mi-cal">${it.cal} kcal</span><div class="mi-done" onclick="toggleMeal(this)">✓</div></div>
+        </div>`).join('')}
+    </div>
+  </div>`).join('');
+
+function toggleMeal(el){el.classList.toggle('checked')}
+
+// Water tracker
+let waterCount=parseInt(FM.load('water_today'))||0;
+function buildWater(){
+  const g=document.getElementById('waterGrid');g.innerHTML='';
+  for(let i=0;i<8;i++){const d=document.createElement('div');d.className='water-cup'+(i<waterCount?' filled':'');d.textContent='💧';d.onclick=()=>toggleWater(i);g.appendChild(d);}
+  document.getElementById('waterCount').textContent=waterCount;
+  document.getElementById('waterML').textContent=(waterCount*250)+'ml';
+  document.getElementById('waterProg').style.width=(waterCount/8*100)+'%';
+}
+function toggleWater(i){waterCount=waterCount===i+1?i:i+1;FM.save('water_today',waterCount);buildWater();}
+function resetWater(){waterCount=0;FM.save('water_today',0);buildWater();}
+buildWater();
+
+// Food log
+let foodLog=FM.load('food_log_today',[])||[];
+function logFood(){
+  const name=document.getElementById('foodName').value.trim();
+  if(!name){FMToast.error('Please enter a food item');return;}
+  const entry={id:Date.now(),name,meal:document.getElementById('foodMeal').value,cal:parseInt(document.getElementById('foodCal').value)||0,prot:parseInt(document.getElementById('foodProt').value)||0,carb:parseInt(document.getElementById('foodCarb').value)||0,fat:parseInt(document.getElementById('foodFat').value)||0};
+  foodLog.unshift(entry);FM.save('food_log_today',foodLog);
+  renderFoodLog();document.getElementById('foodName').value='';document.getElementById('foodCal').value='';document.getElementById('foodProt').value='';document.getElementById('foodCarb').value='';document.getElementById('foodFat').value='';
+  FMToast.success('Food logged!');
+}
+function deleteFood(id){foodLog=foodLog.filter(f=>f.id!==id);FM.save('food_log_today',foodLog);renderFoodLog();}
+function clearFoodLog(){foodLog=[];FM.save('food_log_today',[]);renderFoodLog();}
+function renderFoodLog(){
+  const totCal=foodLog.reduce((a,f)=>a+f.cal,0);
+  const totProt=foodLog.reduce((a,f)=>a+f.prot,0);
+  const totCarb=foodLog.reduce((a,f)=>a+f.carb,0);
+  document.getElementById('calConsumed').textContent=totCal;
+  document.getElementById('calRemain').textContent=Math.max(0,TARGETS.cal-totCal);
+  document.getElementById('proteinTotal').textContent=totProt+'g';
+  document.getElementById('carbsTotal').textContent=totCarb+'g';
+  document.getElementById('p_cal').style.width=Math.min(100,totCal/TARGETS.cal*100)+'%';
+  document.getElementById('p_prot').style.width=Math.min(100,totProt/TARGETS.prot*100)+'%';
+  document.getElementById('p_carb').style.width=Math.min(100,totCarb/TARGETS.carb*100)+'%';
+  document.getElementById('p_fat').style.width=Math.min(100,foodLog.reduce((a,f)=>a+f.fat,0)/TARGETS.fat*100)+'%';
+  if(!foodLog.length){document.getElementById('foodLogList').innerHTML='<div style="color:var(--muted);font-size:13px;text-align:center;padding:16px">No food logged yet. Add items using the form →</div>';return;}
+  document.getElementById('foodLogList').innerHTML=foodLog.map(f=>`
+    <div class="fl-entry">
+      <div><div class="fl-name">${f.name}</div><div class="fl-meta">${f.meal} · P:${f.prot}g C:${f.carb}g F:${f.fat}g</div></div>
+      <div style="display:flex;align-items:center;gap:12px"><span class="fl-cal">${f.cal} kcal</span><button class="btn-ghost btn-sm" style="padding:3px 8px;font-size:11px" onclick="deleteFood(${f.id})">✕</button></div>
+    </div>`).join('');
+}
+renderFoodLog();
+
+async function getAIDietPlan(){
+  const box=document.getElementById('aiDietBox'),body=document.getElementById('aiDietBody');
+  box.classList.remove('show');
+  const btn=document.querySelector('[onclick="getAIDietPlan()"]');
+  btn.disabled=true;btn.textContent='Generating...';
+  const injury=user.injury||'None',disease=user.disease||'None';
+  const prompt=`You are FitMart's nutrition AI. Create a practical, specific 1-day meal plan for: Goal ${goal}, Weight ${wt}kg, Injury ${injury}, Condition ${disease}. Target ${TARGETS.cal}kcal, ${TARGETS.prot}g protein. Use <strong> for meal names and <span class="hl"> for calorie/protein numbers. Format as: Breakfast → item list with cals. Lunch → item list. Dinner → item list. Plus 2 snack options and 1 key nutrition tip. Under 250 words.`;
+  try{
+    const text = await FMAi.ask(prompt, 900);
+    body.innerHTML = text && !text.includes('AI Key Not Configured') ? text : '<p style="color:var(--muted)">Configure your Claude API key in Admin Settings to get personalized AI diet plans.</p>';
+  }catch{body.innerHTML='<p style="color:var(--muted)">Could not reach AI. Check your API key in assets/app.js.</p>';}
+  box.classList.add('show');btn.disabled=false;btn.textContent='⚡ Generate AI Meal Plan';
+}
+</script>
+</body>
+</html>

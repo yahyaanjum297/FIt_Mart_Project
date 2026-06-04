@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Appointments — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.appt-layout{display:grid;grid-template-columns:1fr 400px;gap:24px;align-items:start}
+@media(max-width:1080px){.appt-layout{grid-template-columns:1fr}}
+
+/* Calendar strip */
+.cal-strip{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.cal-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.cal-nav{display:flex;gap:8px}
+.cal-btn{width:32px;height:32px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:color .2s,border-color .2s}
+.cal-btn:hover{color:var(--white);border-color:var(--border2)}
+.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px}
+.cdh{text-align:center;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:6px 0}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s,color .2s;position:relative}
+.cal-day.other{color:var(--muted2)}
+.cal-day.today{background:var(--volt-dim);color:var(--volt);font-weight:700;border:1px solid rgba(181,255,71,.3)}
+.cal-day.selected{background:var(--volt);color:var(--bg);font-weight:700}
+.cal-day:hover:not(.other){background:rgba(181,255,71,.1)}
+.cal-day .dot{width:4px;height:4px;border-radius:50%;background:var(--teal);position:absolute;bottom:4px}
+
+/* Time slots */
+.slots-wrap{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px}
+.slots-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+@media(max-width:500px){.slots-grid{grid-template-columns:repeat(2,1fr)}}
+.slot{padding:10px;border-radius:10px;background:var(--bg3);border:1.5px solid var(--border);text-align:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .25s;position:relative}
+.slot.available:hover{border-color:var(--volt);color:var(--volt);background:var(--volt-dim)}
+.slot.selected{border-color:var(--volt);background:var(--volt);color:var(--bg);font-weight:700}
+.slot.booked{color:var(--muted2);cursor:default;opacity:.5}
+.slot.booked::after{content:'Full';font-size:9px;display:block;color:var(--coral)}
+
+/* Appointment cards */
+.appt-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:12px;transition:border-color .25s}
+.appt-card:hover{border-color:rgba(181,255,71,.15)}
+.ac-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.ac-doc{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px}
+.ac-spec{font-size:12px;color:var(--volt);font-weight:600;margin-bottom:3px}
+.ac-meta{font-size:12px;color:var(--muted)}
+.ac-body{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.ac-item{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.ac-item-v{font-weight:600;font-size:13px;margin-bottom:2px}
+.ac-item-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.ac-actions{display:flex;gap:8px}
+
+/* Doctor cards for selection */
+.doc-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+@media(max-width:500px){.doc-select-grid{grid-template-columns:1fr}}
+.doc-sel-card{padding:14px;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;cursor:pointer;transition:all .25s}
+.doc-sel-card:hover,.doc-sel-card.on{border-color:rgba(181,255,71,.4);background:var(--volt-dim)}
+.doc-sel-name{font-weight:600;font-size:13px;margin-bottom:2px}
+.doc-sel-spec{font-size:11px;color:var(--volt);font-weight:600}
+.doc-sel-avail{font-size:10px;color:var(--muted);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="healthcare.html">Health Care</a>
+    <a class="nav-a on" href="appointment.html">Appointments</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Healthcare Module</span>
+  <h1>Appointments</h1>
+  <p>Book doctor consultations, physiotherapy sessions, lab tests, and check-ups. Manage all your upcoming and past appointments in one place.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="appt-layout">
+
+    <!-- LEFT: Book + Calendar -->
+    <div>
+      <!-- My Appointments -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px" class="rv">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px">My Appointments</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:3px" id="apptCount">Loading...</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="filter-btn on" onclick="filterAppts('all',this)" style="padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s">All</button>
+          <button class="filter-btn" onclick="filterAppts('Pending',this)" style="padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s">Pending</button>
+          <button class="filter-btn" onclick="filterAppts('Confirmed',this)" style="padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s">Confirmed</button>
+        </div>
+      </div>
+      <div id="apptList" class="rv d1"></div>
+
+      <!-- Calendar -->
+      <div class="cal-strip rv d2" style="margin-top:24px">
+        <div class="cal-header">
+          <div class="cal-title" id="calTitle">Loading...</div>
+          <div class="cal-nav">
+            <button class="cal-btn" onclick="changeMonth(-1)">‹</button>
+            <button class="cal-btn" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-days-header">
+          <div class="cdh">Sun</div><div class="cdh">Mon</div><div class="cdh">Tue</div>
+          <div class="cdh">Wed</div><div class="cdh">Thu</div><div class="cdh">Fri</div><div class="cdh">Sat</div>
+        </div>
+        <div class="cal-days" id="calDays"></div>
+      </div>
+
+      <!-- Time slots -->
+      <div class="slots-wrap rv d3" style="margin-top:20px">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px">Available Slots — <span id="selectedDate" style="color:var(--volt)">Select a date</span></div>
+        <div class="slots-grid" id="slotsGrid">
+          <div style="color:var(--muted);font-size:13px;grid-column:1/-1;padding:12px">Click a date on the calendar to see available slots.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Booking form -->
+    <div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:sticky;top:110px" class="rv">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:6px">Book Appointment</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:24px">Fill in the details below to schedule a visit</div>
+
+        <div class="form-group">
+          <label class="form-label">Appointment Type</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:4px">
+            <button class="slot available selected" id="type-clinic" onclick="setType('In-Clinic',this)">🏥 In-Clinic</button>
+            <button class="slot available" id="type-video" onclick="setType('Video Call',this)">💻 Video Call</button>
+            <button class="slot available" id="type-phone" onclick="setType('Phone Call',this)">📞 Phone</button>
+            <button class="slot available" id="type-physio" onclick="setType('Physiotherapy',this)">🦴 Physio</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Select Doctor</label>
+          <div class="doc-select-grid" id="docGrid"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input class="form-input" id="bkName" placeholder="Ali Raza"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="bkPhone" placeholder="+92 300 000 0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="bkEmail" type="email" placeholder="ali@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" id="bkDate" type="date"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Preferred Time</label>
+          <select class="form-select" id="bkTime">
+            <option>9:00 AM</option><option>9:30 AM</option><option>10:00 AM</option>
+            <option>10:30 AM</option><option>11:00 AM</option><option>11:30 AM</option>
+            <option>12:00 PM</option><option>2:00 PM</option><option>2:30 PM</option>
+            <option>3:00 PM</option><option>3:30 PM</option><option>4:00 PM</option>
+            <option>4:30 PM</option><option>5:00 PM</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Reason / Symptoms</label>
+          <textarea class="form-textarea" id="bkReason" placeholder="Describe your concern briefly..." style="min-height:90px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Health Conditions (if any)</label>
+          <input class="form-input" id="bkCondition" placeholder="e.g. diabetes, hypertension"/>
+        </div>
+
+        <button class="btn-main btn-full" id="bookBtn" onclick="confirmBooking()">
+          <div class="spinner" id="bookSpin" style="display:none"></div>
+          <span id="bookLbl">Confirm Appointment →</span>
+        </button>
+
+        <div style="margin-top:16px;text-align:center;font-size:12px;color:var(--muted)">
+          📩 Confirmation sent via SMS and email<br>
+          🔄 Free rescheduling up to 6 hours before
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+const DOCTORS=[
+  {name:'Dr. Fatima Malik',spec:'General Physician',avail:'Today',icon:'F',color:'var(--teal)'},
+  {name:'Dr. Ahmed Siddiqui',spec:'Cardiologist',avail:'Tomorrow',icon:'A',color:'var(--volt)'},
+  {name:'Dr. Sara Rehman',spec:'Endocrinologist',avail:'Wed',icon:'S',color:'var(--coral)'},
+  {name:'Dr. Zara Khan',spec:'Sports Medicine',avail:'Today',icon:'Z',color:'#a78bfa'},
+  {name:'Dr. Umar Farooq',spec:'Physiotherapist',avail:'Today',icon:'U',color:'var(--teal)'},
+  {name:'Dr. Nadia Akhtar',spec:'Nutritionist',avail:'Thu',icon:'N',color:'var(--volt)'},
+];
+const TIMES=['9:00 AM','9:30 AM','10:00 AM','10:30 AM','11:00 AM','11:30 AM','2:00 PM','2:30 PM','3:00 PM','3:30 PM','4:00 PM','5:00 PM'];
+const BOOKED_SLOTS=[2,5,8]; // indices of already-booked slots (demo)
+
+let selectedType='In-Clinic', selectedDoctor=DOCTORS[0].name;
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+let selectedCalDate=null, selectedSlot=null, apptFilter='all';
+
+// Pre-fill from logged-in user
+const user=FM.getUser()||{};
+if(user.name) document.getElementById('bkName').value=user.name;
+if(user.email) document.getElementById('bkEmail').value=user.email;
+document.getElementById('bkDate').value=new Date(Date.now()+86400000).toISOString().split('T')[0];
+document.getElementById('bkDate').min=new Date().toISOString().split('T')[0];
+
+// Render doctor grid
+document.getElementById('docGrid').innerHTML=DOCTORS.map((d,i)=>`
+  <div class="doc-sel-card${i===0?' on':''}" onclick="selectDoc('${d.name}',this)">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:26px;height:26px;border-radius:50%;background:${d.color}22;color:${d.color};font-family:'Syne',sans-serif;font-weight:700;font-size:11px;display:flex;align-items:center;justify-content:center">${d.icon}</div>
+      <div><div class="doc-sel-name">${d.name.split(' ').slice(1).join(' ')}</div><div class="doc-sel-spec">${d.spec}</div></div>
+    </div>
+    <div class="doc-sel-avail">🟢 Available: ${d.avail}</div>
+  </div>`).join('');
+
+function selectDoc(name,el){selectedDoctor=name;document.querySelectorAll('.doc-sel-card').forEach(c=>c.classList.remove('on'));el.classList.add('on');}
+function setType(type,btn){selectedType=type;document.querySelectorAll('#bkType .slot, .slot').forEach(b=>{if(['type-clinic','type-video','type-phone','type-physio'].includes(b.id))b.classList.remove('selected');});btn.classList.add('selected');}
+
+// Calendar
+function buildCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('calTitle').textContent=months[calMonth]+' '+calYear;
+  const first=new Date(calYear,calMonth,1).getDay();
+  const days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date();
+  const appts=FM.load('appointments',[])||[];
+  const apptDates=new Set(appts.map(a=>a.date));
+  let html='';
+  // Empty cells before month starts
+  for(let i=0;i<first;i++) html+=`<div class="cal-day other"></div>`;
+  for(let d=1;d<=days;d++){
+    const dateStr=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=d===today.getDate()&&calMonth===today.getMonth()&&calYear===today.getFullYear();
+    const isSel=dateStr===selectedCalDate;
+    const hasAppt=apptDates.has(dateStr);
+    html+=`<div class="cal-day${isToday?' today':''}${isSel?' selected':''}" onclick="selectDate('${dateStr}')">${d}${hasAppt?'<div class="dot"></div>':''}</div>`;
+  }
+  document.getElementById('calDays').innerHTML=html;
+}
+function changeMonth(dir){calMonth+=dir;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}buildCalendar();}
+
+function selectDate(dateStr){
+  selectedCalDate=dateStr;
+  document.getElementById('bkDate').value=dateStr;
+  document.getElementById('selectedDate').textContent=new Date(dateStr+'T12:00:00').toLocaleDateString('en-PK',{weekday:'long',month:'long',day:'numeric'});
+  buildCalendar();
+  buildSlots();
+}
+
+function buildSlots(){
+  const html=TIMES.map((t,i)=>{
+    const booked=BOOKED_SLOTS.includes(i);
+    const sel=i===selectedSlot;
+    return`<div class="slot ${booked?'booked':'available'}${sel?' selected':''}" onclick="${booked?'':'pickSlot('+i+',\''+t+'\')'}">${t}</div>`;
+  }).join('');
+  document.getElementById('slotsGrid').innerHTML=html;
+}
+function pickSlot(i,time){selectedSlot=i;document.getElementById('bkTime').value=time;buildSlots();}
+
+// Appointments list
+function renderAppts(){
+  let appts=FM.load('appointments',[])||[];
+  if(apptFilter!=='all') appts=appts.filter(a=>(a.status||'Pending')===apptFilter);
+  document.getElementById('apptCount').textContent=`${appts.length} appointment${appts.length!==1?'s':''}`;
+  if(!appts.length){
+    document.getElementById('apptList').innerHTML=`<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;color:var(--muted);font-size:14px">No appointments yet. Book your first one using the form →</div>`;
+    return;
+  }
+  const statusColor={Pending:'badge-teal',Confirmed:'badge-green',Done:'badge-volt',Cancelled:'badge-red'};
+  document.getElementById('apptList').innerHTML=appts.sort((a,b)=>new Date(b.id)-new Date(a.id)).map(a=>`
+    <div class="appt-card">
+      <div class="ac-header">
+        <div>
+          <div class="ac-doc">${a.doctor}</div>
+          <div class="ac-meta">📅 ${a.date} · ⏰ ${a.time||'TBC'} · 📍 ${a.type||'In-Clinic'}</div>
+        </div>
+        <span class="badge ${statusColor[a.status||'Pending']||'badge-teal'}">${a.status||'Pending'}</span>
+      </div>
+      ${a.reason?`<div style="font-size:13px;color:var(--muted);margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:8px">📝 ${a.reason}</div>`:''}
+      <div class="ac-actions">
+        <button class="btn-ghost btn-sm" onclick="cancelAppt(${a.id})">Cancel</button>
+        <button class="btn-outline btn-sm" onclick="rescheduleAppt(${a.id})">Reschedule</button>
+      </div>
+    </div>`).join('');
+}
+
+function filterAppts(f,btn){
+  apptFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>{b.style.borderColor='';b.style.color='';b.style.background='';});
+  btn.style.borderColor='rgba(181,255,71,.4)';btn.style.color='var(--volt)';btn.style.background='var(--volt-dim)';
+  renderAppts();
+}
+
+function cancelAppt(id){
+  if(!confirm('Cancel this appointment?'))return;
+  const appts=FM.load('appointments',[])||[];
+  const idx=appts.findIndex(a=>a.id===id);
+  if(idx>-1){appts[idx].status='Cancelled';FM.save('appointments',appts);}
+  renderAppts();buildCalendar();FMToast.info('Appointment cancelled');
+}
+function rescheduleAppt(id){FMToast.info('Select a new date and time, then book again');buildCalendar();}
+
+async function confirmBooking(){
+  const name=document.getElementById('bkName').value.trim();
+  const date=document.getElementById('bkDate').value;
+  const time=document.getElementById('bkTime').value;
+  if(!name){FMToast.error('Please enter your name');return;}
+  if(!date){FMToast.error('Please select a date from the calendar');return;}
+  const today=new Date().toISOString().split('T')[0];
+  if(date<today){FMToast.error('Please select a future date');return;}
+  if(!selectedDoctor){FMToast.error('Please select a doctor');return;}
+  const btn=document.getElementById('bookBtn'),spin=document.getElementById('bookSpin'),lbl=document.getElementById('bookLbl');
+  spin.style.display='block';lbl.textContent='Booking...';btn.disabled=true;
+  const appt={
+    id:Date.now(), name, phone:document.getElementById('bkPhone').value,
+    email:document.getElementById('bkEmail').value, doctor:selectedDoctor,
+    date, time, type:selectedType,
+    reason:document.getElementById('bkReason').value,
+    condition:document.getElementById('bkCondition').value,
+    status:'Pending'
+  };
+  // Try backend
+  try{ await FMAPI.post('/appointments/'+(user.id||1), {doctor_name:appt.doctor, appt_date:appt.date, appt_type:appt.type, reason:appt.reason}); }catch{}
+  // Always save locally
+  const appts=FM.load('appointments',[])||[];
+  appts.push(appt); FM.save('appointments',appts);
+  await new Promise(r=>setTimeout(r,800));
+  spin.style.display='none';lbl.textContent='Confirm Appointment →';btn.disabled=false;
+  FMToast.success(`✅ Appointment booked with ${selectedDoctor} on ${date} at ${time}!`);
+  renderAppts();buildCalendar();
+  // Reset form
+  document.getElementById('bkReason').value='';document.getElementById('bkCondition').value='';
+}
+
+// Init
+buildCalendar();renderAppts();
+</script>
+</body>
+</html>

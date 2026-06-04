@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Exercise Library — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.lib-controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:32px}
+.lib-search{flex:1;min-width:200px;background:var(--card);border:1px solid var(--border2);border-radius:100px;padding:12px 20px;color:var(--white);font-size:14px}
+.lib-search:focus{border-color:rgba(181,255,71,.4);outline:none}
+.muscle-filter{display:flex;gap:8px;flex-wrap:wrap}
+.mf-btn{padding:8px 16px;border-radius:100px;font-size:12px;font-weight:600;border:1.5px solid var(--border2);color:var(--muted);cursor:pointer;background:transparent;transition:all .25s}
+.mf-btn.on,.mf-btn:hover{border-color:rgba(181,255,71,.4);color:var(--volt);background:var(--volt-dim)}
+.ex-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1100px){.ex-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:800px){.ex-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.ex-grid{grid-template-columns:1fr}}
+.ex-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .3s,transform .3s var(--ease)}
+.ex-card:hover{border-color:rgba(181,255,71,.2);transform:translateY(-4px)}
+.ex-icon-wrap{height:120px;display:flex;align-items:center;justify-content:center;font-size:52px;background:var(--bg3);position:relative;overflow:hidden}
+.ex-icon-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent,var(--card))}
+.ex-body{padding:16px}
+.ex-name{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:4px}
+.ex-muscle{font-size:11px;color:var(--volt);font-weight:600;margin-bottom:6px}
+.ex-diff{display:flex;gap:3px}
+.ex-dot{width:6px;height:6px;border-radius:50%}
+.ex-meta{display:flex;justify-content:space-between;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:11px;color:var(--muted)}
+/* Modal detail */
+.step-list{counter-reset:steps;display:flex;flex-direction:column;gap:12px;margin:12px 0}
+.step-item{display:flex;gap:14px;counter-increment:steps}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--volt);color:var(--bg);font-family:'Syne',sans-serif;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step-text{font-size:13px;color:var(--muted);line-height:1.7;padding-top:5px}
+.mistake-list{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.mistake{display:flex;gap:10px;font-size:13px;color:var(--muted);padding:10px 12px;background:rgba(255,99,71,.05);border:1px solid rgba(255,99,71,.12);border-radius:10px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<div id="exModal" class="modal-overlay">
+  <div class="modal" style="max-width:600px"><button class="modal-close" onclick="FMModal.close('exModal')">×</button><div id="exModalBody"></div></div>
+</div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="workout-plans.html">Plans</a>
+    <a class="nav-a on" href="exercise-library.html">Library</a>
+    <a class="nav-a" href="workout-tracker.html">Tracker</a>
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="workout-tracker.html">+ Log Workout</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Gym Module</span>
+  <h1>Exercise Library</h1>
+  <p>Technique guides, muscle targets, form cues, and common mistakes for every exercise. Tap any card for full instructions.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="lib-controls rv">
+    <input class="lib-search" id="libSearch" placeholder="Search exercises..." oninput="renderLib()"/>
+    <div class="muscle-filter" id="muscleFilter">
+      <button class="mf-btn on" onclick="setMuscle('all',this)">All</button>
+      <button class="mf-btn" onclick="setMuscle('Chest',this)">Chest</button>
+      <button class="mf-btn" onclick="setMuscle('Back',this)">Back</button>
+      <button class="mf-btn" onclick="setMuscle('Shoulders',this)">Shoulders</button>
+      <button class="mf-btn" onclick="setMuscle('Legs',this)">Legs</button>
+      <button class="mf-btn" onclick="setMuscle('Arms',this)">Arms</button>
+      <button class="mf-btn" onclick="setMuscle('Core',this)">Core</button>
+      <button class="mf-btn" onclick="setMuscle('Cardio',this)">Cardio</button>
+    </div>
+  </div>
+  <div class="ex-grid" id="exGrid"></div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+const EXERCISES=[
+  {name:'Bench Press',muscle:'Chest',secondary:['Triceps','Shoulders'],icon:'🏋️',diff:3,equipment:'Barbell',type:'Compound',steps:['Lie flat on bench, feet on floor. Grip bar slightly wider than shoulder-width.','Unrack the bar and hold above chest with arms extended.','Lower the bar slowly to your mid-chest in 3 seconds.','Press back up explosively, fully extending without locking.'],mistakes:['Bouncing bar off chest','Flaring elbows excessively','Lifting feet off the ground','Incomplete range of motion']},
+  {name:'Squat',muscle:'Legs',secondary:['Glutes','Core'],icon:'🦵',diff:3,equipment:'Barbell',type:'Compound',steps:['Stand with feet shoulder-width, toes slightly out. Bar across upper traps.','Brace core, push knees out and hinge at hips simultaneously.','Descend until thighs are parallel to floor (or lower).','Drive through heels to return to start, maintaining neutral spine.'],mistakes:['Knees caving inward','Rounding lower back','Rising on toes','Shallow depth (not reaching parallel)']},
+  {name:'Deadlift',muscle:'Back',secondary:['Legs','Glutes','Core'],icon:'⬆️',diff:4,equipment:'Barbell',type:'Compound',steps:['Stand with bar over mid-foot, feet hip-width. Hinge and grip bar just outside legs.','Brace core hard. Push floor away, keeping bar close to body.','Extend hips and knees simultaneously, keeping chest up.','Lock out at top. Return bar to floor under control.'],mistakes:['Rounding the lower back','Bar drifting away from body','Jerking the bar off floor','Hyperextending at the top']},
+  {name:'Pull-ups',muscle:'Back',secondary:['Biceps','Core'],icon:'🔝',diff:3,equipment:'Pull-up Bar',type:'Compound',steps:['Hang from bar with hands shoulder-width or wider, palms facing away.','Engage lats and pull shoulder blades down before initiating.','Pull until chin clears bar, keeping elbows in front of body.','Lower under full control — don\'t drop.'],mistakes:['Kipping / swinging body','Chin only reaching bar level','Shrugging shoulders at top','Not using full range of motion']},
+  {name:'Overhead Press',muscle:'Shoulders',secondary:['Triceps','Core'],icon:'🙌',diff:3,equipment:'Barbell',type:'Compound',steps:['Hold bar at shoulder height, just outside shoulder-width grip.','Brace core hard. Tuck chin slightly as bar passes face.','Press bar overhead until arms fully extend.','Return bar to collarbone under control.'],mistakes:['Excessive lower back arch','Bar path forward instead of vertical','Elbows too wide','Not locking out at top']},
+  {name:'Barbell Row',muscle:'Back',secondary:['Biceps','Rear Delts'],icon:'🚣',diff:3,equipment:'Barbell',type:'Compound',steps:['Hinge to 45°. Grip bar slightly wider than shoulder-width.','Brace core, pull bar to lower stomach/navel.','Drive elbows back and squeeze shoulder blades together.','Lower bar under control to full hang.'],mistakes:['Swinging torso','Pulling to chest instead of stomach','Not squeezing at top','Excessive momentum']},
+  {name:'Bicep Curl',muscle:'Arms',secondary:['Forearms'],icon:'💪',diff:1,equipment:'Dumbbell',type:'Isolation',steps:['Stand holding dumbbells at sides, palms facing forward.','Curl both dumbbells toward shoulders, keeping elbows pinned to sides.','Squeeze hard at the top for 1 second.','Lower slowly in 3 seconds — the eccentric is crucial.'],mistakes:['Swinging elbows forward','Using momentum','Not achieving full extension','Grip too wide or narrow']},
+  {name:'Tricep Dips',muscle:'Arms',secondary:['Chest','Shoulders'],icon:'🤸',diff:2,equipment:'Parallel Bars',type:'Compound',steps:['Grip parallel bars, arms straight, slight forward lean for tricep focus.','Lower until elbows reach 90°, keeping forearms vertical.','Press back up without fully locking elbows.','Keep core tight throughout.'],mistakes:['Flaring elbows wide','Leaning too far forward','Partial range of motion','Rushing the descent']},
+  {name:'Plank',muscle:'Core',secondary:['Shoulders','Back'],icon:'🧘',diff:1,equipment:'None',type:'Isometric',steps:['Place forearms on floor, elbows under shoulders. Extend legs.','Lift hips to create straight line: head → heels.','Squeeze glutes, brace abs, and breathe steadily.','Hold without letting hips sag or rise.'],mistakes:['Hips too high or too low','Holding breath','Looking up at ceiling','Elbows too far forward']},
+  {name:'Romanian Deadlift',muscle:'Legs',secondary:['Glutes','Lower Back'],icon:'🏆',diff:2,equipment:'Barbell',type:'Compound',steps:['Hold bar at hip height. Soft bend in knees, neutral spine.','Hinge at hips, pushing them back as bar slides down legs.','Feel a deep hamstring stretch at bottom (shin-level).','Drive hips forward to return, squeezing glutes at top.'],mistakes:['Rounding lower back','Bending knees excessively','Bar drifting from legs','Not reaching full hip extension']},
+  {name:'Lateral Raise',muscle:'Shoulders',secondary:['Traps'],icon:'🦅',diff:1,equipment:'Dumbbell',type:'Isolation',steps:['Hold dumbbells at sides, slight elbow bend.','Raise arms out to sides until parallel with floor.','Pause for 1 second at top. Thumbs slightly down at peak.','Lower slowly in 3 seconds — don\'t drop.'],mistakes:['Using too much weight','Swinging body','Shrugging shoulders','Raising arms above shoulder level']},
+  {name:'Leg Press',muscle:'Legs',secondary:['Glutes'],icon:'🦵',diff:2,equipment:'Machine',type:'Compound',steps:['Position seat so knees are at 90° when feet are on plate.','Feet shoulder-width, toes slightly out.','Lower plate until knees reach 90°, keeping lower back flat.','Press through heels — don\'t lock knees fully.'],mistakes:['Feet too low (knee strain)','Knees caving inward','Lower back lifting off pad','Locking knees at top']},
+  {name:'Treadmill Run',muscle:'Cardio',secondary:['Legs','Core'],icon:'🏃',diff:2,equipment:'Treadmill',type:'Cardio',steps:['Start at slow walk (3–4 km/h) for 3-min warm-up.','Gradually increase to your target pace.','Maintain upright posture, relax shoulders, arms at 90°.','Cool down with 3-min walk before stopping.'],mistakes:['Holding the handrails','Overstriding','Hunching forward','Jumping off moving belt to rest']},
+  {name:'Jump Rope',muscle:'Cardio',secondary:['Calves','Shoulders'],icon:'🪢',diff:2,equipment:'Jump Rope',type:'Cardio',steps:['Hold handles at hip height, rope behind you.','Swing rope overhead, jump with both feet simultaneously.','Land lightly on balls of feet — minimal height needed.','Maintain rhythm: aim for 60–80 RPM.'],mistakes:['Jumping too high','Swinging arms wide','Landing on heels','Tensing shoulders']},
+  {name:'Glute Bridge',muscle:'Legs',secondary:['Core','Hamstrings'],icon:'🍑',diff:1,equipment:'None',type:'Isolation',steps:['Lie on back, knees bent, feet flat on floor, hip-width.','Push through heels to lift hips until body forms a straight line.','Squeeze glutes hard at the top for 2 seconds.','Lower slowly — don\'t touch floor between reps.'],mistakes:['Hyperextending the lower back','Feet too close or too far','Not squeezing glutes fully','Rushing the movement']},
+  {name:'Kettlebell Swing',muscle:'Back',secondary:['Legs','Core','Shoulders'],icon:'🔔',diff:2,equipment:'Kettlebell',type:'Compound',steps:['Stand over KB feet shoulder-width. Hinge to grab handle.','Hike KB between legs (like hiking football).','Drive hips forward explosively — arms are just a pendulum.','Let KB swing to chest height. Hinge hips back for next rep.'],mistakes:['Squatting instead of hinging','Pulling with arms','Rounding lower back','Letting KB pull you forward']},
+];
+
+let activeMuslce='all';
+function setMuscle(m,btn){activeMuslce=m;document.querySelectorAll('.mf-btn').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderLib();}
+
+function renderLib(){
+  const q=document.getElementById('libSearch').value.toLowerCase();
+  const filtered=EXERCISES.filter(e=>{
+    const matchMuscle=activeMuslce==='all'||e.muscle===activeMuslce;
+    const matchQ=!q||e.name.toLowerCase().includes(q)||e.muscle.toLowerCase().includes(q)||e.type.toLowerCase().includes(q);
+    return matchMuscle&&matchQ;
+  });
+  const diffColors=['','#22c55e','#4ade80','#f59e0b','#ef4444','#dc2626'];
+  document.getElementById('exGrid').innerHTML=filtered.map(e=>`
+    <div class="ex-card" onclick="openEx('${e.name}')">
+      <div class="ex-icon-wrap">${e.icon}</div>
+      <div class="ex-body">
+        <div class="ex-name">${e.name}</div>
+        <div class="ex-muscle">${e.muscle}</div>
+        <div style="display:flex;gap:4px;margin-bottom:8px">
+          ${Array.from({length:5},(_,i)=>`<div class="ex-dot" style="background:${i<e.diff?diffColors[e.diff]:'var(--border)'}"></div>`).join('')}
+          <span style="font-size:10px;color:var(--muted);margin-left:6px">${['','Easy','Moderate','Intermediate','Hard','Expert'][e.diff]}</span>
+        </div>
+        <div class="ex-meta">
+          <span>${e.equipment}</span>
+          <span class="badge ${e.type==='Compound'?'badge-teal':e.type==='Cardio'?'badge-volt':'badge-coral'}">${e.type}</span>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function openEx(name){
+  const e=EXERCISES.find(x=>x.name===name);
+  if(!e) return;
+  const diffColors=['','#22c55e','#4ade80','#f59e0b','#ef4444','#dc2626'];
+  document.getElementById('exModalBody').innerHTML=`
+    <div style="font-size:60px;text-align:center;margin-bottom:16px">${e.icon}</div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:24px;margin-bottom:6px">${e.name}</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <span class="badge badge-teal">${e.muscle}</span>
+        <span class="badge" style="background:var(--bg3);color:var(--muted)">${e.equipment}</span>
+        <span class="badge ${e.type==='Compound'?'badge-volt':'badge-coral'}">${e.type}</span>
+      </div>
+    </div>
+    ${e.secondary?`<div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px">Also works: ${e.secondary.join(', ')}</div>`:''}
+    <div style="border-top:1px solid var(--border);padding-top:20px">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px">Step-by-Step Technique</div>
+      <div class="step-list">${e.steps.map(s=>`<div class="step-item"><div class="step-num">${e.steps.indexOf(s)+1}</div><div class="step-text">${s}</div></div>`).join('')}</div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:20px;margin-top:4px">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;margin-bottom:14px">⚠️ Common Mistakes</div>
+      <div class="mistake-list">${e.mistakes.map(m=>`<div class="mistake"><span>✗</span><span>${m}</span></div>`).join('')}</div>
+    </div>
+    <button class="btn-main btn-full" style="margin-top:20px" onclick="FMModal.close('exModal');window.location.href='workout-tracker.html'">Log This Exercise →</button>`;
+  FMModal.open('exModal');
+}
+renderLib();
+</script>
+</body>
+</html>

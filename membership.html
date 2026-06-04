@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Membership — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.mem-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start}
+@media(max-width:1000px){.mem-grid{grid-template-columns:1fr}}
+/* Current plan card */
+.current-plan{background:linear-gradient(135deg,rgba(181,255,71,.07),rgba(45,212,191,.05));border:1.5px solid rgba(181,255,71,.25);border-radius:24px;padding:36px;position:relative;overflow:hidden;margin-bottom:20px}
+.current-plan::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(181,255,71,.1),transparent 70%)}
+.cp-tag{display:inline-flex;align-items:center;gap:8px;background:var(--volt);color:var(--bg);padding:5px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:20px}
+.cp-name{font-family:'Syne',sans-serif;font-weight:800;font-size:48px;color:var(--volt);letter-spacing:-2px;margin-bottom:8px}
+.cp-price{font-size:16px;color:var(--muted);margin-bottom:20px}
+.cp-price strong{color:var(--white);font-size:28px;font-family:'Syne',sans-serif;font-weight:700}
+.cp-dates{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px;padding:16px;background:rgba(0,0,0,.2);border-radius:12px}
+.cpd-item{display:flex;flex-direction:column;gap:4px}
+.cpd-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted2)}
+.cpd-value{font-size:14px;font-weight:600}
+.renewal-bar{margin-bottom:20px}
+.rb-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px}
+/* Usage cards */
+.usage-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+@media(max-width:600px){.usage-grid{grid-template-columns:1fr}}
+.usage-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px}
+.uc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.uc-title{font-size:13px;font-weight:600}
+.uc-used{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--volt)}
+.uc-limit{font-size:11px;color:var(--muted)}
+/* History table */
+.panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:20px}
+.panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
+.panel-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.hist-item{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.hist-item:last-child{border-bottom:none}
+.hi-left{display:flex;align-items:center;gap:12px}
+.hi-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hi-name{font-weight:500;font-size:14px;margin-bottom:2px}
+.hi-date{font-size:12px;color:var(--muted)}
+.hi-amount{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--volt)}
+/* Upgrade cards */
+.upgrade-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;cursor:pointer;transition:border-color .3s,transform .35s var(--ease);position:relative;overflow:hidden}
+.upgrade-card:hover{border-color:rgba(181,255,71,.2);transform:translateY(-3px)}
+.upgrade-card.featured{border-color:rgba(181,255,71,.35);background:rgba(181,255,71,.03)}
+.uc-feat-badge{position:absolute;top:16px;right:16px}
+/* Sidebar */
+.sidebar-panel{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:16px;position:sticky;top:110px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="dashboard.html">Dashboard</a>
+    <a class="nav-a on" href="membership.html">Membership</a>
+    <a class="nav-a" href="patient.html">My Profile</a>
+    <a class="nav-a" href="reports.html">Reports</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="dashboard.html">← Dashboard</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Account</span>
+  <h1>My Membership</h1>
+  <p>View your current plan, usage, billing history, and upgrade to unlock more features.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <div class="mem-grid">
+    <!-- LEFT: Main content -->
+    <div>
+      <!-- Current plan -->
+      <div class="current-plan rv" id="currentPlanCard">
+        <div class="cp-tag">⭐ Active Plan</div>
+        <div class="cp-name" id="planName">—</div>
+        <div class="cp-price">Rs <strong id="planPrice">0</strong> / month</div>
+        <div class="cp-dates" id="planDates"></div>
+        <div class="renewal-bar">
+          <div class="rb-header">
+            <span style="font-size:12px;color:var(--muted)">Plan period</span>
+            <span id="daysLeft" style="font-size:12px;font-weight:600;color:var(--volt)">—</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" id="periodBar" style="width:0%"></div></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-main btn-sm" onclick="FMToast.info('Billing integration requires payment gateway (JazzCash/EasyPaisa). See SETUP_GUIDE.md.')">Renew Plan</button>
+          <button class="btn-outline btn-sm" onclick="document.getElementById('upgradeSection').scrollIntoView({behavior:'smooth'})">Upgrade →</button>
+          <button class="btn-outline btn-sm" onclick="confirmCancel()">Cancel Plan</button>
+        </div>
+      </div>
+
+      <!-- Usage this month -->
+      <div class="panel rv d1">
+        <div class="panel-title">Usage This Month</div>
+        <div class="panel-sub">Your consumption against plan limits</div>
+        <div class="usage-grid" id="usageGrid"></div>
+      </div>
+
+      <!-- Upgrade section -->
+      <div id="upgradeSection" class="rv d2">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:17px;margin-bottom:16px">Upgrade Your Plan</div>
+        <div style="display:flex;flex-direction:column;gap:14px" id="upgradeCards"></div>
+      </div>
+
+      <!-- Billing history -->
+      <div class="panel rv d3" style="margin-top:20px">
+        <div class="panel-title">Billing History</div>
+        <div class="panel-sub">Your payment records</div>
+        <div id="billingHistory"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div>
+      <!-- Plan features -->
+      <div class="sidebar-panel rv">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:16px">Your Plan Features</div>
+        <div id="planFeatures"></div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="sidebar-panel rv d1">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px">Quick Actions</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <a href="appointment.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">🩺 Book Appointment</a>
+          <a href="schedule.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">📅 Book Gym Class</a>
+          <a href="patient.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">👤 Update Profile</a>
+          <a href="contact.html" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;font-size:13px;transition:border-color .25s">✉️ Contact Support</a>
+        </div>
+      </div>
+
+      <!-- Promo code -->
+      <div class="sidebar-panel rv d2">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;margin-bottom:14px">Apply Promo Code</div>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="promoInput" placeholder="e.g. WELCOME20" style="flex:1;font-family:'DM Mono',monospace;font-size:12px;text-transform:uppercase"/>
+          <button class="btn-teal btn-sm" onclick="applyPromo()">Apply</button>
+        </div>
+        <div id="promoResult" style="margin-top:10px;font-size:12px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+const user = FM.getUser() || {};
+const planName = user.plan || 'Basic';
+
+// Load plans (from backend or localStorage)
+async function loadPlanData(){
+  let plans = null;
+  try { plans = await FMAPI.get('/admin/plans'); } catch {}
+  if(!plans) plans = FM.load('admin_plans') || [
+    {name:'Basic',price:0,features:[{t:'BMI Calculator',on:true},{t:'Workout Tracker (10/mo)',on:true},{t:'Vitals Logger',on:true},{t:'AI Plans',on:false},{t:'Doctor Consults',on:false}],limits:{workoutsPerMonth:10,doctorConsults:0,gymClasses:0,aiPlans:0}},
+    {name:'Pro',price:2999,priceAnnual:2399,featured:true,features:[{t:'Unlimited Workouts',on:true},{t:'AI Workout Plans',on:true},{t:'AI Diet Plans',on:true},{t:'Progress Analytics',on:true},{t:'2 Doctor Consults/mo',on:true},{t:'5 Gym Classes/mo',on:true}],limits:{workoutsPerMonth:999,doctorConsults:2,gymClasses:5,aiPlans:20}},
+    {name:'Elite',price:5999,priceAnnual:4799,features:[{t:'Everything in Pro',on:true},{t:'Unlimited Doctor Consults',on:true},{t:'Personal Trainer',on:true},{t:'Lab Reports',on:true},{t:'Tele-Medicine',on:true},{t:'4 Physio Sessions/mo',on:true}],limits:{workoutsPerMonth:999,doctorConsults:999,gymClasses:999,aiPlans:999}},
+  ];
+  renderPage(plans);
+}
+
+function renderPage(plans){
+  const plan = plans.find(p=>p.name===planName) || plans[0];
+  const otherPlans = plans.filter(p=>p.name!==planName);
+
+  // Current plan
+  document.getElementById('planName').textContent = plan.name;
+  document.getElementById('planPrice').textContent = (plan.price||0).toLocaleString();
+  const joinDate = user.joinedAt ? new Date(user.joinedAt) : new Date();
+  const renewDate = new Date(joinDate); renewDate.setMonth(renewDate.getMonth()+1);
+  const today = new Date();
+  const daysLeft = Math.max(0, Math.ceil((renewDate-today)/86400000));
+  const pct = Math.round((30-daysLeft)/30*100);
+  document.getElementById('planDates').innerHTML = `
+    <div class="cpd-item"><div class="cpd-label">Member Since</div><div class="cpd-value">${joinDate.toLocaleDateString('en-PK',{month:'long',day:'numeric',year:'numeric'})}</div></div>
+    <div class="cpd-item"><div class="cpd-label">Next Renewal</div><div class="cpd-value">${renewDate.toLocaleDateString('en-PK',{month:'long',day:'numeric',year:'numeric'})}</div></div>
+    <div class="cpd-item"><div class="cpd-label">Status</div><div class="cpd-value" style="color:#4ade80">✓ Active</div></div>`;
+  document.getElementById('daysLeft').textContent = daysLeft + ' days remaining';
+  document.getElementById('periodBar').style.width = pct + '%';
+
+  // Features
+  document.getElementById('planFeatures').innerHTML = (plan.features||[]).map(f=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px">
+      <div style="width:18px;height:18px;border-radius:5px;background:${f.on?'var(--volt-dim)':'var(--border)'};color:${f.on?'var(--volt)':'var(--muted2)'};display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0">${f.on?'✓':'✕'}</div>
+      <span style="color:${f.on?'var(--white)':'var(--muted2)'}">${f.t}</span>
+    </div>`).join('') + `<div style="margin-top:14px;font-size:12px;color:var(--muted)">Plan managed by FitMart Admin. Contact support for changes.</div>`;
+
+  // Usage
+  const wkl = FM.getWorkouts();
+  const vitals = FM.getVitals();
+  const appts = FM.load('appointments',[])||[];
+  const classBookings = FM.load('class_bookings',[])||[];
+  const lim = plan.limits || {};
+  const usages = [
+    {icon:'💪',label:'Workouts',used:wkl.length,limit:lim.workoutsPerMonth||10,color:'var(--volt)'},
+    {icon:'🩺',label:'Doctor Consults',used:appts.length,limit:lim.doctorConsults||0,color:'var(--teal)'},
+    {icon:'🏋️',label:'Gym Classes',used:classBookings.length,limit:lim.gymClasses||0,color:'#a78bfa'},
+    {icon:'⚡',label:'AI Plans',used:FM.load('ai_plan_count')||0,limit:lim.aiPlans||0,color:'var(--coral)'},
+  ];
+  document.getElementById('usageGrid').innerHTML = usages.map(u=>{
+    const unlimited = u.limit >= 999;
+    const pct = unlimited ? 10 : Math.min(100, Math.round(u.used/Math.max(u.limit,1)*100));
+    const statusColor = pct>85?'var(--coral)':pct>60?'#f59e0b':'#4ade80';
+    return `<div class="usage-card">
+      <div class="uc-head">
+        <div class="uc-title">${u.icon} ${u.label}</div>
+        <div><div class="uc-used" style="color:${unlimited?'var(--volt)':statusColor}">${u.used}</div><div class="uc-limit">/ ${unlimited?'∞':u.limit}</div></div>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill" style="width:${pct}%;background:linear-gradient(90deg,${u.color},${u.color}88)"></div></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:6px">${unlimited?'Unlimited':'Used this month'}</div>
+    </div>`;
+  }).join('');
+
+  // Upgrade cards
+  document.getElementById('upgradeCards').innerHTML = otherPlans.filter(p=>p.price>plan.price).map(p=>`
+    <div class="upgrade-card${p.featured?' featured':''}">
+      ${p.featured?`<div class="uc-feat-badge"><span class="badge badge-volt">⭐ Popular</span></div>`:''}
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-right:${p.featured?'80px':'0'}">
+        <div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:20px;margin-bottom:4px">${p.name}</div>
+        <div style="font-size:13px;color:var(--muted)">Rs <strong style="font-size:24px;font-family:'Syne',sans-serif;color:${p.featured?'var(--volt)':'var(--white)'}">${p.price.toLocaleString()}</strong> /mo</div></div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px">${(p.features||[]).filter(f=>f.on).slice(0,4).map(f=>`<span class="badge badge-teal">${f.t}</span>`).join('')}</div>
+      <button class="btn-main btn-sm" onclick="upgradeToplan('${p.name}',${p.price})">Upgrade to ${p.name} →</button>
+    </div>`).join('') || `<div style="color:var(--muted);font-size:13px;padding:20px;text-align:center;background:var(--card);border:1px solid var(--border);border-radius:16px">You're on the highest plan available! 🎉</div>`;
+
+  // Billing history (demo)
+  const history = [
+    {desc:`${planName} Plan — Monthly`,amount:plan.price,date:'Dec 1, 2025',method:'JazzCash',status:'Paid'},
+    {desc:`${planName} Plan — Monthly`,amount:plan.price,date:'Nov 1, 2025',method:'JazzCash',status:'Paid'},
+    {desc:`${planName} Plan — Monthly`,amount:plan.price,date:'Oct 1, 2025',method:'EasyPaisa',status:'Paid'},
+  ];
+  document.getElementById('billingHistory').innerHTML = plan.price === 0
+    ? '<div style="color:var(--muted);font-size:13px">Free plan — no billing history.</div>'
+    : history.map(h=>`<div class="hist-item">
+        <div class="hi-left"><div class="hi-icon" style="background:var(--volt-dim)">💳</div>
+          <div><div class="hi-name">${h.desc}</div><div class="hi-date">${h.date} · ${h.method}</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge badge-green">${h.status}</span>
+          <div class="hi-amount">Rs ${h.amount.toLocaleString()}</div>
+        </div>
+      </div>`).join('');
+}
+
+async function upgradeToplan(name, price){
+  if(!confirm(`Upgrade to ${name} (Rs ${price.toLocaleString()}/mo)?\n\nIn production this opens the payment gateway. For demo, we'll apply the plan directly.`)) return;
+  const u = FM.getUser() || {};
+  FM.setUser({...u, plan: name});
+  // Sync to backend
+  if(u.id){
+    try{
+      await FMAPI.patch('/users/'+u.id+'/profile', {plan: name});
+    }catch(e){ console.warn('Plan sync failed:', e.message); }
+  }
+  FMToast.success(`✅ Plan upgraded to ${name}! Your new benefits are now active.`);
+  loadPlanData();
+}
+
+function confirmCancel(){
+  if(!confirm('Are you sure you want to cancel your plan?\nYour benefits continue until the end of the billing period.')) return;
+  FMToast.info('Cancellation request submitted. Your plan stays active until the renewal date.');
+}
+
+async function applyPromo(){
+  const code = document.getElementById('promoInput').value.trim().toUpperCase();
+  if(!code){ FMToast.error('Please enter a promo code'); return; }
+  const res = document.getElementById('promoResult');
+  try {
+    const data = await FMAPI.post('/promos/'+code+'/validate', {plan: planName});
+    res.style.color = 'var(--volt)';
+    res.textContent = `✓ Code "${code}" valid — ${data.discount} discount applied to next renewal!`;
+    FMToast.success('Promo code applied: ' + data.discount + ' off!');
+  } catch {
+    // Check local promos
+    const promos = FM.load('admin_promos') || [];
+    const p = promos.find(x=>x.code===code&&x.active);
+    if(p){ res.style.color='var(--volt)'; res.textContent=`✓ "${code}" valid — ${p.disc} discount applied!`; FMToast.success('Promo applied: '+p.disc+' off!'); }
+    else { res.style.color='var(--coral)'; res.textContent='✕ Invalid or expired code.'; FMToast.error('Invalid promo code'); }
+  }
+}
+
+loadPlanData();
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dashboard — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+body{padding-top:90px}
+.dash-grid{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+@media(max-width:1000px){.dash-grid{grid-template-columns:1fr}}
+.sidebar{position:sticky;top:110px;display:flex;flex-direction:column;gap:16px}
+.profile-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;text-align:center}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--volt);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:28px;color:var(--bg);margin:0 auto 16px;border:3px solid rgba(181,255,71,0.3)}
+.profile-name{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px}
+.profile-role{font-size:12px;color:var(--muted);margin-bottom:16px}
+.profile-stats{display:flex;justify-content:space-around;padding-top:16px;border-top:1px solid var(--border)}
+.ps-n{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;color:var(--volt)}
+.ps-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.sidebar-nav{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.snav-a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:500;color:var(--muted);transition:color 0.25s,background 0.25s}
+.snav-a:hover,.snav-a.on{color:var(--white);background:var(--card2)}
+.snav-a.on{color:var(--volt)}
+.snav-icon{font-size:16px;width:20px;text-align:center}
+.main-content{display:flex;flex-direction:column;gap:20px}
+/* Stat row */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:900px){.stat-row{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.stat-row{grid-template-columns:1fr 1fr}}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.volt::after{background:var(--volt)}
+.stat-card.teal::after{background:var(--teal)}
+.stat-card.coral::after{background:var(--coral)}
+.stat-card.white::after{background:var(--white)}
+.sc-icon{font-size:24px;margin-bottom:12px}
+.sc-n{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.sc-n.volt{color:var(--volt)}.sc-n.teal{color:var(--teal)}.sc-n.coral{color:var(--coral)}
+.sc-l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.sc-change{font-size:12px;font-weight:600}
+.sc-change.up{color:#4ade80}.sc-change.down{color:var(--coral)}
+/* Chart card */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:16px}
+.chart-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.chart-tabs{display:flex;gap:6px}
+.ctab{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:color 0.25s,background 0.25s;border:1px solid transparent}
+.ctab.on{color:var(--volt);background:var(--volt-dim);border-color:rgba(181,255,71,0.15)}
+/* Quick actions */
+.qa-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(max-width:600px){.qa-grid{grid-template-columns:1fr}}
+.qa-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;transition:border-color 0.25s,transform 0.3s var(--ease)}
+.qa-card:hover{border-color:rgba(181,255,71,0.18);transform:translateY(-2px)}
+.qa-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.qa-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.qa-sub{font-size:12px;color:var(--muted)}
+/* Today's workout */
+.workout-list{display:flex;flex-direction:column;gap:10px}
+.wl-item{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:12px}
+.wl-left{display:flex;align-items:center;gap:12px}
+.wl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.wl-name{font-weight:500;font-size:14px}
+.wl-sets{font-size:12px;color:var(--muted)}
+.wl-done{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;cursor:pointer;transition:background 0.25s,border-color 0.25s}
+.wl-done.checked{background:var(--volt);border-color:var(--volt);color:var(--bg)}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav stuck" id="nav">
+  <a class="nav-brand" href="index.html">
+    <div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart
+  </a>
+  <div class="nav-center">
+    <a class="nav-a on" href="dashboard.html">Dashboard</a>
+    <a class="nav-a" href="workout-tracker.html">Workouts</a>
+    <a class="nav-a" href="progress-tracking.html">Progress</a>
+    <a class="nav-a" href="vitals.html">Vitals</a>
+    <a class="nav-a" href="diet.html">Diet</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="bmi-calculator.html">BMI Calc</a>
+    <button class="btn-volt btn-sm" onclick="FM.logout()">Logout</button>
+  </div>
+</nav>
+
+<main class="wrap section">
+  <!-- Welcome bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px">
+    <div>
+      <div class="stag" id="greetTag">Good Morning</div>
+      <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:32px;letter-spacing:-1px" id="greetName">Member</h1>
+      <p style="color:var(--muted);font-size:14px;margin-top:4px" id="greetDate">Loading...</p>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <a class="btn-outline btn-sm" href="bmi-calculator.html">⚖️ BMI Calc</a>
+      <a class="btn-main btn-sm" href="workout-tracker.html">+ Log Workout</a>
+    </div>
+  </div>
+
+  <div class="dash-grid">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="profile-card">
+        <div class="avatar" id="avatarEl">?</div>
+        <div class="profile-name" id="profName">Member</div>
+        <div class="profile-role" id="profRole">Pro Member</div>
+        <div class="profile-stats">
+          <div><div class="ps-n" id="profWorkouts">0</div><div class="ps-l">Workouts</div></div>
+          <div><div class="ps-n" id="profStreak">0</div><div class="ps-l">Streak</div></div>
+          <div><div class="ps-n" id="profBmi">—</div><div class="ps-l">BMI</div></div>
+        </div>
+      </div>
+      <div class="sidebar-nav">
+        <a class="snav-a on" href="dashboard.html"><span class="snav-icon">🏠</span>Dashboard</a>
+        <a class="snav-a" href="workout-tracker.html"><span class="snav-icon">💪</span>Workout Tracker</a>
+        <a class="snav-a" href="progress-tracking.html"><span class="snav-icon">📈</span>Progress</a>
+        <a class="snav-a" href="vitals.html"><span class="snav-icon">❤️</span>Health Vitals</a>
+        <a class="snav-a" href="diet.html"><span class="snav-icon">🥗</span>Diet Plan</a>
+        <a class="snav-a" href="bmi-calculator.html"><span class="snav-icon">⚖️</span>BMI Calculator</a>
+        <a class="snav-a" href="reports.html"><span class="snav-icon">📊</span>Reports</a>
+        <a class="snav-a" href="plans.html"><span class="snav-icon">💎</span>My Plan</a>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <!-- Stats row -->
+      <div class="stat-row">
+        <div class="stat-card volt"><div class="sc-icon">🔥</div><div class="sc-n volt" id="calBurned">0</div><div class="sc-l">Kcal Burned</div><div class="sc-change up" id="calChange">↑ This week</div></div>
+        <div class="stat-card teal"><div class="sc-icon">👟</div><div class="sc-n teal" id="stepsToday">0</div><div class="sc-l">Steps Today</div><div class="sc-change up">↑ +1,200 vs avg</div></div>
+        <div class="stat-card coral"><div class="sc-icon">💤</div><div class="sc-n coral" id="sleepHrs">7h 20m</div><div class="sc-l">Sleep Last Night</div><div class="sc-change up">✓ Goal met</div></div>
+        <div class="stat-card white"><div class="sc-icon">💧</div><div class="sc-n" id="waterMl">1.8L</div><div class="sc-l">Water Intake</div><div class="sc-change down">↓ 0.7L to go</div></div>
+      </div>
+
+      <!-- Charts row -->
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Weekly Workout Volume</div><div class="chart-sub">Sets × Reps × Weight</div></div>
+            <div class="chart-tabs">
+              <button class="ctab on" onclick="switchChart('week',this)">Week</button>
+              <button class="ctab" onclick="switchChart('month',this)">Month</button>
+            </div>
+          </div>
+          <canvas id="volumeChart" height="180"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Weight Trend</div><div class="chart-sub">Last 30 days (kg)</div></div></div>
+          <canvas id="weightChart" height="180"></canvas>
+        </div>
+      </div>
+
+      <!-- Today's Workout -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Today's Workout Plan</div><div class="chart-sub" id="todayGoal">Loading plan...</div></div>
+          <a class="btn-main btn-sm" href="workout-tracker.html">Log All</a>
+        </div>
+        <div class="workout-list" id="todayWorkout">
+          <div style="color:var(--muted);font-size:14px;padding:12px">Loading your plan...</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions + Vitals -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:16px">Quick Actions</div>
+          <div class="qa-grid">
+            <a class="qa-card" href="bmi-calculator.html"><div class="qa-icon" style="background:var(--volt-dim)">⚖️</div><div><div class="qa-title">BMI Check</div><div class="qa-sub">Recalculate now</div></div></a>
+            <a class="qa-card" href="vitals.html"><div class="qa-icon" style="background:var(--teal-dim)">❤️</div><div><div class="qa-title">Log Vitals</div><div class="qa-sub">BP, HR, Sugar</div></div></a>
+            <a class="qa-card" href="diet.html"><div class="qa-icon" style="background:var(--coral-dim)">🥗</div><div><div class="qa-title">Diet Plan</div><div class="qa-sub">Today's meals</div></div></a>
+            <a class="qa-card" href="reports.html"><div class="qa-icon" style="background:rgba(181,255,71,0.08)">📊</div><div><div class="qa-title">Reports</div><div class="qa-sub">Weekly summary</div></div></a>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title" style="margin-bottom:16px">Latest Vitals</div>
+          <div id="vitalsSnap" style="display:flex;flex-direction:column;gap:14px">
+            <div style="color:var(--muted);font-size:13px">No vitals logged yet. <a href="vitals.html" style="color:var(--volt)">Log now →</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+
+// Greeting
+const user=FM.getUser()||{};
+const hr=new Date().getHours();
+const greet=hr<12?'Good Morning':hr<17?'Good Afternoon':'Good Evening';
+document.getElementById('greetTag').textContent=greet;
+const nm=user.name||'Member';
+document.getElementById('greetName').textContent=nm;
+document.getElementById('avatarEl').textContent=FMFmt.initial(nm);
+document.getElementById('profName').textContent=nm;
+document.getElementById('profRole').textContent=user.plan||'Pro Member';
+document.getElementById('greetDate').textContent=new Date().toLocaleDateString('en-PK',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+
+// Workout count
+const wk=FM.getWorkouts();
+document.getElementById('profWorkouts').textContent=wk.length;
+document.getElementById('profStreak').textContent=Math.min(wk.length,7);
+
+// BMI from saved data
+if(user.weight&&user.height){
+  const bmi=(user.weight/((user.height/100)**2)).toFixed(1);
+  document.getElementById('profBmi').textContent=bmi;
+}
+
+// Load real stats
+const vitalsSnap2 = FM.getVitals();
+const lv2 = vitalsSnap2[0];
+if(lv2){
+  if(lv2.steps) document.getElementById('stepsToday').textContent=Number(lv2.steps).toLocaleString();
+  if(lv2.sleep) document.getElementById('sleepHrs').textContent=(lv2.sleep||7.3)+'h';
+}
+const wkThisWeek = FM.getWorkouts().filter(w=>{
+  const d=new Date(w.date); const now=new Date();
+  const diff=(now-d)/(1000*60*60*24);
+  return diff<=7;
+});
+const calThisWeek = wkThisWeek.reduce((a,w)=>a+(w.calories||0),0);
+document.getElementById('calBurned').textContent = calThisWeek || 0;
+
+// Try backend report
+if(user&&user.id){
+  FMAPI.get('/reports/'+user.id).then(d=>{
+    if(d.total_calories) document.getElementById('calBurned').textContent=d.total_calories;
+    if(d.latest_vitals&&d.latest_vitals.steps) document.getElementById('stepsToday').textContent=Number(d.latest_vitals.steps).toLocaleString();
+    if(d.latest_vitals&&d.latest_vitals.sleep_hrs) document.getElementById('sleepHrs').textContent=d.latest_vitals.sleep_hrs+'h';
+    if(d.current_bmi) document.getElementById('profBmi').textContent=d.current_bmi;
+    if(d.workouts_this_week!==undefined) document.getElementById('profStreak').textContent=Math.min(d.workouts_this_week,7);
+  }).catch(()=>{});
+}
+
+// Today's workout plan (goal-based)
+const goal=user.goal||'General Fitness';
+const plans={
+  'Weight Loss':[{n:'Jump Rope',s:'3×3 min',c:'volt'},{n:'Burpees',s:'3×15',c:'teal'},{n:'Mountain Climbers',s:'3×30s',c:'coral'},{n:'Box Steps',s:'3×20',c:'volt'}],
+  'Muscle Gain':[{n:'Bench Press',s:'4×8 @ 60kg',c:'volt'},{n:'Barbell Rows',s:'4×8',c:'teal'},{n:'Shoulder Press',s:'3×10',c:'coral'},{n:'Bicep Curls',s:'3×12',c:'volt'}],
+  'Endurance':[{n:'Treadmill Run',s:'20 min @ 8kmh',c:'teal'},{n:'Cycling',s:'15 min',c:'volt'},{n:'Jump Squats',s:'3×20',c:'coral'},{n:'Plank',s:'3×45s',c:'volt'}],
+  'Strength':[{n:'Deadlift',s:'5×5 @ 80kg',c:'volt'},{n:'Squats',s:'5×5 @ 70kg',c:'teal'},{n:'Overhead Press',s:'4×6',c:'coral'},{n:'Pull-ups',s:'4×max',c:'volt'}],
+};
+const todayPlan=plans[goal]||plans['Muscle Gain'];
+document.getElementById('todayGoal').textContent='Goal: '+goal;
+document.getElementById('todayWorkout').innerHTML=todayPlan.map(e=>`
+  <div class="wl-item">
+    <div class="wl-left">
+      <div class="wl-dot" style="background:var(--${e.c})"></div>
+      <div><div class="wl-name">${e.n}</div><div class="wl-sets">${e.s}</div></div>
+    </div>
+    <div class="wl-done" onclick="toggleDone(this)">✓</div>
+  </div>`).join('');
+
+function toggleDone(el){el.classList.toggle('checked')}
+
+// Vitals snapshot
+const vitals=FM.getVitals();
+if(vitals.length>0){
+  const v=vitals[0];
+  document.getElementById('vitalsSnap').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">Heart Rate</span><span class="badge badge-green">${v.heartRate||78} bpm ✓</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px;color:var(--muted)">Blood Pressure</span><span class="badge badge-green">${v.bp||'120/80'} ✓</span></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0"><span style="font-size:13px;color:var(--muted)">Sugar</span><span class="badge badge-green">${v.sugar||95} mg/dL ✓</span></div>
+    <a href="vitals.html" style="font-size:12px;color:var(--volt);margin-top:10px;display:block">Update vitals →</a>`;
+}
+
+// Charts
+Chart.defaults.color='rgba(237,244,240,0.46)';
+Chart.defaults.borderColor='rgba(255,255,255,0.055)';
+
+const weekData=[1200,1800,950,2100,1600,800,2400];
+const monthData=[1100,1400,1600,1200,1800,1500,1900,2100,1700,1400,1800,2000,1600,2200,1500,1900,2300,1700,1400,1800,2100,1500,1700,2000,1800,1600,1900,2100,1800,1500];
+let volChart;
+
+function makeVolChart(data,labels){
+  if(volChart)volChart.destroy();
+  volChart=new Chart(document.getElementById('volumeChart').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:ctx=>{const g=ctx.chart.ctx.createLinearGradient(0,0,0,200);g.addColorStop(0,'rgba(181,255,71,0.7)');g.addColorStop(1,'rgba(45,212,191,0.3)');return g;},borderRadius:6,borderSkipped:false}]},
+    options:{responsive:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(14,28,36,0.95)',titleColor:'#edf4f0',bodyColor:'rgba(237,244,240,0.7)',borderColor:'rgba(181,255,71,0.2)',borderWidth:1}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.04)'},beginAtZero:true}}}
+  });
+}
+makeVolChart(weekData,['Mon','Tue','Wed','Thu','Fri','Sat','Sun']);
+
+function switchChart(type,btn){
+  document.querySelectorAll('.ctab').forEach(b=>b.classList.remove('on'));btn.classList.add('on');
+  if(type==='week')makeVolChart(weekData,['Mon','Tue','Wed','Thu','Fri','Sat','Sun']);
+  else makeVolChart(monthData,Array.from({length:30},(_,i)=>'D'+(i+1)));
+}
+
+// Weight chart
+new Chart(document.getElementById('weightChart').getContext('2d'),{
+  type:'line',
+  data:{labels:['W1','W2','W3','W4','W5'],datasets:[{data:[76,75.2,74.8,74.2,73.6],borderColor:'var(--volt)',backgroundColor:'rgba(181,255,71,0.07)',fill:true,tension:0.4,pointBackgroundColor:'var(--volt)',pointRadius:4}]},
+  options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{callback:v=>v+'kg'}}}}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gym — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+/* Hero */
+.gym-hero{position:relative;min-height:56vh;display:flex;align-items:flex-end;overflow:hidden}
+.gym-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.22) saturate(.5)}
+.gym-hero-ov{position:absolute;inset:0;background:linear-gradient(to top,var(--bg) 0%,transparent 55%)}
+.gym-hero-content{position:relative;z-index:2;padding:0 80px 60px;width:100%}
+@media(max-width:600px){.gym-hero-content{padding:0 24px 40px}}
+/* Class schedule */
+.schedule-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;border:1px solid var(--border);border-radius:16px;overflow:hidden}
+@media(max-width:900px){.schedule-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.schedule-grid{grid-template-columns:repeat(2,1fr)}}
+.day-col{border-right:1px solid var(--border)}
+.day-col:last-child{border-right:none}
+.day-head{background:var(--card2);padding:12px 10px;text-align:center;border-bottom:1px solid var(--border)}
+.day-name{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+.day-date{font-size:11px;color:var(--muted2);margin-top:3px}
+.class-slot{padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .2s}
+.class-slot:last-child{border-bottom:none}
+.class-slot:hover{background:rgba(181,255,71,.03)}
+.cs-time{font-size:10px;font-weight:600;color:var(--muted);margin-bottom:4px}
+.cs-name{font-size:12px;font-weight:600;margin-bottom:2px}
+.cs-trainer{font-size:10px;color:var(--muted)}
+.cs-spots{display:inline-block;padding:2px 7px;border-radius:100px;font-size:9px;font-weight:700;margin-top:4px}
+.spots-ok{background:var(--volt-dim);color:var(--volt);border:1px solid rgba(181,255,71,.2)}
+.spots-low{background:rgba(245,158,11,.1);color:#f59e0b;border:1px solid rgba(245,158,11,.2)}
+.spots-full{background:var(--coral-dim);color:var(--coral);border:1px solid rgba(255,99,71,.15)}
+/* Trainers */
+.trainer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+@media(max-width:900px){.trainer-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.trainer-grid{grid-template-columns:1fr}}
+.trainer-card{background:var(--card);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:transform .35s var(--ease),border-color .3s}
+.trainer-card:hover{transform:translateY(-5px);border-color:rgba(181,255,71,.18)}
+.trainer-img{height:200px;overflow:hidden;position:relative}
+.trainer-img img{transition:transform .5s var(--ease)}
+.trainer-card:hover .trainer-img img{transform:scale(1.06)}
+.trainer-img-ov{position:absolute;inset:0;background:linear-gradient(to top,var(--card) 0%,transparent 50%)}
+.trainer-body{padding:20px}
+.trainer-name{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:3px}
+.trainer-role{font-size:12px;color:var(--volt);font-weight:600;margin-bottom:8px}
+.trainer-bio{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.trainer-tags{display:flex;flex-wrap:wrap;gap:6px}
+.ttag{padding:4px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;font-size:10px;font-weight:600;color:var(--muted)}
+/* Facilities */
+.fac-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:800px){.fac-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.fac-grid{grid-template-columns:1fr}}
+.fac-card{position:relative;height:220px;border-radius:18px;overflow:hidden;cursor:pointer}
+.fac-card img{transition:transform .5s var(--ease);width:100%;height:100%;object-fit:cover;filter:brightness(.35) saturate(.5)}
+.fac-card:hover img{transform:scale(1.07);filter:brightness(.45) saturate(.6)}
+.fac-ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:22px}
+.fac-title{font-family:'Syne',sans-serif;font-weight:700;font-size:18px;margin-bottom:4px}
+.fac-desc{font-size:12px;color:rgba(237,244,240,.7)}
+/* Book modal */
+.book-form{display:flex;flex-direction:column;gap:14px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a on" href="gym.html">Gym</a>
+    <a class="nav-a" href="healthcare.html">Health Care</a>
+    <a class="nav-a" href="bmi-calculator.html">BMI</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="gym-hero">
+  <img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1920&q=80&auto=format&fit=crop" alt="Gym"/>
+  <div class="gym-hero-ov"></div>
+  <div class="gym-hero-content">
+    <span class="stag">World-Class Facilities</span>
+    <h1 class="sh2" style="margin-bottom:14px">Train Like You<br><span style="color:var(--volt)">Mean It.</span></h1>
+    <p style="font-size:16px;color:var(--muted);max-width:500px;margin-bottom:32px;line-height:1.75">50+ weekly classes, expert trainers, medical-grade safety protocols, and AI-powered workout plans — all under one roof.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap">
+      <button class="btn-main" onclick="FMModal.open('bookModal')">Book a Class →</button>
+      <a class="btn-outline" href="workout-tracker.html">Start Tracking</a>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 0">
+  <div class="wrap" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;text-align:center">
+    <div style="padding:0 24px;border-right:1px solid var(--border)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:40px;color:var(--volt);letter-spacing:-1px">50+</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px">Classes/Week</div></div>
+    <div style="padding:0 24px;border-right:1px solid var(--border)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:40px;color:var(--teal);letter-spacing:-1px">12</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px">Expert Trainers</div></div>
+    <div style="padding:0 24px;border-right:1px solid var(--border)"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:40px;color:var(--volt);letter-spacing:-1px">24/7</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px">Gym Access</div></div>
+    <div style="padding:0 24px"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:40px;color:var(--teal);letter-spacing:-1px">15K+</div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px">Active Members</div></div>
+  </div>
+</div>
+
+<!-- CLASS SCHEDULE -->
+<section class="section">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:44px">
+      <span class="stag">Weekly Schedule</span>
+      <h2 class="sh2">This Week's Classes</h2>
+      <p class="ssub">Click any class to book your spot. Updates in real-time.</p>
+    </div>
+    <div class="schedule-grid rv d1" id="scheduleGrid"></div>
+  </div>
+</section>
+
+<!-- TRAINERS -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:44px">
+      <span class="stag">Our Team</span>
+      <h2 class="sh2">Meet the Trainers</h2>
+      <p class="ssub">All certified professionals with 5+ years of experience.</p>
+    </div>
+    <div class="trainer-grid">
+      <div class="trainer-card rv d1">
+        <div class="trainer-img"><img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=400&q=80&auto=format&fit=crop&face" alt=""/><div class="trainer-img-ov"></div></div>
+        <div class="trainer-body"><div class="trainer-name">Ahmad Qureshi</div><div class="trainer-role">Head Strength Coach</div><div class="trainer-bio">10 years experience. Former national powerlifting champion. Specialises in progressive overload and injury-safe technique.</div><div class="trainer-tags"><span class="ttag">Powerlifting</span><span class="ttag">Strength</span><span class="ttag">Rehab</span></div></div>
+      </div>
+      <div class="trainer-card rv d2">
+        <div class="trainer-img"><img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&q=80&auto=format&fit=crop&face" alt=""/><div class="trainer-img-ov"></div></div>
+        <div class="trainer-body"><div class="trainer-name">Nadia Hussain</div><div class="trainer-role">Yoga & Mobility Coach</div><div class="trainer-bio">Certified yoga instructor and physiotherapy assistant. Expert in flexibility, breathwork, and post-injury mobility restoration.</div><div class="trainer-tags"><span class="ttag">Yoga</span><span class="ttag">Mobility</span><span class="ttag">Prenatal</span></div></div>
+      </div>
+      <div class="trainer-card rv d3">
+        <div class="trainer-img"><img src="https://images.unsplash.com/photo-1594381898411-846e7d193883?w=400&q=80&auto=format&fit=crop&face" alt=""/><div class="trainer-img-ov"></div></div>
+        <div class="trainer-body"><div class="trainer-name">Bilal Mahmood</div><div class="trainer-role">HIIT & Cardio Specialist</div><div class="trainer-bio">7 years experience designing metabolic conditioning programs. Helped 400+ clients reach their fat-loss goals safely.</div><div class="trainer-tags"><span class="ttag">HIIT</span><span class="ttag">Cardio</span><span class="ttag">Fat Loss</span></div></div>
+      </div>
+      <div class="trainer-card rv d4">
+        <div class="trainer-img"><img src="https://images.unsplash.com/photo-1548690312-e3b507d8c110?w=400&q=80&auto=format&fit=crop&face" alt=""/><div class="trainer-img-ov"></div></div>
+        <div class="trainer-body"><div class="trainer-name">Sana Riaz</div><div class="trainer-role">Nutrition & Wellness Coach</div><div class="trainer-bio">Registered dietitian with a focus on sports nutrition. Works alongside our medical team to align diet with health goals.</div><div class="trainer-tags"><span class="ttag">Nutrition</span><span class="ttag">Wellness</span><span class="ttag">Diabetes</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FACILITIES -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="rv" style="margin-bottom:44px">
+      <span class="stag">Facilities</span>
+      <h2 class="sh2">World-Class Equipment</h2>
+    </div>
+    <div class="fac-grid">
+      <div class="fac-card rv d1"><img src="https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Free Weights Zone</div><div class="fac-desc">Dumbbells 2.5–80kg, barbells, EZ bars, racks</div></div></div>
+      <div class="fac-card rv d2"><img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Cardio Floor</div><div class="fac-desc">40 treadmills, bikes, rowers, stair climbers</div></div></div>
+      <div class="fac-card rv d3"><img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Group Class Studio</div><div class="fac-desc">Yoga, Zumba, Spin, HIIT — 6 sessions daily</div></div></div>
+      <div class="fac-card rv d1"><img src="https://images.unsplash.com/photo-1576678927484-cc907957088c?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Functional Training</div><div class="fac-desc">Turf area, battle ropes, TRX, sleds, kettlebells</div></div></div>
+      <div class="fac-card rv d2"><img src="https://images.unsplash.com/photo-1519505907962-0a6cb0167c73?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Recovery Suite</div><div class="fac-desc">Sauna, ice bath, massage chairs, foam rolling</div></div></div>
+      <div class="fac-card rv d3"><img src="https://images.unsplash.com/photo-1559757175-5700dde675bc?w=800&q=80&auto=format&fit=crop" alt=""/><div class="fac-ov"><div class="fac-title">Medical Bay</div><div class="fac-desc">On-site physio, BP monitoring, vitals check</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GYM-HEALTH INTEGRATION -->
+<section class="section" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="wrap">
+    <div class="rv" style="text-align:center;margin-bottom:52px">
+      <span class="stag" style="justify-content:center">Unique to FitMart</span>
+      <h2 class="sh2">Gym + Health, Integrated</h2>
+      <p class="ssub" style="margin:0 auto">Your trainer and doctor talk to each other. Your workout adapts to your health.</p>
+    </div>
+    <div class="feat-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
+      <div class="card rv d1"><div class="card-icon volt">🧠</div><h3>Smart Exercise Suggestions</h3><p>High BP today? System suggests light cardio only. Low sugar? Alerts before intense sessions. Injury flagged? Exercises auto-modify.</p></div>
+      <div class="card rv d2"><div class="card-icon teal">🩺</div><h3>Trainer + Doctor Collaboration</h3><p>Trainers see doctor-approved exercise restrictions in their dashboard. Doctors review workout data to refine treatment plans.</p></div>
+      <div class="card rv d3"><div class="card-icon coral">🚨</div><h3>Real-Time Health Alerts</h3><p>If heart rate exceeds your safe limit during a session, trainers and your assigned doctor are notified instantly.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section style="padding:100px 0;text-align:center">
+  <div class="wrap rv">
+    <span class="stag" style="justify-content:center">Get Started</span>
+    <h2 class="sh2">Your First Class<br><span style="color:var(--volt)">Is on Us.</span></h2>
+    <p class="ssub" style="margin:16px auto 40px;text-align:center">Book a free trial class today. No membership needed.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <button class="btn-main" onclick="FMModal.open('bookModal')">Book Free Trial Class →</button>
+      <a class="btn-outline" href="plans.html">View Membership Plans</a>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="wrap"><div class="fbottom" style="border:none;padding-top:0"><p>© 2025 FitMart · Rawalpindi, Punjab, Pakistan</p><div style="display:flex;gap:20px"><a href="index.html">Home</a><a href="plans.html">Plans</a><a href="healthcare.html">Health Care</a></div></div></div></footer>
+
+<!-- BOOK MODAL -->
+<div class="modal-overlay" id="bookModal">
+  <div class="modal">
+    <button class="modal-close" onclick="FMModal.close('bookModal')">×</button>
+    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:6px">Book a Class</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">Select your class and preferred time</div>
+    <div class="book-form">
+      <div class="form-group"><label class="form-label">Your Name</label><input class="form-input" id="bookName" placeholder="Ali Raza"/></div>
+      <div class="form-group"><label class="form-label">Class Type</label>
+        <select class="form-select" id="bookClass">
+          <option>Yoga Flow · 7:00 AM</option><option>HIIT Blast · 8:30 AM</option>
+          <option>Zumba · 10:00 AM</option><option>Spin Cycle · 12:00 PM</option>
+          <option>Strength Basics · 5:00 PM</option><option>Evening Yoga · 7:00 PM</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Preferred Date</label><input class="form-input" type="date" id="bookDate"/></div>
+      <div class="form-group"><label class="form-label">Notes (injuries, conditions)</label><textarea class="form-textarea" id="bookNotes" placeholder="Optional..." style="min-height:72px"></textarea></div>
+      <button class="btn-main btn-full" onclick="confirmBook()">Confirm Booking →</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/app.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>60),{passive:true});
+document.getElementById('bookDate').value=new Date().toISOString().split('T')[0];
+
+// Build schedule
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const CLASSES=[
+  [{t:'6:00',n:'Morning Yoga',tr:'Nadia H.',sp:12,max:15},{t:'8:00',n:'HIIT Blast',tr:'Bilal M.',sp:3,max:20},{t:'12:00',n:'Spin',tr:'Ahmad Q.',sp:8,max:20}],
+  [{t:'7:00',n:'Zumba',tr:'Nadia H.',sp:10,max:20},{t:'9:00',n:'Strength',tr:'Ahmad Q.',sp:5,max:12},{t:'6:00 PM',n:'Yoga Flow',tr:'Nadia H.',sp:14,max:15}],
+  [{t:'6:30',n:'Cardio Burn',tr:'Bilal M.',sp:0,max:18},{t:'11:00',n:'Pilates',tr:'Sana R.',sp:7,max:12},{t:'5:00 PM',n:'HIIT',tr:'Bilal M.',sp:4,max:20}],
+  [{t:'7:00',n:'Yoga Flow',tr:'Nadia H.',sp:11,max:15},{t:'9:30',n:'Kettlebell',tr:'Ahmad Q.',sp:6,max:14}],
+  [{t:'6:00',n:'Morning HIIT',tr:'Bilal M.',sp:2,max:20},{t:'10:00',n:'Zumba',tr:'Nadia H.',sp:9,max:20},{t:'6:00 PM',n:'Power Yoga',tr:'Nadia H.',sp:13,max:15}],
+  [{t:'8:00',n:'Weekend Spin',tr:'Ahmad Q.',sp:5,max:20},{t:'10:00',n:'Full Body',tr:'Bilal M.',sp:8,max:18},{t:'12:00',n:'Nutrition Talk',tr:'Sana R.',sp:15,max:30}],
+  [{t:'9:00',n:'Gentle Yoga',tr:'Nadia H.',sp:12,max:15},{t:'11:00',n:'Open Gym',tr:'Staff',sp:20,max:50}],
+];
+const now=new Date();
+document.getElementById('scheduleGrid').innerHTML=DAYS.map((day,i)=>`
+  <div class="day-col">
+    <div class="day-head"><div class="day-name">${day}</div><div class="day-date">${new Date(now.getTime()+(i-now.getDay()+1)*86400000).getDate()}</div></div>
+    ${CLASSES[i].map(c=>{
+      const pct=c.sp/c.max;const cls=pct===0?'spots-full':pct<0.3?'spots-low':'spots-ok';const lbl=c.sp===0?'Full':c.sp+' left';
+      return`<div class="class-slot" onclick="quickBook('${c.n}','${c.t}','${day}')">
+        <div class="cs-time">${c.t}</div><div class="cs-name">${c.n}</div>
+        <div class="cs-trainer">${c.tr}</div>
+        <span class="cs-spots ${cls}">${lbl}</span>
+      </div>`;
+    }).join('')}
+  </div>`).join('');
+
+function quickBook(name,time,day){
+  document.getElementById('bookClass').value=name+' · '+time;
+  FMModal.open('bookModal');
+}
+function confirmBook(){
+  const name=document.getElementById('bookName').value.trim();
+  if(!name){FMToast.error('Please enter your name');return;}
+  FMModal.close('bookModal');
+  FMToast.success(`✅ Booked: ${document.getElementById('bookClass').value} for ${name}`);
+  const bookings=FM.load('bookings',[])||[];
+  bookings.push({name,class:document.getElementById('bookClass').value,date:document.getElementById('bookDate').value,id:Date.now()});
+  FM.save('bookings',bookings);
+}
+</script>
+</body>
+</html>

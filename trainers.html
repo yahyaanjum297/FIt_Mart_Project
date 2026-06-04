@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Trainers — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<style>
+body{padding-top:90px}
+.trainers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+@media(max-width:900px){.trainers-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.trainers-grid{grid-template-columns:1fr}}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:22px;overflow:hidden;transition:transform .35s var(--ease),border-color .3s,box-shadow .35s}
+.tc:hover{transform:translateY(-6px);border-color:rgba(181,255,71,.2);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.tc-img{height:260px;position:relative;overflow:hidden}
+.tc-img img{width:100%;height:100%;object-fit:cover;object-position:top;filter:brightness(.4) saturate(.5);transition:transform .6s var(--ease),filter .4s}
+.tc:hover .tc-img img{transform:scale(1.06);filter:brightness(.55) saturate(.65)}
+.tc-img-ov{position:absolute;inset:0;background:linear-gradient(to top,var(--card) 0%,transparent 50%)}
+.tc-cert{position:absolute;top:16px;right:16px;background:var(--volt);color:var(--bg);font-size:9px;font-weight:800;padding:4px 12px;border-radius:100px;font-family:'Syne',sans-serif;letter-spacing:1px}
+.tc-body{padding:24px}
+.tc-name{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;margin-bottom:4px}
+.tc-role{font-size:12px;color:var(--volt);font-weight:700;letter-spacing:.5px;margin-bottom:10px}
+.tc-rating{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.tc-stars{color:var(--volt);font-size:13px;letter-spacing:1px}
+.tc-reviews{font-size:12px;color:var(--muted)}
+.tc-bio{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:16px}
+.tc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.tc-tag{padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;font-size:11px;font-weight:600;color:var(--muted)}
+.tc-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.tc-stat{background:var(--bg3);padding:12px 8px;text-align:center}
+.tc-stat-n{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--volt)}
+.tc-stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+.tc-actions{display:flex;gap:10px}
+/* Feature section */
+.why-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+@media(max-width:800px){.why-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.why-grid{grid-template-columns:1fr}}
+/* Speciality filter */
+.spec-filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:36px}
+</style>
+</head>
+<body>
+<div class="grain-layer"></div><div class="global-grid"></div>
+<div id="cur"></div><div id="cring"></div>
+
+<div class="modal-overlay" id="trainerModal">
+  <div class="modal" style="max-width:540px">
+    <button class="modal-close" onclick="FMModal.close('trainerModal')">×</button>
+    <div id="trainerModalBody"></div>
+  </div>
+</div>
+
+<nav class="nav" id="nav">
+  <a class="nav-brand" href="index.html"><div class="n-mark"><svg viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg></div>FitMart</a>
+  <div class="nav-center">
+    <a class="nav-a" href="index.html">Home</a>
+    <a class="nav-a" href="gym.html">Gym</a>
+    <a class="nav-a" href="schedule.html">Schedule</a>
+    <a class="nav-a on" href="trainers.html">Trainers</a>
+    <a class="nav-a" href="plans.html">Plans</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost btn-sm" href="auth-login.html">Login</a>
+    <a class="btn-volt btn-sm" href="auth-register.html">Get Started</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <span class="stag">Expert Team</span>
+  <h1>Meet Our Trainers</h1>
+  <p>All FitMart trainers are internationally certified, background-checked, and work alongside our medical team to ensure your training is always safe and effective.</p>
+</div>
+
+<div class="wrap section" style="padding-top:24px">
+  <!-- Stats band -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:44px" class="rv">
+    <div class="stat-box"><div class="stat-n">12</div><div class="stat-l">Expert Trainers</div></div>
+    <div class="stat-box"><div class="stat-n teal">8+</div><div class="stat-l">Avg. Years Exp.</div></div>
+    <div class="stat-box"><div class="stat-n white">98%</div><div class="stat-l">Satisfaction</div></div>
+    <div class="stat-box"><div class="stat-n teal">2,400+</div><div class="stat-l">Clients Trained</div></div>
+  </div>
+
+  <!-- Filter -->
+  <div class="spec-filter rv d1" id="specFilter">
+    <button class="filter-btn on" onclick="filterTrainers('all',this)">All Trainers</button>
+    <button class="filter-btn" onclick="filterTrainers('Strength',this)">💪 Strength</button>
+    <button class="filter-btn" onclick="filterTrainers('Cardio',this)">🏃 Cardio & HIIT</button>
+    <button class="filter-btn" onclick="filterTrainers('Yoga',this)">🧘 Yoga</button>
+    <button class="filter-btn" onclick="filterTrainers('Nutrition',this)">🥗 Nutrition</button>
+    <button class="filter-btn" onclick="filterTrainers('Rehab',this)">🦴 Rehab</button>
+  </div>
+
+  <!-- Trainers grid -->
+  <div class="trainers-grid" id="trainersGrid"></div>
+
+  <!-- Why FitMart trainers -->
+  <div style="margin-top:80px" class="rv">
+    <div style="text-align:center;margin-bottom:44px">
+      <span class="stag" style="justify-content:center">What Sets Us Apart</span>
+      <h2 class="sh2">Training With<br><span style="color:var(--volt)">Medical Backing</span></h2>
+    </div>
+    <div class="why-grid">
+      <div class="card rv d1"><div class="card-icon volt" style="font-size:22px">🩺</div><h3>Doctor-Trainer Link</h3><p>Your trainer sees doctor-approved exercise restrictions. If your doctor flags a condition, your plan updates automatically.</p></div>
+      <div class="card rv d2"><div class="card-icon teal" style="font-size:22px">📊</div><h3>Data-Driven Plans</h3><p>Workouts are built from your vitals, BMI, and health history — not guesswork. Progress is tracked scientifically every session.</p></div>
+      <div class="card rv d3"><div class="card-icon coral" style="font-size:22px">🏆</div><h3>Certified & Vetted</h3><p>Every trainer holds at least one international certification (NASM, ACE, CrossFit L2) and is background-checked annually.</p></div>
+      <div class="card rv d4"><div class="card-icon volt" style="font-size:22px">💬</div><h3>Direct Messaging</h3><p>Chat with your trainer through the platform. Get form checks on videos, ask questions, and receive real-time adjustments.</p></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fbottom" style="border:none;padding-top:0">
+      <p>© 2025 FitMart · Rawalpindi, Punjab, Pakistan</p>
+      <div style="display:flex;gap:20px"><a href="index.html" class="link-muted">Home</a><a href="gym.html" class="link-muted">Gym</a><a href="schedule.html" class="link-muted">Schedule</a><a href="plans.html" class="link-muted">Plans</a></div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/app.js"></script>
+<script>
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>60),{passive:true});
+
+const TRAINERS=[
+  {id:1,name:'Ahmad Qureshi',role:'Head Strength & Powerlifting Coach',cert:'NASM-CPT',specs:['Strength','Rehab'],exp:10,clients:420,classes:8,rating:4.9,reviews:187,
+   img:'https://images.unsplash.com/photo-1567013127542-490d757e51fc?w=600&q=80&auto=format&fit=crop',
+   bio:'Former national powerlifting champion with 10 years of coaching experience. Ahmad specialises in building elite-level strength while maintaining long-term joint health. Works closely with our physiotherapy team for injury-safe programming.',
+   tags:['Powerlifting','Barbell Strength','Injury Rehab','Progressive Overload','1-on-1 Coaching'],
+   schedule:['Mon 5PM','Wed 5PM','Fri 5PM','Sat 8AM','Sun 11AM']},
+  {id:2,name:'Nadia Hussain',role:'Yoga, Mobility & Prenatal Coach',cert:'RYT-500',specs:['Yoga','Rehab'],exp:9,clients:380,classes:12,rating:5.0,reviews:214,
+   img:'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=600&q=80&auto=format&fit=crop',
+   bio:'Registered Yoga Teacher (RYT-500) and certified prenatal yoga instructor. Nadia blends traditional yoga philosophy with modern sports science, making her classes accessible to complete beginners while still challenging for advanced practitioners.',
+   tags:['Hatha Yoga','Yin Yoga','Prenatal Yoga','Mobility','Breathwork','Meditation'],
+   schedule:['Mon 6AM','Mon 7PM','Tue 7AM','Wed 10AM','Thu 7PM','Fri 5PM','Sat 2PM']},
+  {id:3,name:'Bilal Mahmood',role:'HIIT & Metabolic Conditioning Specialist',cert:'ACE-CPT',specs:['Cardio','Strength'],exp:7,clients:360,classes:10,rating:4.8,reviews:156,
+   img:'https://images.unsplash.com/photo-1594381898411-846e7d193883?w=600&q=80&auto=format&fit=crop',
+   bio:'Bilal has helped 360+ clients lose over 2,400kg combined through his evidence-based HIIT and metabolic conditioning programmes. His high-energy classes are legendary at FitMart — expect to be pushed, motivated, and transformed.',
+   tags:['HIIT','Fat Loss','Metabolic Conditioning','Cardio','Boxing Fitness','Group Training'],
+   schedule:['Mon 8AM','Tue 6PM','Wed 6PM','Thu 6:30AM','Fri 6AM','Fri 7PM','Sat 8AM']},
+  {id:4,name:'Sana Riaz',role:'Sports Nutritionist & Wellness Coach',cert:'RDN, CSSD',specs:['Nutrition'],exp:8,clients:290,classes:4,rating:4.9,reviews:132,
+   img:'https://images.unsplash.com/photo-1548690312-e3b507d8c110?w=600&q=80&auto=format&fit=crop',
+   bio:'Registered Dietitian Nutritionist and Certified Sports Dietitian. Sana bridges the gap between gym performance and medical nutrition — her plans are used by our doctors to support patients with diabetes, hypertension, and weight management goals.',
+   tags:['Sports Nutrition','Weight Management','Diabetes Diet','Meal Planning','Supplement Guidance'],
+   schedule:['Tue 11AM','Thu 11AM','Fri 12PM','Sat 12PM']},
+  {id:5,name:'Umar Cheema',role:'Functional Fitness & CrossFit Coach',cert:'CF-L2',specs:['Strength','Cardio'],exp:6,clients:210,classes:7,rating:4.7,reviews:98,
+   img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&auto=format&fit=crop',
+   bio:'CrossFit Level 2 Trainer with a background in military fitness. Umar\'s classes combine Olympic lifting, gymnastics, and metabolic conditioning. He specialises in building real-world functional strength that transfers to everyday life.',
+   tags:['CrossFit','Olympic Lifting','Gymnastics','Functional Strength','Military Fitness'],
+   schedule:['Mon 7AM','Wed 7AM','Fri 7AM','Sat 9:30AM']},
+  {id:6,name:'Fatima Azhar',role:'Zumba & Dance Fitness Instructor',cert:'ZUMBA Certified',specs:['Cardio'],exp:5,clients:340,classes:9,rating:4.9,reviews:176,
+   img:'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=600&q=80&auto=format&fit=crop',
+   bio:'Pakistan\'s most energetic Zumba instructor. Fatima\'s classes routinely sell out within hours of opening. She brings 5 years of professional dance training to every session, making cardio feel less like exercise and more like a celebration.',
+   tags:['Zumba','Dance Fitness','Latin Dance','Body Toning','Cardio Dance','Senior Fitness'],
+   schedule:['Tue 7AM','Wed 7PM','Thu 12PM','Fri 10AM','Sat 10AM']},
+];
+
+let activeSpec='all';
+
+function filterTrainers(spec,btn){
+  activeSpec=spec;
+  document.querySelectorAll('.spec-filter .filter-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTrainers();
+}
+
+function renderTrainers(){
+  const filtered=activeSpec==='all'?TRAINERS:TRAINERS.filter(t=>t.specs.includes(activeSpec));
+  document.getElementById('trainersGrid').innerHTML=filtered.map((t,i)=>`
+    <div class="tc rv d${Math.min(i+1,6)}">
+      <div class="tc-img">
+        <img src="${t.img}" alt="${t.name}" loading="lazy"/>
+        <div class="tc-img-ov"></div>
+        <span class="tc-cert">${t.cert}</span>
+      </div>
+      <div class="tc-body">
+        <div class="tc-name">${t.name}</div>
+        <div class="tc-role">${t.role}</div>
+        <div class="tc-rating">
+          <span class="tc-stars">${'★'.repeat(Math.floor(t.rating))}${t.rating%1?'½':''}</span>
+          <span class="tc-reviews">${t.rating} (${t.reviews} reviews)</span>
+        </div>
+        <div class="tc-bio">${t.bio.substring(0,120)}...</div>
+        <div class="tc-tags">${t.tags.slice(0,4).map(tag=>`<span class="tc-tag">${tag}</span>`).join('')}</div>
+        <div class="tc-stats">
+          <div class="tc-stat"><div class="tc-stat-n">${t.exp}</div><div class="tc-stat-l">Yrs Exp</div></div>
+          <div class="tc-stat"><div class="tc-stat-n">${t.clients}+</div><div class="tc-stat-l">Clients</div></div>
+          <div class="tc-stat"><div class="tc-stat-n">${t.classes}</div><div class="tc-stat-l">Classes/Wk</div></div>
+        </div>
+        <div class="tc-actions">
+          <button class="btn-outline btn-sm" style="flex:1" onclick="viewTrainer(${t.id})">View Profile</button>
+          <button class="btn-main btn-sm" style="flex:1" onclick="bookTrainer(${t.id})">Book Session</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function viewTrainer(id){
+  const t=TRAINERS.find(x=>x.id===id);
+  if(!t)return;
+  document.getElementById('trainerModalBody').innerHTML=`
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:90px;height:90px;border-radius:50%;overflow:hidden;margin:0 auto 14px;border:3px solid rgba(181,255,71,.3)"><img src="${t.img}" style="width:100%;height:100%;object-fit:cover;object-position:top;filter:brightness(.7)"/></div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:22px;margin-bottom:4px">${t.name}</div>
+      <div style="font-size:12px;color:var(--volt);font-weight:600;margin-bottom:8px">${t.role}</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <span class="badge badge-volt">${t.cert}</span>
+        <span class="badge badge-teal">${t.rating} ★ (${t.reviews})</span>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:18px;margin-bottom:16px">
+      <div style="font-size:14px;color:var(--muted);line-height:1.8">${t.bio}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px">
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:var(--volt)">${t.exp}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Years Exp</div></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:var(--teal)">${t.clients}+</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Clients</div></div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:22px;color:#a78bfa">${t.classes}</div><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Classes/Wk</div></div>
+    </div>
+    <div style="margin-bottom:18px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Specialities</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${t.tags.map(tag=>`<span class="badge badge-volt">${tag}</span>`).join('')}</div>
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Weekly Schedule</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${t.schedule.map(s=>`<span style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:500;color:var(--muted)">${s}</span>`).join('')}</div>
+    </div>
+    <button class="btn-main w-full" onclick="FMModal.close('trainerModal');bookTrainer(${t.id})">Book a 1-on-1 Session →</button>`;
+  FMModal.open('trainerModal');
+}
+
+function bookTrainer(id){
+  const t=TRAINERS.find(x=>x.id===id);
+  if(!t)return;
+  FMModal.close('trainerModal');
+  const appts=FM.load('appointments',[])||[];
+  appts.push({id:Date.now(),name:FM.getUser()?.name||'Member',doctor:t.name,date:new Date(Date.now()+86400000).toISOString().split('T')[0],time:'10:00 AM',type:'Personal Training',reason:'1-on-1 session with '+t.name,status:'Pending'});
+  FM.save('appointments',appts);
+  FMToast.success(`✅ Session requested with ${t.name}! Check your appointments.`);
+  setTimeout(()=>window.location.href='appointment.html',1500);
+}
+
+renderTrainers();
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Doctor Dashboard — FitMart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="assets/styles.css"/>
+<script src="assets/nav.js"></script>
+<style>
+.dr-grid{display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start}
+@media(max-width:900px){.dr-grid{grid-template-columns:1fr}}
+.patient-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;cursor:pointer;transition:border-color .25s,transform .3s var(--ease);margin-bottom:12px}
+.patient-card:hover,.patient-card.active{border-color:rgba(181,255,71,.35);transform:translateY(-2px)}
+.patient-card.active{background:rgba(181,255,71,.04)}
+.pa-row{display:flex;align-items:center;gap:14px}
+.pa-avatar{width:44px;height:44px;border-radius:50%;background:var(--volt-dim);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--volt);flex-shrink:0}
+.pa-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.pa-sub{font-size:12px;color:var(--muted)}
+.pa-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px;background:var(--volt-dim);color:var(--volt);margin-left:auto;flex-shrink:0}
+.pa-badge.alert{background:var(--coral-dim);color:var(--coral)}
+.vital-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+@media(max-width:700px){.vital-grid{grid-template-columns:repeat(2,1fr)}}
+.vt-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center}
+.vt-val{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;margin-bottom:2px}
+.vt-lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.vt-status{font-size:10px;font-weight:700;margin-top:4px}
+.note-card{background:var(--bg3);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}
+.note-date{font-size:11px;color:var(--muted2);margin-bottom:6px}
+.note-text{font-size:13px;color:var(--muted);line-height:1.7}
+.tab-bar{display:flex;gap:4px;background:var(--bg3);border-radius:12px;padding:4px;margin-bottom:24px}
+.tab-btn{flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted2);background:none;border:none;cursor:pointer;transition:all .25s;text-align:center}
+.tab-btn.on{background:var(--card);color:var(--white);box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.search-wrap{position:relative;margin-bottom:16px}
+.search-wrap input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px 12px 40px;color:var(--white);font-size:14px;transition:border-color .25s}
+.search-wrap input:focus{border-color:rgba(181,255,71,.4);outline:none}
+.search-wrap .s-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted2);font-size:15px;pointer-events:none}
+.stat-mini{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px}
+.stat-mini .sm-icon{font-size:22px;width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-mini .sm-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1}
+.stat-mini .sm-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.appt-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;gap:12px;flex-wrap:wrap}
+.appt-info .a-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.appt-info .a-sub{font-size:12px;color:var(--muted)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted2)}
+.empty-state .e-icon{font-size:36px;margin-bottom:12px}
+.empty-state .e-text{font-size:14px}
+</style>
+</head>
+<body>
+<main style="padding-top:100px;padding-bottom:60px;min-height:100vh">
+  <div class="container">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:32px" class="rv">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:2px;color:var(--teal);text-transform:uppercase;margin-bottom:6px">Doctor Portal</div>
+        <h1 style="font-size:28px;font-weight:800;letter-spacing:-1px;margin-bottom:4px" id="drName">Loading...</h1>
+        <p style="color:var(--muted);font-size:14px">Monitor patients · Write notes · Manage appointments</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="backend-status offline" id="beStatus"><div class="backend-dot"></div>Offline</div>
+        <button class="btn-outline btn-sm" onclick="FM.logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:32px" class="rv">
+      <div class="stat-mini"><div class="sm-icon" style="background:var(--volt-dim)">👥</div><div><div class="sm-num" id="totalPt">—</div><div class="sm-lbl">Total Patients</div></div></div>
+      <div class="stat-mini"><div class="sm-icon" style="background:var(--coral-dim)">🚨</div><div><div class="sm-num" id="alertPt">—</div><div class="sm-lbl">Critical Alerts</div></div></div>
+      <div class="stat-mini"><div class="sm-icon" style="background:var(--teal-dim)">📅</div><div><div class="sm-num" id="todayAppts">—</div><div class="sm-lbl">Today's Appts</div></div></div>
+      <div class="stat-mini"><div class="sm-icon" style="background:rgba(181,255,71,.08)">📋</div><div><div class="sm-num" id="notesCount">—</div><div class="sm-lbl">Notes Written</div></div></div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="dr-grid">
+
+      <!-- Patient List (left) -->
+      <div class="rv">
+        <div class="section-label" style="margin-bottom:14px">Patient List</div>
+        <div class="search-wrap">
+          <span class="s-icon">🔍</span>
+          <input type="text" id="ptSearch" placeholder="Search patients…" oninput="filterPatients(this.value)"/>
+        </div>
+        <div id="patientList"><div class="empty-state"><div class="e-icon">⏳</div><div class="e-text">Loading patients…</div></div></div>
+      </div>
+
+      <!-- Patient Detail (right) -->
+      <div id="patientDetail" class="rv">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px;text-align:center;color:var(--muted2)">
+          <div style="font-size:48px;margin-bottom:12px">👈</div>
+          <div style="font-size:15px;font-weight:600;color:var(--muted)">Select a patient to view details</div>
+          <div style="font-size:13px;margin-top:6px">Click any patient in the list to see their vitals, notes and history</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script src="assets/app.js"></script>
+<script>
+requireLogin();
+requireRole('doctor','auth-login.html');
+
+const doctor = FM.getUser();
+document.getElementById('drName').textContent = doctor?.name || 'Doctor';
+
+let allPatients = [], selectedPatient = null, notesData = [];
+
+/* ── Load Data ── */
+async function loadAll() {
+  // Backend status
+  const online = await FMStatus.check();
+  const bel = document.getElementById('beStatus');
+  bel.className = 'backend-status ' + (online ? 'online' : 'offline');
+  bel.innerHTML = `<div class="backend-dot"></div>${online ? 'Live' : 'Offline'}`;
+
+  // Load patients from backend or demo
+  try {
+    allPatients = await FMAPI.get('/doctor/patients/' + (doctor?.id || 1));
+  } catch {
+    allPatients = getDemoPatients();
+  }
+
+  // Load appointments
+  try {
+    const appts = await FMAPI.get('/doctor/appointments/' + (doctor?.id || 1));
+    const today = new Date().toISOString().split('T')[0];
+    const todayCount = appts.filter(a => a.date === today).length;
+    document.getElementById('todayAppts').textContent = todayCount;
+  } catch {
+    document.getElementById('todayAppts').textContent = '3';
+  }
+
+  document.getElementById('totalPt').textContent = allPatients.length;
+  const critCount = allPatients.filter(p => isCritical(p.latest_vitals)).length;
+  document.getElementById('alertPt').textContent = critCount;
+
+  renderPatientList(allPatients);
+}
+
+function isCritical(v) {
+  if (!v) return false;
+  return (v.hr && (v.hr < 50 || v.hr > 120)) ||
+         (v.sugar && (v.sugar < 70 || v.sugar > 200)) ||
+         (v.spo2 && v.spo2 < 92);
+}
+
+/* ── Render Patient List ── */
+function renderPatientList(patients) {
+  const el = document.getElementById('patientList');
+  if (!patients.length) {
+    el.innerHTML = '<div class="empty-state"><div class="e-icon">😔</div><div class="e-text">No patients found</div></div>';
+    return;
+  }
+  el.innerHTML = patients.map(p => {
+    const crit = isCritical(p.latest_vitals);
+    const initials = FMFmt.initial(p.name);
+    return `<div class="patient-card ${selectedPatient?.id===p.id?'active':''}" onclick="selectPatient(${p.id})">
+      <div class="pa-row">
+        <div class="pa-avatar">${initials}</div>
+        <div style="flex:1;min-width:0">
+          <div class="pa-name">${p.name}</div>
+          <div class="pa-sub">${p.age||'—'} yrs · ${p.condition||'—'}</div>
+        </div>
+        ${crit ? '<span class="pa-badge alert">⚠ Alert</span>' : `<span class="pa-badge">${p.plan||'Basic'}</span>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterPatients(q) {
+  const lq = q.toLowerCase();
+  const filtered = allPatients.filter(p =>
+    p.name.toLowerCase().includes(lq) ||
+    (p.condition||'').toLowerCase().includes(lq) ||
+    (p.goal||'').toLowerCase().includes(lq)
+  );
+  renderPatientList(filtered);
+}
+
+/* ── Select Patient ── */
+async function selectPatient(id) {
+  selectedPatient = allPatients.find(p => p.id === id);
+  if (!selectedPatient) return;
+
+  // Re-render list to show active state
+  renderPatientList(allPatients.filter(p => {
+    const q = document.getElementById('ptSearch').value.toLowerCase();
+    return !q || p.name.toLowerCase().includes(q);
+  }));
+
+  // Load notes
+  try {
+    notesData = await FMAPI.get('/doctor/notes/' + id);
+  } catch {
+    notesData = getDemoNotes();
+  }
+  document.getElementById('notesCount').textContent = notesData.length;
+
+  renderPatientDetail(selectedPatient, notesData);
+}
+
+/* ── Render Patient Detail ── */
+function renderPatientDetail(p, notes) {
+  const v = p.latest_vitals || {};
+  const detail = document.getElementById('patientDetail');
+
+  const vitalCard = (icon, label, value, unit, status, statusCls) =>
+    `<div class="vt-card">
+      <div style="font-size:20px;margin-bottom:4px">${icon}</div>
+      <div class="vt-val" style="color:var(--volt)">${value||'—'}${value&&unit?`<span style="font-size:13px;color:var(--muted)">${unit}</span>`:''}</div>
+      <div class="vt-lbl">${label}</div>
+      ${status?`<div class="vt-status ${statusCls}">${status}</div>`:''}
+    </div>`;
+
+  const hrStatus  = !v.hr ? '' : v.hr<60||v.hr>100 ? 'Abnormal' : 'Normal';
+  const hrCls     = !v.hr ? '' : v.hr<60||v.hr>100 ? 'vital-status crit' : 'vital-status ok';
+  const sugStatus = !v.sugar ? '' : v.sugar<70 ? 'Low' : v.sugar>180 ? 'High' : 'Normal';
+  const sugCls    = !v.sugar ? '' : v.sugar<70||v.sugar>180 ? 'vital-status crit' : 'vital-status ok';
+
+  detail.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px">
+
+      <!-- Patient Header -->
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--volt-dim);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:var(--volt);flex-shrink:0">${FMFmt.initial(p.name)}</div>
+        <div style="flex:1">
+          <h2 style="font-size:20px;font-weight:800;margin-bottom:4px">${p.name}</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${[p.age?p.age+'y':'',p.gender||'',p.goal||'',p.level||''].filter(Boolean).map(t=>`<span class="badge badge-teal">${t}</span>`).join('')}
+          </div>
+        </div>
+        <button class="btn-volt btn-sm" onclick="openNoteModal()">+ Add Note</button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn on" onclick="showTab('vitals',this)">Vitals</button>
+        <button class="tab-btn" onclick="showTab('notes',this)">Notes (${notes.length})</button>
+        <button class="tab-btn" onclick="showTab('profile',this)">Profile</button>
+      </div>
+
+      <!-- Vitals Tab -->
+      <div id="tab-vitals">
+        ${v.hr||v.sugar||v.spo2||v.sleep ? `
+        <div class="vital-grid">
+          ${vitalCard('❤️','Heart Rate',v.hr,'bpm',hrStatus,hrCls)}
+          ${vitalCard('🩸','Blood Sugar',v.sugar,'mg/dL',sugStatus,sugCls)}
+          ${vitalCard('💧','SpO2',v.spo2,'%',v.spo2&&v.spo2<92?'Critical':'Normal',v.spo2&&v.spo2<92?'vital-status crit':'vital-status ok')}
+          ${vitalCard('😴','Sleep',v.sleep,'hrs',v.sleep&&v.sleep>=7?'Good':'Low',v.sleep&&v.sleep>=7?'vital-status ok':'vital-status warn')}
+          ${vitalCard('👣','Steps',v.steps?Number(v.steps).toLocaleString():'—','',v.steps&&v.steps>=8000?'Goal Met':'Below Goal',v.steps&&v.steps>=8000?'vital-status ok':'vital-status warn')}
+          ${vitalCard('🩺','Blood Pressure',v.bp||'—','',v.bp?'Logged':'—','')}
+        </div>` : `<div class="empty-state"><div class="e-icon">📊</div><div class="e-text">No vitals recorded yet</div></div>`}
+        ${isCritical(v) ? `<div class="alert-box error" style="margin-top:8px"><span class="alert-icon">🚨</span><div><strong>Critical values detected.</strong> This patient has readings outside safe range. Immediate follow-up recommended.</div></div>` : ''}
+      </div>
+
+      <!-- Notes Tab -->
+      <div id="tab-notes" style="display:none">
+        ${notes.length ? notes.map(n=>`
+          <div class="note-card">
+            <div class="note-date">${FMFmt.date(n.created_at)} · Dr. ${doctor?.name||'You'}</div>
+            <div class="note-text">${n.note}</div>
+            ${n.restrictions?`<div style="margin-top:8px;font-size:12px;color:var(--coral)">⚠️ Restrictions: ${n.restrictions}</div>`:''}
+            ${n.approved_ex?`<div style="margin-top:4px;font-size:12px;color:var(--volt)">✓ Approved: ${n.approved_ex}</div>`:''}
+            ${n.next_review?`<div style="margin-top:4px;font-size:12px;color:var(--muted)">🗓 Next Review: ${n.next_review}</div>`:''}
+          </div>`).join('') :
+          '<div class="empty-state"><div class="e-icon">📝</div><div class="e-text">No notes yet — add the first one</div></div>'}
+      </div>
+
+      <!-- Profile Tab -->
+      <div id="tab-profile" style="display:none">
+        <table style="width:100%;border-collapse:collapse">
+          ${[
+            ['Email',     p.email||'—'],
+            ['Age',       p.age?p.age+' years':'—'],
+            ['Gender',    p.gender||'—'],
+            ['Goal',      p.goal||'—'],
+            ['Level',     p.level||'—'],
+            ['Condition', p.condition||'None'],
+            ['Injury',    p.injury||'None'],
+            ['Plan',      p.plan||'Basic'],
+          ].map(([l,v])=>`<tr style="border-bottom:1px solid var(--border)">
+            <td style="padding:12px 0;font-size:13px;color:var(--muted2);width:130px">${l}</td>
+            <td style="padding:12px 0;font-size:13px;color:var(--white);font-weight:500">${v}</td>
+          </tr>`).join('')}
+        </table>
+      </div>
+
+    </div>
+
+    <!-- Note Modal -->
+    <div class="modal-overlay" id="noteModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(8,14,20,.85);display:none;align-items:center;justify-content:center;padding:24px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;width:100%;max-width:500px">
+        <h3 style="font-size:18px;font-weight:800;margin-bottom:20px">Add Doctor Note — ${p.name}</h3>
+        <div class="form-group">
+          <label class="form-label">Clinical Note *</label>
+          <textarea id="noteText" class="form-input form-textarea" placeholder="Observations, diagnosis, treatment notes…" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Exercise Restrictions</label>
+          <input type="text" id="noteRestrictions" class="form-input" placeholder="e.g. No squats, avoid high-impact"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Approved Exercises</label>
+          <input type="text" id="noteApproved" class="form-input" placeholder="e.g. Swimming, light yoga, walking"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Next Review Date</label>
+          <input type="date" id="noteReview" class="form-input"/>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button class="btn-volt btn-full" onclick="saveNote()">Save Note</button>
+          <button class="btn-outline" onclick="closeNoteModal()" style="flex-shrink:0;padding:0 24px">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function showTab(name, btn) {
+  ['vitals','notes','profile'].forEach(t => {
+    const el = document.getElementById('tab-'+t);
+    if (el) el.style.display = t===name ? 'block' : 'none';
+  });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function openNoteModal() {
+  const m = document.getElementById('noteModal');
+  if (m) { m.style.display = 'flex'; }
+}
+
+function closeNoteModal() {
+  const m = document.getElementById('noteModal');
+  if (m) { m.style.display = 'none'; }
+}
+
+async function saveNote() {
+  const note = document.getElementById('noteText').value.trim();
+  if (!note) { FMToast.error('Please enter a clinical note'); return; }
+  const payload = {
+    doctor_id:     doctor?.id || 1,
+    patient_id:    selectedPatient.id,
+    note:          note,
+    restrictions:  document.getElementById('noteRestrictions').value.trim(),
+    approved_ex:   document.getElementById('noteApproved').value.trim(),
+    next_review:   document.getElementById('noteReview').value || null,
+  };
+  try {
+    await FMAPI.post('/doctor/notes', payload);
+  } catch(e) {
+    // Save locally as fallback
+    notesData.unshift({ ...payload, created_at: new Date().toISOString() });
+  }
+  FMToast.success('Note saved successfully');
+  closeNoteModal();
+  await selectPatient(selectedPatient.id);
+}
+
+/* ── Demo Data ── */
+function getDemoPatients() {
+  return [
+    { id:10, name:'Ali Raza',   age:28, gender:'Male',   goal:'Weight Loss',  level:'Intermediate', condition:'Hypertension', injury:'None',       plan:'Pro',   email:'ali@fitmart.pk',
+      latest_vitals:{hr:110,sugar:95,spo2:98,sleep:6.5,steps:7200,bp:'138/88'} },
+    { id:11, name:'Sara Ahmed', age:34, gender:'Female', goal:'Muscle Gain',  level:'Beginner',     condition:'None',         injury:'Knee pain',  plan:'Basic', email:'sara@fitmart.pk',
+      latest_vitals:{hr:72,sugar:85,spo2:99,sleep:7.5,steps:9500,bp:'120/80'} },
+    { id:12, name:'Kamran Mir', age:52, gender:'Male',   goal:'General Fitness',level:'Beginner',   condition:'Type 2 Diabetes',injury:'None',     plan:'Elite', email:'kamran@fitmart.pk',
+      latest_vitals:{hr:88,sugar:220,spo2:95,sleep:5.2,steps:4800,bp:'145/92'} },
+    { id:13, name:'Ayesha Khan',age:26, gender:'Female', goal:'Endurance',    level:'Advanced',     condition:'None',         injury:'None',       plan:'Pro',   email:'ayesha@fitmart.pk',
+      latest_vitals:{hr:58,sugar:78,spo2:99,sleep:8.0,steps:12000,bp:'112/72'} },
+  ];
+}
+
+function getDemoNotes() {
+  return [
+    { id:1, note:'Blood pressure elevated. Advised reduced sodium intake. Cleared for moderate cardio only.', restrictions:'No heavy lifting, no high-intensity intervals', approved_ex:'Walking, cycling, swimming', next_review:'2025-08-15', created_at: new Date(Date.now()-86400000*3).toISOString() },
+    { id:2, note:'Follow-up visit. BP improving with medication. Patient reports better sleep.', restrictions:'', approved_ex:'All moderate exercises cleared', next_review:'2025-09-01', created_at: new Date(Date.now()-86400000*10).toISOString() },
+  ];
+}
+
+// Init
+loadAll();
+</script>
+</body>
+</html>
